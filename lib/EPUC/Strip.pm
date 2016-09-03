@@ -22,6 +22,19 @@ sub _log {
     print $out "$msg\n";
 }
 
+sub can_change {
+    my( $self, $acct ) = @_;
+    my $panels = $self->get__panels;
+    return @$panels == 1 && $panels->[0]->get__artist->get__account == $acct && ! $panels->[0]->get__reserved_by;
+} #can_change
+
+sub delete_strip {
+    my( $self, $acct ) = @_;
+    die { err => "Cannot remove" } unless $self->can_change($acct);
+    my $app = $acct->get_app;
+    $acct->remove_from__in_progress_strips( $self );
+    $app->remove_from_in_progress_strips( $self );
+}
 
 # returns the panels on a strip
 sub panels {
@@ -68,28 +81,47 @@ sub panels {
         # this account was the author of
 
         my $panels = $self->get__panels;
-        my $found_panel_with_author;
-        for my $panel (reverse @$panels) {
-            if( $found_panel_with_author || $panel->get__artist == $acct->get_avatar ) {
+        my $ava = $acct->get_avatar;
+        my $found_panel_with_author = 0 < grep { $_->get__artist == $ava } @$panels;
+        if( $found_panel_with_author ) {
+            my( @pans );
+            for my $panel (@$panels) {
                 my $phash = {
-                    type => $panel->get_type,
+                    type   => $panel->get_type,
+                    artist => $panel->get__artist,
                 };
-                if( $acct && $acct->get_is_super ) {
-                    $phash->{artist} = $panel->get__artist;
-                }
-                
                 if( $panel->get_type eq 'picture' ) {
                     $phash->{url} = $panel->get_picture->url( $size );
                 } else {
                     $phash->{sentence} = $panel->get_sentence;
                 }
-                print STDERR Data::Dumper->Dump([$phash,'WHUUf']);
-                push @shown_panels, $phash;
-                
-                $found_panel_with_author = 1;
+                push @pans, $phash;
             }
+            return [@pans];
         }
-        return [reverse @shown_panels ];
+        return [];
+        
+        # for my $panel (reverse @$panels) {
+        #     if( $found_panel_with_author || $panel->get__artist == $acct->get_avatar ) {
+        #         my $phash = {
+        #             type => $panel->get_type,
+        #         };
+        #         if( $acct && $acct->get_is_super ) {
+        #             $phash->{artist} = $panel->get__artist;
+        #         }
+                
+        #         if( $panel->get_type eq 'picture' ) {
+        #             $phash->{url} = $panel->get_picture->url( $size );
+        #         } else {
+        #             $phash->{sentence} = $panel->get_sentence;
+        #         }
+        #         print STDERR Data::Dumper->Dump([$phash,'WHUUf']);
+        #         push @shown_panels, $phash;
+                
+        #         $found_panel_with_author = 1;
+        #     }
+        # }
+        # return [reverse @shown_panels ];
     }
     die { err => 'unknown panels' };
 } #panels

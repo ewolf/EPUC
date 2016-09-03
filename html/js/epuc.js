@@ -165,7 +165,7 @@ function detailHandler(ev, strip, $str, idx, strips, override ) {
     show_strip( {
         size  : 'big',
         strip : strip,
-        strip_container : $( '.detail-strip' ).empty(),
+        strip_container : $( '.detail-strip' ).empty().append('<div class="inner-strip"></div>' ),
         override : override
     } ); //login for kudos maybe?
 
@@ -237,7 +237,7 @@ function show_strips( args ) {
                                 if( end === undefined || end > strips.length() ) end = strips.length();
                                 for( var i=start; i<end; i++ ) {
                                     var strip = strips.get(i);
-                                    var $strip = $( '<div class="strip" data-id="' + strip.id + '" id="strip_' + key + "_" + strip.id + '"></div>' ).appendTo( $strip_container );
+                                    var $strip = $( '<div class="strip" data-id="' + strip.id + '" id="strip_' + key + "_" + strip.id + '"><div class="inner-strip"></div><div class="actions"></div></div>' ).appendTo( $strip_container );
                                     show_strip( {
                                         strip           : strip,
                                         strip_container : $strip,
@@ -280,13 +280,26 @@ function show_strip(args) {
         width = 100;
         height = 58;
     }
+
+    strip.can_change( [ get_login() ], function( can_change ) {
+        if( false && can_change ) {
+            $strip.find( '.actions' ).append( '<br><a href="#" class="delthis">delete this strip</a>' )
+                .find( '.delthis' )
+                .on( 'click', function( ev ) {
+                    strip.delete_strip( [get_login()], function() {
+                        msg( "Deleted" );
+                    } );
+                } );
+        }
+    } );
+    
     strip.panels( [ get_login(), size, override ], function( panels ) {
 
-        var $table = $( '<table>' ).appendTo( $strip );
+        var $table = $( '<table>' ).appendTo( $strip.find( '.inner-strip' ) );
         panels.forEach( function( panel ) {
             var $tr = $( '<tr>' ).appendTo( $table );
             var txt;
-//            var txt = '<tr>';
+            //            var txt = '<tr>';
             if( panel.type === 'sentence' ) {
                 txt += '<td class="sentence">';
                 if( show_artists ) {
