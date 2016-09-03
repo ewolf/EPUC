@@ -1,0 +1,433 @@
+<html>
+  <head>
+    <title>Eat Poop U Cat</title>
+  </head>
+
+  <script src="/js/jquery-1.12.0.min.js"></script>
+  <script src="/js/yote.js"></script>
+  <script src="/js/yote.ui.js"></script>
+
+  <style>
+  .starticon {
+    vertical-align:text-top;
+    float:left;
+    margin-right: 5px;
+   }
+  body {
+      background-color:#CEF;
+  }
+  body.login-requested .login-requested,body.logged-in .logged-in,body.yote-init .needs-yote {
+      display: block;
+  }
+    .toggle-div {
+        display: none;
+    }
+  body .login-requested, body .logged-in, body .needs-yote,
+  body.logged-in .needs-login {
+      display: none;
+  }
+  .login-requested.has-password.has-user .login {
+      background-color: green;
+  }
+  .warning {
+        background-color: orange;
+    }
+    .message {
+        background-color: lightgreen;
+    }
+    .preferences {
+        margin-top: 8px;
+        margin-left: 10px;
+    }
+    .strip {
+        border: solid 3px black;
+        display: inline-block;
+        vertical-align: top;
+        margin: 10px;
+        padding: 5px;
+    }
+    .strip ul {
+        list-style-type: none;
+    }
+    .detail {
+        display: none;
+        border: solid 5px blue;
+        padding: 10px;
+        position:absolute;
+        top:0px;
+        left:0px;
+        background-color: lightblue;
+    }
+    .sentence {
+        background-color: lightgrey;
+        border: solid 3px lightgreen;
+        margin:4px;
+    }
+    .picture {
+        margin:4px;
+        border: solid 3px lightgreen;
+    }
+    .strip .artist {
+        text-align: right;
+    }
+  </style>
+
+    <script>
+    $().ready( function() {
+        var $body = $('body');
+        function msg( msg, where ) {
+            $( where || '.message-receiver' ).empty().append( msg ).removeClass( 'warning' ).addClass( 'message' );
+        }
+        function warn( msg, where ) {
+            $( where || '.message-receiver' ).empty().append( msg ).addClass( 'warning' ).removeClass( 'message' );
+        }
+        function onLogin( login ) {
+            $body.addClass( 'logged-in' );
+            msg( "welcome " + login.get('user'), '.login-message-receiver' );
+            $('#user').val('');
+            $('#pw').val('');
+            
+            var icon = login.get( 'icon' );
+            if( icon ) {
+                icon.url( ['80x80'], function( url ) {
+                    $( '.icon' ).attr( 'src', url );
+                } );
+            } else {
+                $( '.has-icon' ).hide();
+            }
+            $( '.info' ).each( function() {
+                var $this = $(this);
+                var fld = $this.data( 'field' );
+                var txt = login.get( fld );
+                $this.val( txt );
+            } );
+            $( '.info' ).on( 'keyup', function(ev) {
+                var $this = $(this);
+                var fld = $this.data('field');
+                var txt = $this.val();
+                login.setInfo( [fld, txt] );
+            } );
+            $( '#iconup' ).on( 'change', function( ev ) {
+                var files = ev.target.files;
+                if( files.length == 1 ) {
+                    login.uploadIcon( [yote.prepUpload( files )], function(icon) {
+                        icon.url( ['80x80' ], function( url ) {
+                            $( '.icon' ).attr( 'src', url );
+                            msg( 'uploaded icon' );
+                        } );
+                    }, function( err ) { msg ( err ); } );
+                }
+            } );
+            $( '#resetpw' ).on( 'click', function( ev ) {
+                ev.preventDefault();
+                ev.stopPropagation();
+                if( $('#newpw').val() == $('#newpw2').val() ) {
+                    login.reset_password( [$('#newpw').val(),$('#oldpw').val()], function(newacct) {
+                        msg( "reset password for " + newacct.get('user') );
+                        $('#newpw').val('');
+                        $('#oldpw').val('');
+                        $('#newpw2').val('');
+                    }, function( err ) { msg( err ); } );
+                } else {
+                    warn( "Error, passwords do not match" );
+                }
+            } );            
+        } //onLogin
+        
+        yote.init( {
+            yoteServerURL : '/cgi-bin/yote/yote_cgi.pl',
+            appName       : 'EPUC::App',
+            globalErrHandler : function() {},
+            handler       : function( root, app, login ) {
+                $body.addClass( 'yote-init' );
+
+                if( login ) {
+                    onLogin( login );
+                }
+
+                // ----------- login control -----------
+                $( '#loginreq' ).on( 'click', function(ev) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    $body.toggleClass( 'login-requested' );
+                } );
+                $( '#logout' ).on( 'click', function(ev) {
+                    yote.logout( function( res ) {
+                        alert( 'logged out' );
+                        $body.removeClass( 'logged-in');
+                    } );
+                } );
+                $( '#login' ).on( 'click', function(ev) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    var un = $('#user').val();
+                    var pw = $('#pw').val();
+                    msg( 'logging in' );
+                    app.login( [ un, pw ],
+                               function( acct ) {
+                                   onLogin( acct );
+                               },
+                               function(err ) {
+                                   warn( err );
+                               } );
+                } ); //login click
+
+                // -------- updating account controls ----
+                $( '#toggleupdate' ).on( 'click', function() {
+                    $body.toggleClass( 'updating-account' );
+                } );
+
+                // -------- public strips / recent strips ---
+                //                function show_strips( key, strips, $strip_container, login, start, end, clickhandler ) {
+                function show_strips( args ) {
+                    
+                    var key              = args.key; //needed to different these strips from other strip containers
+                    var strips           = args.strips; //yote list
+                    var $strip_container = args.container; //jQuery object
+                    var login            = args.login;
+                    var start            = args.start;
+                    var end              = args.end;
+                    var clickhandler     = args.clickhandler;
+                    var sizes            = args.sizes || [];
+                    
+                    yote.ui.updateListener( strips,
+                                            'reserved_' + key,
+                                            function() {
+                                                $strip_container.empty();
+                                                if( start === undefined ) start = 0;
+                                                if( end === undefined || end > strips.length() ) end = strips.length();
+                                                for( var i=start; i<end; i++ ) {
+                                                    var strip = strips.get(i);
+                                                    var $strip = $( '<div class="strip" data-id="' + strip.id + '" id="strip_' + key + "_" + strip.id + '"></div>' ).appendTo( $strip_container );
+                                                    show_strip( {
+                                                        strip           : strip,
+                                                        strip_container : $strip,
+                                                        login           : login,
+                                                        size            : sizes[ i ]
+                                                    } );
+                                                    if( clickhandler ) {
+                                                        (function(str,$str) {
+                                                            $strip.on( 'click', function( ev ) {
+                                                                var $str = $( this );
+                                                                clickhandler( ev, str, $str );
+                                                            } );
+                                                        }) (strip,$strip);
+                                                    }
+
+                                                } //each strip
+                                            }, true ); //update listener
+                } // _show_strips
+
+                function show_strip(args) {
+                    var strip  = args.strip;
+                    var $strip = args.strip_container;
+                    var login  = login;
+                    var size   = args.size || 'thumb';
+                    var show_artists = false;
+                    var width = 600;
+                    var height = 450;
+                    if( size === 'big' ) {
+                        show_artists = true;
+                        size = '700x700';
+                        width = 600;
+                        height = 450;
+                    }
+                    if( size === 'medium' ) {
+                        size = '400x400';
+                    }
+                    if( size === 'thumb' ) {
+                        size = '50x50';
+                        width = 100;
+                        height = 58;
+                    }
+                    strip.panels( [ login, size ], function( panels ) {
+                        
+                        var $table = $( '<table>' ).appendTo( $strip );
+                        panels.forEach( function( panel ) {
+                            var $tr = $( '<tr>' ).appendTo( $table );
+                            var txt = '<tr>';
+                            if( panel.type === 'sentence' ) {
+                                txt += '<td class="sentence">';
+                                txt += panel.sentence;
+                            } else if( panel.type === 'picture' ) {
+                                txt += '<td class="picture">';
+                                txt += '<img src="' + panel.url + '" width="' + width + '" height="' + height + '">';
+                            } else {
+                                txt += '<td>';
+                                txt += "<b>unknown panel</b>";
+                            }
+                            if( show_artists ) {
+                                var artist = panel.artist;
+                                if( artist ) {
+                                    var user = artist.get('user');
+                                    txt += '<div class="artist">( by <a href="#" class="artist-link">' + user + '</a> ) </div>';
+                                }
+                            }
+                            txt += '</td></tr>';
+                            $tr.append( txt );
+                            if( artist ) {
+                                (function (author) { 
+                                    $tr.find( '.artist-link' ).on( 'click', function(ev) {
+                                        ev.preventDefault();
+                                        ev.stopPropagation();
+                                        $( '.detail' ).hide();
+                                        $( '.detail.artist' ).show();
+                                        var icon = author.get('icon');
+                                        if( icon ) {
+                                            icon.url( ['80x80'], function( url ) {
+                                                var name = author.get('name');
+                                                var about = author.get('about');
+                                                $( '#detail-artist' ).empty().append(
+                                                    ['<img src="' + url + '"> ' + author.get('user'),
+                                                     (name ? 'aka <b>' + author.get( 'name' ) + '</b>' : ''),
+                                                     about,
+                                                    ].join( '<br>' )
+                                                );
+                                            } );
+                                        }                                        
+                                    } );
+                                } )(artist);
+                            }
+                        } );
+                    } );
+                } //show_strip
+                
+                show_strips( { key : 'recent',
+                               strips : app.get( 'recently_completed_strips' ),
+                               container : $( '#recent-strips' ),
+                               start : 0,
+                               end : 5,
+                               clickhandler : function( ev, strip, $str ) {
+                                   // show detail strip
+                                   $('.detail.artist').hide();
+                                   $('.detail.strip').show();
+                                   show_strip( {
+                                       size  : 'big',
+                                       strip : strip,
+                                       strip_container : $( '#detail-strip' ).empty()
+                                   } ); //login for kudos maybe?
+                               } 
+                             } );
+                $('.close').on( 'click', function() {
+                    $(this).parent().hide();
+                } );
+            } // handler
+        } ); // yote init
+        function updateToggles() {
+            $( '.div-toggle' ).each( function() {
+                var $a = $( this );
+                var txt = $a.text();
+                $a.empty().append( '[<span class="not-updating">+</span><span class="updating">-</span>] ' + txt );
+                $a.find( '.updating' ).hide();
+                $a.off( 'click' ).on( 'click', function(ev) {
+                    var $a = $(this);
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    var $div = $( $a.data( 'div' ) );
+                    $div.toggle();
+                    $a.find( '.updating,.not-updating' ).toggle();
+                } )
+            } );
+        }
+        updateToggles();
+    } ); // jQuery init
+  </script>
+  
+  <body>
+    <div class="needs-yote" style="float:right">
+      <div class="needs-login">
+        <a href="#" id="loginreq">Log In</a>
+        <div class="login-requested">
+          <table>
+            <tr> <td colspan="2" class="message-receiver"></td> </tr>
+            <tr> <th>name</th><td> <input type="text" id="user"><td> </tr>
+            <tr> <th>password</th><td><input type="password" id="pw"><td> </tr>
+          </table>
+          <button id="login" type="button">log in</button>
+        </div>
+      </div>
+      <div class="logged-in">
+        <img class="icon">
+        <span class="login-message-receiver"></span>
+        <a href="#" id="logout">log out</a>
+      </div>
+    </div>
+
+    <h1>Eat Poop U Clone</h1>
+
+    
+    <h2>A low power clone</h2>
+
+    <p>
+      <img class="starticon" src="/epuc/images/coyo.jpg"> Coyo here. I really miss the the <i><b>eat poop u cat</b></i> site,
+      so I made this little clone of it. This site, madyote.com doesn&#39;t have much in the way of horsepower
+      or even storage, so this is by necessity a small affair. The framework the site runs on requires javascript
+      to use and is experimental so potentially buggy. For this reason, there are a few limitations on strips.
+    </p>
+    <p>To get an account, <a href="mailto:coyocanid@gmail.com">contact me</a>  or any of the admins of the site. 
+    </p>
+
+    <section class="logged-in">
+      <h3>Play</h3>
+      <p>
+      <a href="#">start strip</a> 
+      </p>
+      <p>
+        <a href="#" id="findstrip">Find a strip to play</a>
+        <div id="foundstrip"></div>
+      </p>
+      
+    </section>
+
+    <section>
+      <h3>Browse</h3>
+      <div>
+        <h4>recent strips</h4>
+        <div id="recent-strips"></div>
+      </div>
+      <div>
+        <h4>search for strips</h4>
+      </div>
+    </section>
+
+    
+    <section class="logged-in">
+      <a href="#" class="div-toggle" data-div=".updating.preferences">Update Account</a>
+      <div class="toggle-div updating preferences">
+        <span class="message-receiver"></span>
+        <div>
+          <div class="has-icon">
+            <img class="icon">
+          </div>
+          <div class="icon">
+            upload icon <input type="file" id="iconup">
+          </div>
+        </div>
+        <div>
+          My Name : <input type="text" class="info" data-field="name"><br>
+          Details about me : <textarea class="info" data-field="about"></textarea> <br>
+
+          Reset password <blockquote> old password <input type="password" id="oldpw">
+            <br> new password <input type="password" id="newpw"> <br>
+            new password again <input type="password" id="newpw2"> <br>
+            <button type="button" id="resetpw">reset password</button>
+          </blockquote>
+
+        </div>
+        
+      </div>
+    </section>
+
+    <div class="detail strip">
+      <a href="#" class="close">close</a>
+      <div id="detail-strip" class="strip"></div>
+    </div>
+
+    <div class="detail artist">
+      <a href="#" class="close">close</a>
+      <div id="detail-artist" class="strip"></div>
+      <div id="artist-recent-strips" class="strip"></div>
+    </div>
+
+  </body>
+</html>
