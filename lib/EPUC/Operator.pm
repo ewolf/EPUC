@@ -134,7 +134,7 @@ sub _make_page {
   
   <body class="$body_classes">
     <div class="header" style="float:right">
-      <a href="/epucc/login" id="login-link">log in</a>
+      <a href="/spuc/login" id="login-link">log in</a>
     </div>
     
 
@@ -145,25 +145,31 @@ sub _make_page {
     <div class="body">
 
       <div class="side">
-        <a href="/epucc/updateprefs"><img class="icon" src="$self->{icon_url}"><br></a>
+        <a href="/spuc/updateprefs"><img class="icon" src="$self->{icon_url}"><br></a>
         Welcome <span class="name">$self->{name}</span>
         <h3>Artwork</h3>
         <ul>
-          <li><a href="/epucc/about" class="action">about</a></li>
-          <li><a href="/epucc/recent" class="action">show recent strips</a></li>
-          <li><a href="/epucc/completed" class="action">my completed strips</a></li>
-          <li><a href="/epucc/inprogress" class="action">my in progress strips</a></li>
+          <li><a href="/spuc/about" class="action">about</a></li>
+          <li><a href="/spuc/recent" class="action">show recent strips</a></li>
+          <li><a href="/spuc/completed" class="action">my completed strips</a></li>
+          <li><a href="/spuc/inprogress" class="action">my in progress strips</a></li>
         </ul>
         <h3>Play</h3>
         <ul>
-          <li><a href="/epucc/playstrip/find" class="action">find a strip to play</a></li>
-          <li><a href="/epucc/startstrip" class="action">start a new strip</a></li>
-          <li><a href="/epucc/reserved" class="action">my reserved strips</a></li>
+          <li><a href="/spuc/playstrip/find" class="action">find a strip to play</a></li>
+          <li><a href="/spuc/startstrip" class="action">start a new strip</a></li>
+          <li><a href="/spuc/reserved" class="action">my reserved strips</a></li>
         </ul>
         <h3>Actions</h3>
         <ul>
-          <li><a href="/epucc/updateprefs" class="action">update user preferences</a></li>
-          <li><a href="/epucc/logout" class="action" id="logout">log out</a></li>
+          <li><a href="/spuc/updateprefs" class="action">update user preferences</a></li>
+          <li><a href="/spuc/logout" class="action" id="logout">log out</a></li>
+        </ul>
+        <h3>Todo List</h3>
+        <ul>
+          <li>show strips of an artist</li>
+          <li></li>
+          <li></li>
         </ul>
         <div class="needs-admin">
           <h3>Admin Actions</h3>
@@ -224,7 +230,7 @@ sub app {
         ( $self->{root}, $self->{token} ) = $root->init_root;
         my $token_cookie = Apache2::Cookie->new( $r,
                                                  -name => "token",
-                                                 -path => "/epucc",
+                                                 -path => "/spuc",
                                                  -value => $self->{token} );
         
         $token_cookie->bake( $r );
@@ -301,6 +307,7 @@ sub make_main {
         my $strips = $self->recent_strips;
         $self->{main} = <<"END";
 <h2>Recent Strips</h2>
+<h3>Click on the strip title to get more detail</h3>
 $strips
 END
         
@@ -308,7 +315,7 @@ END
         my $login = $self->login;
 
         #pagination
-        my $strips = $self->strips_html( $login->get_reserved_strips, '/epucc/reserved/' );
+        my $strips = $self->strips_html( $login->get_reserved_strips, '/spuc/reserved/' );
         $self->{main} = <<"END";
 <h2>My reserved strips</h2>
 $strips
@@ -328,6 +335,9 @@ END
             if( $about ) { $about = "<h3>About</h3>$about" }
             
             my $icon_url = $avatar->get_icon->url( '400x400' );
+
+            # recent strips for artist
+            
             $self->{main} = <<"END";
  <h1>$handle</h1>
  <img src="$icon_url"> <br>
@@ -340,7 +350,7 @@ END
         my $login = $self->login;
 
         #pagination
-        my $strips = $self->strips_html( $login->get_avatar->get_completed_strips, '/epucc/completed/' );
+        my $strips = $self->strips_html( $login->get_avatar->get_completed_strips, '/spuc/completed/' );
         $self->{main} = <<"END";
 <h2>My completed strips</h2>
 $strips
@@ -363,7 +373,7 @@ END
                         if( $strip == $list_strip ) {
                             if( $i > 0 ) {
                                 my $prev = $strips->[$i-1];
-                                $prevnext .= sprintf( '<a href="/epucc/detail/%s/%s">%s</a>',
+                                $prevnext .= sprintf( '<a href="/spuc/detail/%s/%s">%s</a>',
                                                       $prev->{ID},
                                                       $strips_id,
                                                       'prev' );
@@ -373,7 +383,7 @@ END
                                     $prevnext .= ' ';
                                 }
                                 my $next = $strips->[$i+1];
-                                $prevnext .= sprintf( '<a href="/epucc/detail/%s/%s">%s</a>',
+                                $prevnext .= sprintf( '<a href="/spuc/detail/%s/%s">%s</a>',
                                                       $next->{ID},
                                                       $strips_id,
                                                       'next' );
@@ -465,7 +475,7 @@ END
         } else {
             $self->{main} = <<"END";
 <h2>Start a Strip</h2>
-<form action="/epucc/startstrip" method="POST">
+<form action="/spuc/startstrip" method="POST">
   <textarea name="startsentence"></textarea>
   <br>
   <input type="submit" value="start new strip">
@@ -474,9 +484,10 @@ END
         }
     } elsif( $page eq 'inprogress' ) {
         my $login = $self->login;
-        my $strip_html = $self->strips_html( $login->get_in_progress_strips, '/epucc/inprogress/' );
+        my $strip_html = $self->strips_html( $login->get_in_progress_strips, '/spuc/inprogress/' );
         $self->{main} =<<"END";
 <h2>In Progress Strips</h2>
+<h3>Click on the strip title to get more detail</h3>
 $strip_html
 END
     } elsif( $page eq 'updateprefs' ) {
@@ -520,7 +531,7 @@ END
         }
         $self->{main} = <<"END";
  <h2>Update User Preferences</h2>
- <form method="POST" enctype="multipart/form-data" action="/epucc/updateprefs">
+ <form method="POST" enctype="multipart/form-data" action="/spuc/updateprefs">
   <h3>change icon</h3>
   <div>
     <img class="icon" src="$self->{icon_url}">
@@ -564,7 +575,7 @@ END
             unless( $self->{login} ) {
                 $self->{main} = <<"END";
 $err_span
-<form action="/epucc/login" method="POST">
+<form action="/spuc/login" method="POST">
   <table>
     <tr> <th>Handle</th>   <td><input type="text" name="un"> </td> </tr>
     <tr> <th>Password</th> <td><input type="password" name="pw"> </td> </tr>
@@ -579,7 +590,7 @@ END
     } elsif( $page eq 'logout' ) {
         my $token_cookie = Apache2::Cookie->new( $r,
                                                  -name => "token",
-                                                 -path => "/epucc",
+                                                 -path => "/spuc",
                                                  -value => 0 );
         $token_cookie->bake( $r );
         $self->{message} = 'logged out';
@@ -597,14 +608,14 @@ sub play_panel {
     if( $panel->get_type eq 'sentence' ) {
         my $can_free = $panel->get__reserved_by;
         return sprintf( 'Submit and image for this sentence' .
-                        '<form method="POST" enctype="multipart/form-data" action="/epucc/playstrip/submitpicture/%s">' .
+                        '<form method="POST" enctype="multipart/form-data" action="/spuc/playstrip/submitpicture/%s">' .
                         '<div class="sentence">%s</div>'.
                         '<br>'.
                         '<input type="file" name="pictureup">'.
                         '<input type="submit" value="submit picture">'.
                         '</form><p>'.
-                        ( $can_free ? '<a href="/epucc/playstrip/free/%s">stop reserving this sentence</a>' :
-                          '<a href="/epucc/playstrip/reserve/%s">reserve this sentence for later</a>' ) .
+                        ( $can_free ? '<a href="/spuc/playstrip/free/%s">stop reserving this sentence</a>' :
+                          '<a href="/spuc/playstrip/reserve/%s">reserve this sentence for later</a>' ) .
                         '</p>',
                         $panel->{ID},
                         dc( $panel->get_sentence ),
@@ -613,7 +624,7 @@ sub play_panel {
     } else {
         my $url = $panel->get_picture->url( '700x700' );
         return sprintf( '<img src="%s"><br> ' .
-                        '<form method="POST" action="/epucc/playstrip/submitsentence/%s">' .
+                        '<form method="POST" action="/spuc/playstrip/submitsentence/%s">' .
                         ' Enter a caption <textarea name="newcaption"></textarea>' .
                         ' <input type="submit">' .
                         '</form>', $url, $panel->{ID} );
@@ -623,7 +634,7 @@ sub play_panel {
 sub recent_strips {
     my $self = shift;
     my $app = $self->app();
-    $self->strips_html( $app->get_recently_completed_strips, '/epucc/recent/' );
+    $self->strips_html( $app->get_recently_completed_strips, '/spuc/recent/' );
 }  #recent_strips
 
 sub strip_html {
@@ -638,7 +649,7 @@ sub strip_html {
             my $panel = $panels->[$i];
             my $artist = $panel->get__artist;
             if( $self->{show_artist} ) {
-                $strip_html .= sprintf( '<div><a class="artist-link" href="/epucc/artist/%s">%s</a></div>',
+                $strip_html .= sprintf( '<div><a class="artist-link" href="/spuc/artist/%s">%s</a></div>',
                                         $artist->{ID},
                                         dc( $artist->get_user ),
                     );
@@ -646,7 +657,7 @@ sub strip_html {
             if( $panel->get_type eq 'sentence' ) {
                 if( $i == 0 && $self->{show_detail} ) {
                     use Encode;
-                    $strip_html .= sprintf( '<a href="/epucc/detail/%s/%s">%s</a>', 
+                    $strip_html .= sprintf( '<div class="sentence"><a href="/spuc/detail/%s/%s">%s</a></div>', 
                                             $strip->{ID},
                                             $self->{store}->_get_id( $strips ),
                                             dc( $panel->get_sentence ) );
@@ -685,13 +696,13 @@ sub strips_html {
             if( $newstart < 0 ) {
                 $newstart = 0;
             }
-            $strip_html .= qq~<a href="$href$newstart">back</a>~;
+            $strip_html .= qq~<a href="$href$newstart">&lt;&lt;back</a>~;
         }
         if( $end < @$strips ) {
             if( $start > 0 ) {
                 $strip_html .= ' ';
             }
-            $strip_html .= qq~<a style="margin-left:2em;" href="$href$end">forward</a>~;
+            $strip_html .= qq~<a style="margin-left:2em;" href="$href$end">forward&gt;&gt;</a>~;
         }
         $strip_html .= "</div>";
     }
