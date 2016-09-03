@@ -27,14 +27,6 @@ sub _init {
 
 sub _load {
     my $self = shift;
-    
-    my $accts = $self->get__accts({});
-    #translate to lower case in acct hash
-    for my $un (keys %$accts) {
-        my $acct = $accts->{$un};
-        delete $accts->{$un};
-        $accts->{lc($un)} = $acct;
-    }
 } #_load
 
 
