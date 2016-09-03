@@ -15,6 +15,7 @@ sub _load {
     my $url = $self->get_base_url;
     $url =~ s!^/epuc/!/epuc_data/!;
     $self->set_base_url( $url );
+    print STDERR Data::Dumper->Dump([$self->{DATA},"DD"]);
 }
 
 sub url {
