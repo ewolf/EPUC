@@ -28,5 +28,8 @@ find if a request method is attached or not? try
 
 sudo apt install libapache2-mod-perl2-dev
 sudo apt install libapache2-mod-apreq2
+sudo apt install libapache2-request-perl
 apt-get install apache2-dev
 get Apache2::Cookie from cpan
+
+Dave Rhodes landline 323 469 5922

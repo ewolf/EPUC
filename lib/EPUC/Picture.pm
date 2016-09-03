@@ -51,6 +51,7 @@ sub develop {
     }
 
     $image->set_base_url( "/epuc/images/$relative_path/$filename" );
+
     $self;
 } #develop
 

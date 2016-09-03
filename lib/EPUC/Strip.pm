@@ -32,8 +32,8 @@ sub delete_strip {
     my( $self, $acct ) = @_;
     die { err => "Cannot remove" } unless $self->can_change($acct);
     my $app = $acct->get_app;
-    $acct->remove_from__in_progress_strips( $self );
-    $app->remove_from_in_progress_strips( $self );
+    $acct->remove_from_in_progress_strips( $self );
+    $app->remove_from__in_progress_strips( $self );
 }
 
 # returns the panels on a strip
