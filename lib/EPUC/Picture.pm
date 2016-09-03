@@ -37,7 +37,7 @@ sub develop {
     my $filename      = pop @path;
     my $relative_path = join( '/', @path );
 
-    my $file_root_path = "/var/www/html/epuc/images/$relative_path";
+    my $file_root_path = "/var/www/html/epuc_data/images/$relative_path";
     my $file_path      = "$file_root_path/$filename";
     make_path( $file_root_path );
 
@@ -50,7 +50,7 @@ sub develop {
         copy( $image->get_file_path, $file_path ) or die "$@ $!";
     }
 
-    $image->set_base_url( "/epuc/images/$relative_path/$filename" );
+    $image->set_base_url( "/epuc_data/images/$relative_path/$filename" );
 
     $self;
 } #develop

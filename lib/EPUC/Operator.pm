@@ -33,7 +33,7 @@ sub handler {
 
 sub new {
     my( $class, $r ) = @_;
-    my( $page, @rest ) = grep { $_ } split /\//, $r->path_info;
+    my( $app, $page, @rest ) = grep { $_ } split /\//, $r->uri;
 
     my $jar = Apache2::Cookie::Jar->new($r);
     my $token_cookie = $jar->cookies("token");
@@ -41,7 +41,8 @@ sub new {
     return bless {
         r     => $r,
         page  => $page,
-        path  => \@rest,
+        path  => [@rest],
+        initial_path  => \@rest,
         token => $token,
     }, $class;
 }
@@ -102,6 +103,9 @@ sub _make_page {
       div.strip {
          vertical-align: top;
       }
+      div.strip.detail {
+         display: block;
+      }
       div.strip {
          display: inline-block;
          border: solid 1px black;
@@ -126,6 +130,18 @@ sub _make_page {
       .needs-admin {
         display : none;
       }
+      .needs-super {
+        display : none;
+      }
+      .is-super li.needs-super {
+        display : list-item;
+      }
+      .is-super tr.needs-super {
+        display : table-row;
+      }
+      .is-admin .needs-admin {
+        display : block;
+      }
       .logged-in .enclosure {
         margin-left: 15em;
       }
@@ -138,18 +154,19 @@ sub _make_page {
     </div>
     
 
-    <div class="top">
-      <h1>Scarf Poutine U Clone</h1>
+    <div class="top" style="text-align:left;padding:1em">
+      <a href="/spuc/about">
+        <h1>Scarf Poutine U Clone</h1>
+      </a>
     </div>
 
-    <div class="body">
+    <div class="body" style="align-content:center">
 
       <div class="side">
         <a href="/spuc/updateprefs"><img class="icon" src="$self->{icon_url}"><br></a>
         Welcome <span class="name">$self->{name}</span>
         <h3>Artwork</h3>
         <ul>
-          <li><a href="/spuc/about" class="action">about</a></li>
           <li><a href="/spuc/recent" class="action">show recent strips</a></li>
           <li><a href="/spuc/completed" class="action">my completed strips</a></li>
           <li><a href="/spuc/inprogress" class="action">my in progress strips</a></li>
@@ -165,20 +182,13 @@ sub _make_page {
           <li><a href="/spuc/updateprefs" class="action">update user preferences</a></li>
           <li><a href="/spuc/logout" class="action" id="logout">log out</a></li>
         </ul>
-        <h3>Todo List</h3>
-        <ul>
-          <li>show strips of an artist</li>
-          <li></li>
-          <li></li>
-        </ul>
         <div class="needs-admin">
           <h3>Admin Actions</h3>
           <ul>
-            <li><a href="#list-accounts" class="action">list accounts</a></li>
-            <li><a href="#create-account" class="action">create account</a></li>
-            <li><a href="#set-password" class="action">set password</a></li>
-            <li><a href="#strip-editor" class="action">strip editor</a></li>
-            <li class="needs-super"><a href="#admin-in-progress" class="action">in progress strips</a></li>
+            <li><a href="/spuc/list-accounts" class="action">list accounts</a></li>
+            <li><a href="/spuc/create-account" class="action">create account</a></li>
+            <li><a href="/spuc/set-password" class="action">set password</a></li>
+            <li class="needs-super"><a href="/spuc/allinprogress" class="action">in progress strips</a></li>
           </ul>
         </div>
       </div> <!-- side -->
@@ -242,6 +252,8 @@ sub app {
     $self->{login} = $login;
     if( $login ) {
         push @{$self->{body_classes}}, 'logged-in';
+        push @{$self->{body_classes}}, 'is-admin' if $login->isa( 'EPUC::AdminAcct' );
+        push @{$self->{body_classes}}, 'is-super' if $login->isa( 'EPUC::AdminAcct' ) && $login->get_is_super;        
         $self->{icon_url} = $login->get_avatar->get_icon->url( '80x80' );
         $self->{name} = dc( $login->get_avatar->get_user );
     }
@@ -267,10 +279,6 @@ sub login {
     $login;
 }
 
-sub path {
-    @{shift->{path}};
-}
-
 sub upload {
     my( $self, $name ) = @_;
     my $upload = $self->{r}->upload( $name );
@@ -290,6 +298,64 @@ sub upload {
     }
 } #upload
 
+sub detail {
+    my( $self, $page ) = @_;
+    $self->{size} = '700x700';
+    $self->{show_artist} = 1;
+    my( $strip_id ) = $self->shift_path;
+    my( $strips_id ) = $self->shift_path;
+    my( $strip, $strips ) = map { $self->{store}->fetch($_) } ( $strip_id, $strips_id );
+    # complete strips can strips with you as a participant can be displayed in detail
+    if( $strip && $strip->can_see( $self->{login} ) ) {
+        $self->{is_detail} = 1;
+        my $strip_html = $self->strip_html( $strip, $strips );
+        my $prevnext = '';
+        if( ref $strips eq 'ARRAY' ) {
+            if( @$strips > 1 ) {
+                $prevnext = '<div style="text-align:left;padding: 0em 3em 0em 3em">';
+                for( my $i=0; $i<@$strips; $i++ ) {
+                    my $list_strip = $strips->[$i];
+                    if( $strip == $list_strip ) {
+                        if( $i > 0 ) {
+                            my $prev = $strips->[$i-1];
+                            $prevnext .= sprintf( '<a href="/spuc/%s/detail/%s/%s">%s</a>',
+                                                  $page,
+                                                  $prev->{ID},
+                                                  $strips_id,
+                                                  'prev' );
+                        }
+                        if( $i < $#$strips ) {
+                            if( $i > 0 ) {
+                                $prevnext .= ' ';
+                            }
+                            my $next = $strips->[$i+1];
+                            $prevnext .= sprintf( '<a href="/spuc/%s/detail/%s/%s" style="float:right">%s</a>',
+                                                  $page,
+                                                  $next->{ID},
+                                                  $strips_id,
+                                                  'next' );
+                        }
+                        last;
+                    }
+                }
+                $prevnext .= '</div>';
+            }
+        }
+        # prev and next
+        $self->{main} = <<"END";
+$prevnext
+$strip_html
+END
+    } else {
+        $self->{message} = "Cannot view incomplete strip";
+        $self->{main} = '';
+    }
+}
+
+sub shift_path {
+    shift @{shift->{path}};
+}
+
 sub make_main {
     my $self = shift;
 
@@ -299,23 +365,34 @@ sub make_main {
     my $r = $self->{r};
 
     if( $page eq 'comic' ) {
-
+        
     } elsif( $page eq 'play' ) {
 
     } elsif( $page eq 'recent' ) {
-        #pagination
-        my $strips = $self->recent_strips;
-        $self->{main} = <<"END";
+        my $cmd = $self->shift_path;
+
+        if( $cmd eq 'detail' ) {
+            my $detail = $self->detail( 'recent' );
+            $self->{main} = <<"END";
+<div style="display:inline-block;text-align:center">
+  <h2>Showing Recent Strips</h2>
+  $detail
+</div>
+END
+        } else {
+            #pagination
+            my $strips = $self->recent_strips('recent');
+            $self->{main} = <<"END";
 <h2>Recent Strips</h2>
 <h3>Click on the strip title to get more detail</h3>
 $strips
 END
-        
+        }
     } elsif( $page eq 'reserved' ) {        
         my $login = $self->login;
 
         #pagination
-        my $strips = $self->strips_html( $login->get_reserved_strips, '/spuc/reserved/' );
+        my $strips = $self->strips_html( $login->get_reserved_strips, '/spuc/reserved/' ) || 'no reserved strips';
         $self->{main} = <<"END";
 <h2>My reserved strips</h2>
 $strips
@@ -323,7 +400,8 @@ END
     } elsif( $page eq 'artist' ) {
         # show icon, name and about
         # then recent strips
-        my( $avatar_id ) = $self->path;
+        my( $avatar_id ) = $self->shift_path;
+        my( $paginate ) = $self->shift_path;
         my $avatar = $self->{store}->fetch($avatar_id);
         if( $avatar ) {
             my( $handle, $name, $about ) = map { dc($_) } (
@@ -331,18 +409,33 @@ END
                 $avatar->get_name,
                 $avatar->get_about );
 
+            my $handle = $avatar->get_user;
             if( $name ) { $name = "<h3>Given Name</h3>$name" }
             if( $about ) { $about = "<h3>About</h3>$about" }
             
             my $icon_url = $avatar->get_icon->url( '400x400' );
 
             # recent strips for artist
+            my $strips;
+            if( $paginate eq 'detail' ) { 
+                $strips = $self->detail( "artist/$avatar->{ID}" );
+            } else {
+                $strips = $self->strips_html( $avatar->get_completed_strips, "artist/$avatar_id" ) || 'no strips found';
+            }
             
             $self->{main} = <<"END";
  <h1>$handle</h1>
- <img src="$icon_url"> <br>
- $name
- $about
+ <div>
+  <div style="float:left">
+   <img src="$icon_url"> <br>
+   $name
+   $about
+' </div>
+  <div>
+    <h3>Recent Strips for $handle</h3>
+    $strips
+  </div>
+ </div>
 END
         }
         
@@ -350,65 +443,24 @@ END
         my $login = $self->login;
 
         #pagination
-        my $strips = $self->strips_html( $login->get_avatar->get_completed_strips, '/spuc/completed/' );
+        my( $action ) = $self->shift_path;
+        my $strips;
+        if( $action eq 'detail' ) {
+            $strips = $self->detail( 'completed' );
+        } else {
+            $strips = $self->strips_html( $login->get_avatar->get_completed_strips, 'completed' )  || 'no strips found';
+        }
         $self->{main} = <<"END";
 <h2>My completed strips</h2>
 $strips
 END
-    } elsif( $page eq 'detail' ) {
-        $self->{size} = '700x700';
-        $self->{show_artist} = 1;
-        my( $strip_id, $strips_id ) = $self->path;
-        my( $strip, $strips ) = map { $self->{store}->fetch($_) } ( $strip_id, $strips_id );
-        # complete strips can strips with you as a participant can be displayed in detail
-        
-        if( $strip && $strip->can_see( $self->{login} ) ) {
-            my $strip_html = $self->strip_html( $strip, $strips );
-            my $prevnext = '';
-            if( ref $strips eq 'ARRAY' ) {
-                if( @$strips > 1 ) {
-                    $prevnext = '<div>';
-                    for( my $i=0; $i<@$strips; $i++ ) {
-                        my $list_strip = $strips->[$i];
-                        if( $strip == $list_strip ) {
-                            if( $i > 0 ) {
-                                my $prev = $strips->[$i-1];
-                                $prevnext .= sprintf( '<a href="/spuc/detail/%s/%s">%s</a>',
-                                                      $prev->{ID},
-                                                      $strips_id,
-                                                      'prev' );
-                            }
-                            if( $i < $#$strips ) {
-                                if( $i > 0 ) {
-                                    $prevnext .= ' ';
-                                }
-                                my $next = $strips->[$i+1];
-                                $prevnext .= sprintf( '<a href="/spuc/detail/%s/%s">%s</a>',
-                                                      $next->{ID},
-                                                      $strips_id,
-                                                      'next' );
-                            }
-                            last;
-                        }
-                    }
-                    $prevnext .= '</div>';
-                }
-            }
-            # prev and next
-            $self->{main} = <<"END";
-$prevnext
-$strip_html
-END
-        } else {
-            $self->{message} = "Cannot view incomplete strip";
-            $self->{main} = '';
-        }
-    } elsif( $page eq 'playstrip' ) {
-        my @path = $self->path;
-        my $action = shift @path;
+    } 
+    elsif( $page eq 'playstrip' ) {
+        my( $action ) = $self->shift_path;
         my $login = $self->login;
+        my( $panel_id ) = $self->shift_path;
         if( $action eq 'submitsentence' ) {
-            my( $panel ) = ( map { $self->{store}->fetch( $_ ) } @path );
+            my $panel = $self->{store}->fetch( $panel_id );
             die "panel not found" unless $panel;
             my $sentence = $r->param( 'newcaption' );
             if( $sentence ) {
@@ -424,7 +476,7 @@ END
                 die "must submit sentence";
             }
         } elsif( $action eq 'submitpicture' ) {
-            my( $panel ) = ( map { $self->{store}->fetch( $_ ) } @path );
+            my $panel = $self->{store}->fetch( $panel_id );
             die "panel not found" unless $panel;
 
             my $picture = $self->upload( 'pictureup' );
@@ -442,12 +494,10 @@ END
             }
 
         } elsif( $action eq 'reserve' ) {
-            my( $panel_id ) = @path;
             my $panel = $self->{store}->fetch( $panel_id );
             $panel->reserve( $login );
             $self->{main} = "Reserved Strip. You can find this under the 'reserved strips list'";
         } elsif( $action eq 'free' ) {
-            my( $panel_id ) = @path;
             my $panel = $self->{store}->fetch( $panel_id );
             if( $panel ) {
                 $panel->free( $login );
@@ -471,7 +521,7 @@ END
         if( $start ) {
             $login->start_strip( $start );
             $self->{message} = "Started new strip";
-            $self->{main} = $self->about();
+            $self->{main} = $self->about;
         } else {
             $self->{main} = <<"END";
 <h2>Start a Strip</h2>
@@ -484,7 +534,13 @@ END
         }
     } elsif( $page eq 'inprogress' ) {
         my $login = $self->login;
-        my $strip_html = $self->strips_html( $login->get_in_progress_strips, '/spuc/inprogress/' );
+        my( $action ) = $self->shift_path;
+        my $strip_html;
+        if( $action eq 'detail' ) {
+            $strip_html = $self->detail( 'inprogress' );
+        } else {
+            $strip_html = $self->strips_html( $login->get_in_progress_strips, 'inprogress' )  || 'no strips found';;
+        }
         $self->{main} =<<"END";
 <h2>In Progress Strips</h2>
 <h3>Click on the strip title to get more detail</h3>
@@ -564,8 +620,9 @@ END
             if( $un && $pw ) {
                 eval {
                     $self->{login} = $app->login( $un, $pw );
-                    $self->{main} = $self->about();
+                    $self->{main} = $self->about;
                     push @{$self->{body_classes}}, 'logged-in';
+                    push @{$self->{body_classes}}, 'is-admin' if $self->{login}->isa( 'EPUC::AdminAcct' );
                     $self->{message} = "logged in as $un";
                 };
                 if( $@ ) {
@@ -585,7 +642,7 @@ $err_span
 END
             }
         } else {
-            $self->{main} = $self->about();
+            $self->{main} = $self->about;
         }
     } elsif( $page eq 'logout' ) {
         my $token_cookie = Apache2::Cookie->new( $r,
@@ -595,9 +652,112 @@ END
         $token_cookie->bake( $r );
         $self->{message} = 'logged out';
         $self->{body_classes} = [grep { $_ ne 'logged-in' } @{$self->{body_classes}}];
-        $self->{main} = $self->about();
-    } else {  #about page
-        $self->{main} = $self->about();
+        $self->{main} = $self->about;
+    } elsif( $page eq 'list-accounts' ) {
+        my $login = $self->login;
+        if( $login ) {
+            my $accts = $login->list_accounts;
+            my $rows = '';
+            for my $acct (@$accts) {
+                my $status = $acct->get_is_super ? 'super admin' : $acct->get_is_admin ? 'admin' : 'active';
+                $rows .= sprintf( '<tr> <td> <a href="/spuc/artist/%s">%s</a> </td>' .
+                                  '     <td> %s </td> </tr> ', $acct->get_avatar->{ID}, $acct->get_user, $status );
+            }
+            $self->{main} = <<"END";
+<h2>User Accounts</h2>
+<table>
+ <tr> <th>Account Name</th> <th>Status</th> </tr>
+ $rows
+</table>
+END
+        }
+    } elsif( $page eq 'set-password' ) {
+        my $login = $self->login;
+        die "error" if ! $login->isa( 'EPUC::AdminAcct' );
+        my( $action ) = $self->shift_path;
+        my( $success, $msg );
+        if( $action eq 'submit' ) {
+            my( $un, $pw ) = ( $r->param('un'), $r->param('pw') );
+            eval {
+                my $acct = $login->reset_user_password( $un, $pw );
+                $success = $acct->get_user;
+            };
+            $msg = $@;
+        }
+        if( $success ) {
+            $self->{main} = <<"END";
+<h2>Set Password</h2>
+Set Password for $success
+END
+        } else {
+            $self->{main} = <<"END";
+<h2>Set Password</h2>
+<form method="POST" action="/spuc/set-password/submit">
+  <div class="message">$msg</div>
+  <table>
+    <tr> <th>User</th>     <td><input type="text" name="un"></td> </tr>
+    <tr> <th>Password</th> <td><input type="password" name="pw"></td> </tr>
+  </table>
+  <br>
+  <input type="submit" name="set-password" value="set password">
+</form>
+END
+        }        
+    } elsif( $page eq 'create-account' ) {
+        my $login = $self->login;  
+        die "error" if ! $login->isa( 'EPUC::AdminAcct' );
+        my( $action ) = $self->shift_path;
+        my( $success, $msg );
+        if( $action eq 'submit' ) {
+            my( $un, $pw, $isadmin ) = ( $r->param('un'), $r->param('pw'), $r->param('new-admin') );
+            my $err_span = '';
+            eval {
+                $login->create_user_account( $un, $pw, $isadmin );
+                $success = 1;
+            };
+            $msg = $@;
+        }
+        if( $success ) {
+            $self->{main} = <<"END";
+<h2>Create Account</h2>
+Created Account
+END
+        } else {
+            $self->{main} = <<"END";
+<h2>Create Account</h2>
+<form method="POST" action="/spuc/create-account/submit">
+  <div class="message">$msg</div>
+  <table>
+    <tr> <th>User</th>     <td><input type="text" name="un"></td> </tr>
+    <tr> <th>Password</th> <td><input type="password" name="pw"></td> </tr>
+    <tr class="needs-super"> <th>is admin</th> <td><input type="checkbox" value="1" name="new-admin"></td> </tr>
+  </table>
+  <br>
+  <input type="submit" name="create-account" value="create account">
+</form>
+END
+        }
+    } elsif( $page eq 'allinprogress' ) {
+        my $login = $self->login;
+        die "error" if ! ($login->isa( 'EPUC::AdminAcct' ) && $login->get_is_super );
+
+        my( $action ) = $self->shift_path;
+
+        my $strip_html;
+        if( $action eq 'detail' ) {
+            $strip_html = $self->detail( 'allinprogress' );
+        } else {
+            my $all_inprogress = $self->{app}->get__in_progress_strips;
+            $strip_html = $self->strips_html( $all_inprogress, 'allinprogress') || ' no in progress strips ';
+        }
+        $self->{main} = <<"END";
+<h2>admin show all in progress strips</h2>
+$strip_html
+END
+        
+    } else {  
+        #about page
+        $self->{main} = $self->about;
     }
 
     $self->save;
@@ -632,14 +792,16 @@ sub play_panel {
 }
 
 sub recent_strips {
-    my $self = shift;
+    my( $self, $page ) = @_;
     my $app = $self->app();
-    $self->strips_html( $app->get_recently_completed_strips, '/spuc/recent/' );
+    $self->{size} = '400x400';
+    $self->strips_html( $app->get_recently_completed_strips, $page ) || 'no strips found';;
 }  #recent_strips
 
 sub strip_html {
-    my( $self, $strip, $strips ) = @_;
-    my $strip_html = '<div class="strip">';
+    my( $self, $strip, $strips, $page ) = @_;
+    my $strip_class = $self->{is_detail} ? "strip detail" : "strip";
+    my $strip_html = '<div class="$strip_class">';
     if( $strip->get__reserved_by ) {
         $strip_html .= $self->play_panel( $strip->_last_panel );
     }
@@ -657,7 +819,7 @@ sub strip_html {
             if( $panel->get_type eq 'sentence' ) {
                 if( $i == 0 && $self->{show_detail} ) {
                     use Encode;
-                    $strip_html .= sprintf( '<div class="sentence"><a href="/spuc/detail/%s/%s">%s</a></div>', 
+                    $strip_html .= sprintf( qq~<div class="sentence"><a href="/spuc/$page/detail/%s/%s">%s</a></div>~, 
                                             $strip->{ID},
                                             $self->{store}->_get_id( $strips ),
                                             dc( $panel->get_sentence ) );
@@ -676,11 +838,15 @@ sub strip_html {
 } #strip_html
 
 sub strips_html {
-    my( $self, $strips, $href, $size ) = @_;
-    my( $start ) = $self->path;
+    my( $self, $strips, $page, $size ) = @_;
+    my( $start ) = $self->shift_path;
     $start //= 0;
-    $size  //= 4;
+    $size  //= 1;
     my $end = $start + $size;
+
+    if( @$strips == 0 ) {
+        return '';
+    }
 
     my $strip_html = '<div>';
 
@@ -696,13 +862,13 @@ sub strips_html {
             if( $newstart < 0 ) {
                 $newstart = 0;
             }
-            $strip_html .= qq~<a href="$href$newstart">&lt;&lt;back</a>~;
+            $strip_html .= qq~<a href="/spuc/$page/paginate/$newstart">&lt;&lt;back</a>~;
         }
         if( $end < @$strips ) {
             if( $start > 0 ) {
                 $strip_html .= ' ';
             }
-            $strip_html .= qq~<a style="margin-left:2em;" href="$href$end">forward&gt;&gt;</a>~;
+            $strip_html .= qq~<a style="margin-left:2em;" href="/spuc/$page/paginate/$end">forward&gt;&gt;</a>~;
         }
         $strip_html .= "</div>";
     }
@@ -711,7 +877,7 @@ sub strips_html {
     $strip_html .= '<div class="strips">';
     for( my $i=$start; $i<$end; $i++ ) {
         my $strip = $strips->[$i];
-        $strip_html .= $self->strip_html( $strip, $strips );
+        $strip_html .= $self->strip_html( $strip, $strips, $page );
     }
     $strip_html .= '</div></div>';
     $strip_html;
@@ -719,10 +885,10 @@ sub strips_html {
 
 sub about {
     my $self = shift;
-    my $recent = $self->recent_strips;
+    my $recent = $self->recent_strips('recent');
     return <<"END";
         <p>
-          <img class="starticon" src="/epuc/images/coyo.jpg"> Coyo here. I really miss the the <i><b>eat poop u cat</b></i> site,
+          <img class="starticon" src="/epuc_data/images/coyo.jpg"> Coyo here. I really miss the the <i><b>eat poop u cat</b></i> site,
           so I made this little clone of it. This site, madyote.com doesn&#39;t have much in the way of horsepower
           or even storage, so this is by necessity a small affair. The framework the site runs on requires javascript
           to use and is experimental so potentially buggy. For this reason, there are a few limitations on strips.

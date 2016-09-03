@@ -24,7 +24,7 @@ sub _init {
     my $icon = $self->{STORE}->newobj( {}, 'EPUC::Picture' );
     $icon->develop(  $self->{STORE}->newobj( {
         extension => 'png',
-        file_path => '/var/www/html/epuc/images/question.png',
+        file_path => '/var/www/html/epuc_data/images/question.png',
                                              } ), '80x80' );
 
     $self->set_avatar( $self->{STORE}->newobj( {
