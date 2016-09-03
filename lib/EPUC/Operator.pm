@@ -841,7 +841,7 @@ sub strips_html {
     my( $self, $strips, $page, $size ) = @_;
     my( $start ) = $self->shift_path;
     $start //= 0;
-    $size  //= 1;
+    $size  //= 4;
     my $end = $start + $size;
 
     if( @$strips == 0 ) {
