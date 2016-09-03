@@ -25,17 +25,18 @@ sub _onLogin {
 sub create_user_account {
     my( $self, $username, $password, $is_admin ) = @_;
     my $app = $self->get_app;
+    my $acct;
     if( $is_admin ) {
         if( $self->get_is_super ) {
-            my $acct = $app->_create_account( $username, $password, 'EPUC::AdminAcct' );
-            $acct->set__is_admin(1);
-            $acct;
+            $acct = $app->_create_account( $username, $password, 'EPUC::AdminAcct' );
         } else {
             die { err => "Only superuser can create admin accounts" };
         }
     } else {
-        $app->_create_account( $username, $password );
+        $acct = $app->_create_account( $username, $password );
     }
+    $acct->get_avatar->set_user( $username );
+    $acct;
 }
 
 sub reset_user_password {

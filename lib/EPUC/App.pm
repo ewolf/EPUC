@@ -16,8 +16,9 @@ sub _init {
     my $self = shift;
     # TODO - way to update a password for an account
     my $first_admin = $self->_create_account( 'epuc', 'slatherSLAPTY---+', 'EPUC::AdminAcct' );
+    $first_admin->get_avatar->set_user( 'epuc' );
     $first_admin->set_is_super(1);
-    $first_admin->set__is_admin(1);
+    $first_admin->set_is_admin(1);
     $self->set__first_admin( $first_admin );
 
     $self->set_recently_completed_strips([]);

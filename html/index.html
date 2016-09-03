@@ -21,13 +21,22 @@
     </script>
     <style>
       .templates { display: none; }
-    .strip {
-        border: solid 3px black;
-        display: inline-block;
-        vertical-align: top;
-        margin: 10px;
-        padding: 5px;
-    }
+      .strip {
+          border: solid 3px black;
+          display: inline-block;
+          vertical-align: top;
+          margin: 10px;
+          padding: 5px;
+      }
+      .needs-admin,.needs-super {
+          display: none;
+      }
+      .is-admin li.needs-admin,.is-super li.needs-super {
+          display: list-item;
+      }
+      .is-admin .needs-admin,.is-super .needs-super {
+          display: inline-block;
+      }
 
     </style>
   </head>
@@ -84,42 +93,101 @@
           <li><a href="#findstrip" class="action">Find a strip to play</a></li>
           <li><a href="#updateprefs" class="action">Update my preferences</a></li>
           <li><a href="#inprogress" class="action">my in progress strips</a></li>
+          <li><a href="#reserved" class="action">my reserved strips</a></li>
         </ul>
+        <div class="needs-admin">
+          <h3>Admin Actions</h3>
+          <ul>
+            <li><a href="#list-accounts" class="action">list accounts</a></li>
+            <li><a href="#create-account" class="action">create account</a></li>
+            <li><a href="#set-password" class="action">set password</a></li>
+            <li><a href="#strip-editor" class="action">strip editor</a></li>
+          </ul>
+        </div>
         <h3>Recent Strips</h3>
         <p class="recent-strips"> </p>
       </div>
 
       <div id="startstrip" class="content">
         Start a new strip <input type="text" id="startsentence"> <button type="button" id="doStart">Start</button>
+        <hr>
+        <a href="#account" class="action">cancel</a>
       </div>
 
       <div id="findstrip" class="content">
+        <div id="foundstrip"></div>
+        <hr>
         <a href="#account" class="action">back</a>
       </div>
 
       <div id="inprogress" class="content">
         <div id="strips"></div>
+        <hr>
+        <a href="#account" class="action">back</a>        
+      </div>
+
+      <div id="reserved" class="content">
+        <div id="reserved-strips"></div>
+        <hr>
         <a href="#account" class="action">back</a>        
       </div>
 
       
+      <div id="create-account" class="content">
+        <table>
+          <tr> <th>User</th>     <td><input type="text" id="new-username"></td> </tr>
+          <tr> <th>Password</th> <td><input type="password" id="new-password"></td> </tr>
+          <tr class="needs-super"> <th>is admin</th> <td><input type="checkbox" id="new-admin"></td> </tr>
+        </table>
+        <br>
+        <button type="button" id="do-create-account">create account</button>        
+        <hr>
+        <a href="#account" class="action">back</a>
+      </div>
+
+      <div id="set-password" class="content">
+        <table>
+         <tr> <th>User</th>     <td><input type="text" id="username-set"></td> </tr>
+         <tr> <th>Password</th> <td><input type="password" id="password-set"></td> </tr>
+        </table>
+        <br>
+        <button type="button" id="do-password-set">set password</button>
+        <hr>
+        <a href="#account" class="action">back</a>
+      </div>
+
+      <div id="strip-editor" class="content">
+        not implemented yet.<br>
+        <hr>
+         <a href="#account" class="action">back</a>
+      </div>
+
+      <div id="list-accounts" class="content">
+        <div id="accounts"></div>
+        <hr>
+         <a href="#account" class="action">back</a>
+      </div>
+
+      
       <div id="updateprefs" class="content">
-            <div class="icon">
-              upload icon <input type="file" id="iconup">
-            </div>
-            <table>
-              <tr> <th>My Name</th> <td><input type="text" class="info" data-field="name"></td></tr>
-              <tr> <th>Details about me</th> <td><textarea class="info" data-field="about"></textarea> </td></tr>
-              <tr> <th>Reset password</th> <td>
-                  <table>
-                    <tr> <th>old password</th> <td><input type="password" id="oldpw"></td> </tr>
-                    <tr> <th>new password</th> <td><input type="password" id="newpw"></td> </tr>
-                    <tr> <th>new password again</th> <td><input type="password" id="newpw2"></td> </tr>
-                  </table>
-                  <button type="button" id="resetpw">reset password</button>
-              </td> </tr>
-            </table>
-            <a href="#account" class="action">back</a>
+        <div>
+          <img class="icon">
+          upload icon <input type="file" id="iconup">
+        </div>
+        <table>
+          <tr> <th>My Name</th> <td><input type="text" class="info" data-field="name"></td></tr>
+          <tr> <th>Details about me</th> <td><textarea class="info" data-field="about"></textarea> </td></tr>
+          <tr> <th>Reset password</th> <td>
+              <table>
+                <tr> <th>old password</th> <td><input type="password" id="oldpw"></td> </tr>
+                <tr> <th>new password</th> <td><input type="password" id="newpw"></td> </tr>
+                <tr> <th>new password again</th> <td><input type="password" id="newpw2"></td> </tr>
+              </table>
+              <button type="button" id="resetpw">reset password</button>
+          </td> </tr>
+        </table>
+        <hr>
+        <a href="#account" class="action">back</a>
       </div>
 
       

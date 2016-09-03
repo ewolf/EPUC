@@ -8,12 +8,20 @@ use base 'Yote::ServerObj';
 use EPUC::Picture;
 
 sub _init {
-
+    my $self = shift;
 }
 
 sub _load {
     my $self = shift;
 }
+
+sub _log {
+    my( $msg, $sev ) = @_;
+    $sev //= 1;
+    open my $out, ">>/opt/yote/log/yote.log";
+    print $out "$msg\n";
+}
+
 
 # returns the panels on a strip
 sub panels {
@@ -23,8 +31,22 @@ sub panels {
     # completed, return the whole thing
     # looking to be reserved
     # 
-    # 
+    #
+
+    if( $acct && $self->get__reserved_by == $acct->get_avatar() ) {
+        my $panel = $self->reserved_panel($acct);
+        my $phash = {
+            type => $panel->get_type,
+        };
+        if( $panel->get_type eq 'picture' ) {
+            $phash->{url} = $panel->get_picture->url( $size );
+        } else {
+            $phash->{sentence} = $panel->get_sentence;
+        }
+        return [ $phash ];
+    }
     
+    _log( "State " . $self->get__state );
     my @shown_panels;
     if( $self->get__state eq 'pending' ) {
         # grab the panels up to the last panel
@@ -33,7 +55,8 @@ sub panels {
         my $panels = $self->get__panels;
         my $found_panel_with_author;
         for my $panel (reverse @$panels) {
-            if( $found_panel_with_author || $panel->get__artist == $acct ) {
+            _log( $panel->get__artist . ' vs ' . $acct->get_avatar . ' vs ' . $acct);
+            if( $found_panel_with_author || $panel->get__artist == $acct->get_avatar ) {
                 my $phash = {
                     type => $panel->get_type,
                 };
@@ -73,7 +96,7 @@ sub panels {
 sub reserved_panel {
     my( $self, $acct ) = @_;
 
-    if( $self->get__reserved_by == $acct ) {
+    if( $self->get__reserved_by == $acct->get_avatar ) {
         return $self->_last_panel;
     }
     die { err => "Did not reserve this strip" };
@@ -81,13 +104,14 @@ sub reserved_panel {
 
 sub reserve {
     my( $self, $acct, $admin ) = @_;
+    my $ava = $acct->get_avatar;
     if( ($admin && $admin->get__is_admin) ||
             ! $self->get__reserved_by ) {
         die "non account trying to reserve" unless $acct->isa( 'EPUC::Acct' );
-        $self->set__reserved_by( $acct );
-        $acct->get__my_data->add_to_reserved_strips( $self );
-    } elsif( $self->get__reserved_by == $acct ) {
-        print STDERR "ALREADY RESERVED\n";
+        $self->set__reserved_by( $ava );
+        $acct->add_to_reserved_strips( $self );
+    } elsif( $self->get__reserved_by == $ava ) {
+        die { err => "already reserved by you" };
         # already reserved, so do nothing, no error
         $self;
     } else {
@@ -98,9 +122,10 @@ sub reserve {
 
 sub free {
     my( $self, $acct, $admin ) = @_;
-    if( $self->get__reserved_by == $acct || ($admin && $admin->get__is_admin) ) {
+    my $ava = $acct->get_avatar;
+    if( $self->get__reserved_by == $ava || ($admin && $admin->get__is_admin) ) {
         $self->set__reserved_by(undef);
-        $acct->get__my_data->remove_from_reserved_strips( $self );
+        $acct->remove_from_reserved_strips( $self );
     } else {
         die { err => 'could not free strip' };
     }
@@ -117,8 +142,9 @@ sub _last_panel {
 sub _add_panel {
     my( $self, $acct, $obj, $is_picture ) = @_;
 
+    my $ava = $acct->get_avatar;
     my $panel = $self->{STORE}->newobj( {
-        _artist  => $acct,
+        _artist  => $ava,
     }, 'EPUC::Panel' );
     if( $is_picture ) {
         die { err => "two pictures in a row" } if $self->_last_panel->get_type ne 'sentence';
@@ -131,20 +157,20 @@ sub _add_panel {
         $panel->set_type( 'sentence' );
         $panel->set_sentence( $obj );
     }
-    if( 0 == grep { $acct == $_ } @{$self->get__players} ) {
-        $self->add_to__players( $acct );
+    if( 0 == grep { $ava == $_ } @{$self->get__players} ) {
+        $self->add_to__players( $ava );
     }
     $self->set__reserved_by(undef);
-    $acct->get__my_data->remove_from_reserved_strips( $self );
-    $acct->get__my_data->add_once_to_in_progress_strips( $self );    
+    $acct->remove_from_reserved_strips( $self );
+    $acct->add_once_to_in_progress_strips( $self );    
 
     my $togo = $self->get_panels_to_go - 1;
     $self->set_panels_to_go( $togo );
     if( $togo == 0 ) {
         $self->set__state( 'complete' );
-        $acct->get__my_data->remove_from_reserved_strips( $self );
-        $acct->get__my_data->remove_from_in_progress_strips( $self );
-        $acct->get__my_data->add_to_completed_strips( $self );
+        $acct->remove_from_reserved_strips( $self );
+        $acct->remove_from_in_progress_strips( $self );
+        $ava->add_to_completed_strips( $self );
         my $app = $acct->get_app;
         $app->remove_from__in_progress_strips( $self );
         $app->add_to__completed_strips( $self );
@@ -164,7 +190,7 @@ sub add_sentence {
     my( $self, $acct, $sentence ) = @_;
 
     die { err => "need to reserve this strip to play it" }
-        unless $self->get__reserved_by == $acct;
+        unless $self->get__reserved_by == $acct->get_avatar;
 
     if( $sentence =~ /\S/ ) {
         return $self->_add_panel( $acct, $sentence );
@@ -176,10 +202,8 @@ sub add_sentence {
 sub add_picture {
     my( $self, $acct, $picture ) = @_;
 
-print STDERR "GETPIC : ". $self->get__reserved_by. " == $acct\n";
-    
     die { err => "need to reserve this strip to play it" }
-        unless $self->get__reserved_by == $acct;
+        unless $self->get__reserved_by == $acct->get_avatar;
 
     $self->_add_panel( $acct, $picture, 'is_picture' );
 
