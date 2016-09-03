@@ -24,7 +24,7 @@ sub _init {
     my $icon = $self->{STORE}->newobj( {}, 'EPUC::Picture' );
     $icon->develop(  $self->{STORE}->newobj( {
         extension => 'png',
-        file_path => '/home/wolf/proj/EPUC/html/images/question.png',
+        file_path => '/var/www/html/epuc/images/question.png',
                                              } ), '80x80' );
 
     $self->set_avatar( $self->{STORE}->newobj( {
@@ -88,7 +88,7 @@ sub start_strip {
         _title   => $sentence,
         _artist  => $self->get_avatar,
         _players => [ $self->get_avatar ],
-        panels_to_go => 2,#8, (8 is correct, there are 9 panels total)
+        panels_to_go => 8, #(8 is correct, there are 9 panels total)
         _next    => 'picture',
         _panels  => [ $panel ],
                                         }, 'EPUC::Strip' );
