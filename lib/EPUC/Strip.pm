@@ -46,7 +46,6 @@ sub panels {
         return [ $phash ];
     }
     
-    _log( "State " . $self->get__state );
     my @shown_panels;
     if( $self->get__state eq 'pending' ) {
         # grab the panels up to the last panel
@@ -55,7 +54,6 @@ sub panels {
         my $panels = $self->get__panels;
         my $found_panel_with_author;
         for my $panel (reverse @$panels) {
-            _log( $panel->get__artist . ' vs ' . $acct->get_avatar . ' vs ' . $acct);
             if( $found_panel_with_author || $panel->get__artist == $acct->get_avatar ) {
                 my $phash = {
                     type => $panel->get_type,
@@ -111,10 +109,10 @@ sub reserve {
         $self->set__reserved_by( $ava );
         $acct->add_to_reserved_strips( $self );
     } elsif( $self->get__reserved_by == $ava ) {
-        die { err => "already reserved by you" };
         # already reserved, so do nothing, no error
         $self;
     } else {
+        _log( "$ava, ".$self->get__reserved_by );
         die { err => 'strip already reserved' };
     }
     $self;

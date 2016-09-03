@@ -108,10 +108,18 @@ sub play_random_strip {
 
     # sort by strips you've not played yet
     my $strips = $app->get__in_progress_strips([]);
+
+    
     my( @new_strips );
+    my $ava = $self->get_avatar;
+
+    _log( "RAND : AVA $ava" );
+    
     for my $strip (@$strips) {
-        if( (0 == grep { $self == $_}
-            @{$strip->get__players()} ) && $strip->get__reserved_by != $self->get_avatar )
+        _log( "RANDSTR RES BY : " . $strip->get__reserved_by );
+
+        if( (0 == grep { $ava == $_ }
+            @{$strip->get__players()} ) && $strip->get__reserved_by != $ava )
         {
             push @new_strips, $strip;
         }

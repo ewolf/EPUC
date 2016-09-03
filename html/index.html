@@ -20,6 +20,22 @@
       } );
     </script>
     <style>
+      .side { float: left; display: none; }
+
+      .artist {
+          font-family: cursive;
+          font-style: oblique;
+      }
+
+      .navigation {
+          text-align: center;
+      }
+      
+      div.sentence {
+          font-size: x-large;
+          text-align: center;
+      }
+      
       .templates { display: none; }
       .strip {
           border: solid 3px black;
@@ -28,6 +44,7 @@
           margin: 10px;
           padding: 5px;
       }
+      
       .needs-admin,.needs-super {
           display: none;
       }
@@ -45,55 +62,35 @@
 
     <div class="header" style="float:right">
       <a href="#login" class="action" id="login">log in</a>
-      <a href="#logout" class="action" id="logout" style="display:none">log out</a>
     </div>
     
-    <h1>EPUC</h1>
-    <h2>Eat Poop U Clone</h2>
-
     <span class="message"></span>
 
-    <div class="main">
-      <div class="content" id="about">
-        <h3>A low power clone</h3>
-
-        <p>
-          <img class="starticon" src="/epuc/images/coyo.jpg"> Coyo here. I really miss the the <i><b>eat poop u cat</b></i> site,
-          so I made this little clone of it. This site, madyote.com doesn&#39;t have much in the way of horsepower
-          or even storage, so this is by necessity a small affair. The framework the site runs on requires javascript
-          to use and is experimental so potentially buggy. For this reason, there are a few limitations on strips.
-        </p>
-        <p>
-          To get an account, <a href="mailto:coyocanid@gmail.com">contact me</a>  or any of the admins of the site. Include
-          the user handle you would like.
-        </p>
-
-        <h3>Recent Strips</h3>
-        <p class="recent-strips"> </p>
-        
-      </div>
+    <div class="top">
+      <h1>Scarf Poutine U Clone</h1>
     </div>
-
-    <div class="templates">
-      
-      <div id="login" class="content">
-        <span id="loginerr"></span>
-        <table>
-          <tr> <th>user</th> <td><input type="text" id="username"></td> </tr>
-          <tr> <th>password</th> <td><input type="password" id="password"></td> </tr>
-          </table><br>
-        <button type="button" id="doLogin">Login Here</button>
-      </div>
-
-      <div id="account" class="content">
-        <img class="icon"> Welcome <span class="name"></span>
+    
+    <div class="body"> <!--        body -->
+      <div class="side">
+        <img class="icon"><br>
+        Welcome <span class="name"></span>
+        <h3>Artwork</h3>
+        <ul>
+          <li><a href="#about" class="action">about</a></li>
+          <li><a href="#recentstrips" class="action">show recent strips</a></li>
+          <li><a href="#completed" class="action">my completed strips</a></li>
+          <li><a href="#inprogress" class="action">my in progress strips</a></li>
+        </ul>
+        <h3>Play</h3>
+        <ul>
+          <li><a href="#findstrip" class="action">find a strip to play</a></li>
+          <li><a href="#startstrip" class="action">start a new strip</a></li>
+          <li><a href="#reserved" class="action">my reserved strips</a></li>
+        </ul>
         <h3>Actions</h3>
         <ul>
-          <li><a href="#startstrip" class="action">Start a new strip</a></li>
-          <li><a href="#findstrip" class="action">Find a strip to play</a></li>
-          <li><a href="#updateprefs" class="action">Update my preferences</a></li>
-          <li><a href="#inprogress" class="action">my in progress strips</a></li>
-          <li><a href="#reserved" class="action">my reserved strips</a></li>
+          <li><a href="#updateprefs" class="action">update user preferences</a></li>
+          <li><a href="#logout" class="action" id="logout">log out</a></li>
         </ul>
         <div class="needs-admin">
           <h3>Admin Actions</h3>
@@ -104,34 +101,68 @@
             <li><a href="#strip-editor" class="action">strip editor</a></li>
           </ul>
         </div>
+      </div> <!-- side -->
+
+
+      <div class="main">
+      </div>  <!-- main -->
+
+      
+    </div>     <!--        body -->
+
+    
+    <div class="templates">  <!-- templates -->
+
+      <div class="content" id="about">
+        <p>
+          <img class="starticon" src="/epuc/images/coyo.jpg"> Coyo here. I really miss the the <i><b>eat poop u cat</b></i> site,
+          so I made this little clone of it. This site, madyote.com doesn&#39;t have much in the way of horsepower
+          or even storage, so this is by necessity a small affair. The framework the site runs on requires javascript
+          to use and is experimental so potentially buggy. For this reason, there are a few limitations on strips.
+        </p>
+        <p>
+          To get an account, <a href="mailto:coyocanid@gmail.com">contact me</a>  or any of the admins of the site. Include
+          the user handle you would like.
+        </p>
         <h3>Recent Strips</h3>
         <p class="recent-strips"> </p>
       </div>
 
+      
+      <div id="login" class="content">
+        <span id="loginerr"></span>
+        <table>
+          <tr> <th>user</th> <td><input type="text" id="username"></td> </tr>
+          <tr> <th>password</th> <td><input type="password" id="password"></td> </tr>
+        </table><br>
+        <button type="button" id="doLogin">Login Here</button>
+      </div>
+
       <div id="startstrip" class="content">
         Start a new strip <input type="text" id="startsentence"> <button type="button" id="doStart">Start</button>
-        <hr>
-        <a href="#account" class="action">cancel</a>
       </div>
 
       <div id="findstrip" class="content">
         <div id="foundstrip"></div>
-        <hr>
-        <a href="#account" class="action">back</a>
       </div>
 
       <div id="inprogress" class="content">
         <div id="strips"></div>
-        <hr>
-        <a href="#account" class="action">back</a>        
       </div>
 
       <div id="reserved" class="content">
         <div id="reserved-strips"></div>
-        <hr>
-        <a href="#account" class="action">back</a>        
       </div>
 
+      <div id="completed" class="content">
+        Completed strips for <span id="artist"></span>
+        <div id="completed-strips"></div>
+      </div>
+
+      <div id="recentstrips" class="content">
+        <h3>Recent Strips</h3>
+        <p class="recent-strips"> </p>
+      </div>
       
       <div id="create-account" class="content">
         <table>
@@ -141,38 +172,41 @@
         </table>
         <br>
         <button type="button" id="do-create-account">create account</button>        
-        <hr>
-        <a href="#account" class="action">back</a>
       </div>
 
       <div id="set-password" class="content">
         <table>
-         <tr> <th>User</th>     <td><input type="text" id="username-set"></td> </tr>
-         <tr> <th>Password</th> <td><input type="password" id="password-set"></td> </tr>
+          <tr> <th>User</th>     <td><input type="text" id="username-set"></td> </tr>
+          <tr> <th>Password</th> <td><input type="password" id="password-set"></td> </tr>
         </table>
         <br>
         <button type="button" id="do-password-set">set password</button>
-        <hr>
-        <a href="#account" class="action">back</a>
       </div>
 
       <div id="strip-editor" class="content">
         not implemented yet.<br>
-        <hr>
-         <a href="#account" class="action">back</a>
       </div>
 
       <div id="list-accounts" class="content">
         <div id="accounts"></div>
-        <hr>
-         <a href="#account" class="action">back</a>
       </div>
 
+      <div id="strip-detail" class="content">
+        <div class="navigation">
+          navigation
+        </div>        
+        <div class="detail-strip">
+          detail strip
+        </div>
+      </div>
       
-      <div id="updateprefs" class="content">
+      <div id="updateprefs" class="content">  <!-- update prefs -->
         <div>
-          <img class="icon">
-          upload icon <input type="file" id="iconup">
+          <p>
+            <img class="icon"><br>
+            update icon 
+            <input type="file" id="iconup">
+          </p>
         </div>
         <table>
           <tr> <th>My Name</th> <td><input type="text" class="info" data-field="name"></td></tr>
@@ -186,12 +220,14 @@
               <button type="button" id="resetpw">reset password</button>
           </td> </tr>
         </table>
-        <hr>
-        <a href="#account" class="action">back</a>
-      </div>
-
+      </div> <!-- update prefs -->
       
-    </div>
-    
-  </body>
+    </div> <!-- templates -->
+
+    <h2>TODOS</h2>
+    artist detail
+    <br>
+
+  </body> 
+  
 </html>
