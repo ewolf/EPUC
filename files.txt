@@ -1,0 +1,11 @@
+to make seamless between clien and server...
+  pass in arguments to the called function
+   normal scalars, lists, hashes and yote objects
+   but also functions for file objects
+
+   the function could look like
+       yote.include_files( '.filecontrols' ) which returns functions that return the
+       file objects
+
+on the other side, those functions come across as files
+

@@ -1,0 +1,462 @@
+<html>
+  <head>
+    <title>Eat Poop U Cat</title>
+
+    <script src="/js/jquery-1.12.0.min.js"></script>
+    <script src="/js/yote.js"></script>
+    <script src="/js/yote.ui.js"></script>
+
+    <style>
+    section {
+        padding: 5px;
+        margin: 5px;
+        border: solid 1px;
+    }
+    </style>
+
+    <script><!--
+    $().ready( function() {
+
+        var mylogin, myapp;
+
+        function msg( msg ) {
+            $( '#message' ).empty().text( msg );
+        }
+
+        function list_accounts() {
+            mylogin.list_accounts( [], function( accts ) {
+                $('#accounts').empty().append(
+                    accts.map( function( act ) {
+                        return '<li>' + act.get('user') + ( act.get('is_admin') ? ' *admin*' : '' ) + '</li>'; }
+                             ).join("")
+                );
+            } );
+        }
+        
+        $( '#admin' ).hide();
+        $( '.loggedinsection' ).hide();
+        $( '#loginsection' ).hide();
+
+        function show_strips( key, strips, $strip_container ) {
+            yote.ui.updateListener( strips,
+                                    'reserved_' + key,
+                                    function() {
+                                        $strip_container.empty();
+                                        strips.each( function( strip ) {
+                                            var $strip = $( '<div id="strip_' + key + "_" + strip.id + '"></div>' ).appendTo( $strip_container );
+                                            strip.panels( [ mylogin ], function( panels ) {
+                                                $strip.empty();
+                                                var txt = '<ul>';
+                                                panels.forEach( function( panel ) {
+                                                    txt += '<li>';
+                                                    if( panel.get('type') === 'sentence' ) {
+                                                        txt += panel.get('sentence');
+                                                    } else if( panel.get('type') === 'picture' ) {
+                                                        txt += '<img src="' + panel.get('picture').get('url') + '">';
+                                                    } else {
+                                                        txt += "<b>unknown panel</b>";
+                                                    }
+                                                    txt += '</li>';
+                                                } );
+                                                $strip.append( txt + '</ul>' );
+                                            } );
+                                        } ); //each strip
+                                    } ); //update listener
+        }
+
+        
+        function init_login( acct ) {
+            mylogin = acct;
+            $( '#foundstrip,#inprogress,#reserved' ).empty();
+            
+            $( '#welcome' ).empty().append( "Welcome " + mylogin.get('user' ) );
+            $( '#loginsection' ).hide();
+            $( '#logoutsection,.loggedinsection' ).show();
+            if( acct.get( 'is_admin' ) ) {
+                msg( "welcome administrator : " +  acct.get( 'user' ) );
+                $( '#admin' ).show();
+                list_accounts();
+            } else {
+                msg( "welcome : " +  acct.get( 'user' ) );
+                $( '#admin' ).hide();
+            }
+            if( ! mylogin.get('is_super') ) {
+                $( '#createadmin' ).hide();
+            }
+            
+
+            $( '.info' ).each( function() {
+                var $this = $(this);
+                var fld = $this.data( 'field' );
+                var txt = mylogin.get( fld );
+                $this.val( txt );
+            } );
+
+            yote.ui.updateListener( mylogin, 'icon', function() {
+                if( mylogin === undefined ) return;
+                var icon = mylogin.get('icon');
+                $( '#icon').attr('src', '' );
+                if( icon ) {
+                    var url = icon.get('url');
+                    $( '#icon').attr('src', url );
+                }
+            }, true );
+
+            var reserved_strips = mylogin.get( 'my_reserved_strips' );
+            var $reserved = $( '#reserved' );
+            yote.ui.updateListener( reserved_strips,
+                                    'reserved',
+                                    function( ) {
+                                        if( reserved_strips === undefined ) return;
+                                        $reserved.empty();
+                                        reserved_strips.each( function( strip ) {
+                                            strip.reserved_panel( [ mylogin ], function( panel ) {
+                                                var drawstrip = '<div style="border:2px black solid">';
+                                                if( panel.get('type') === 'sentence' ) {
+                                                    drawstrip += '<b>' + panel.get('sentence') + '</b>';
+                                                    drawstrip += '<br><input id="panelUpReserved" name="panelUpReserved" type="file">';
+                                                    drawstrip += '<a href="#" id="upload_reserved">upload picture</a>';
+                                                } else if( panel.get('type') === 'picture' ) {
+                                                    drawstrip += '<img src="' + panel.get('picture').get('url') + '">';
+                                                    drawstrip += '<br><input type="text" id="reserved_sentence"> <button type="button" id="submit_reserved_sentence">submit sentence</button>';
+                                                }
+                                                drawstrip += '</div>';
+                                                $reserved.append( drawstrip );
+
+                                                $( '#submit_reserved_sentence' ).on( 'click', function(ev) {
+                                                    ev.preventDefault();
+                                                    ev.stopPropagation();
+                                                    var sen = $( '#reserved_sentence' ).val();
+                                                    if( sen.match( /\S/ ) ) {
+                                                        strip.add_sentence( [ mylogin, sen ], function() {
+                                                            msg( "added sentence" );
+                                                        }, function(err) { msg(err) } );
+                                                    } else {
+                                                        msg( "sentence can't be empty" );
+                                                    }
+                                                } );
+                        
+                                                var files;
+                                                $( '#panelUpReserved' ).on( 'change', function( ev ) {
+                                                    files = ev.target.files;
+                                                } );
+                                                $( '#upload_reserved' ).on( 'click', function(ev) {
+                                                    ev.preventDefault();
+                                                    ev.stopPropagation();
+                                                    if( files && files.length == 1 ) {
+                                                        strip.add_picture( [ mylogin,yote.prepUpload(files) ], function(ret) {
+                                                            msg( 'uploaded panel' );
+                                                        }, function(err) { msg(err) } )
+                                                    }
+                                                } );
+                                            } );
+                                        } );
+                                    }, true ); //reserved stuff
+            show_strips( 'completed', mylogin.get( 'my_completed_strips' ), $( '#completed' ) );
+            show_strips( 'progress', mylogin.get( 'my_in_progress_strips' ), $( '#inprogress' ) );
+
+            $( '#findstrip' ).on( 'click', function() {
+                mylogin.play_random_strip([], function( strip, panel ) {
+                    if( strip && panel ) {
+                        var drawstrip = '<div style="border:2px black solid">';
+                        if( panel.get('type') === 'sentence' ) {
+                            drawstrip += '<b>' + panel.get('sentence') + '</b>';
+                            drawstrip += '<br><input id="panelUp" name="panelUp" type="file">';
+                            drawstrip += '<a href="#" id="upload">upload picture</a>';
+                            drawstrip += '<br><a href="#" id="reserve_this">reserve this strip</a>';
+                        } else if( panel.get('type') === 'picture' ) {
+                            drawstrip += '<img src="' + panel.get('picture').get('url') + '">';
+                            drawstrip += '<input type="text" id="random_sentence"> <button type="button" id="submit_sentence">submit sentence</button>';
+                        }
+                        drawstrip += '</div>';
+                        $( '#foundstrip' ).empty().append( drawstrip );
+
+                        $( '#submit_sentence' ).on( 'click', function(ev) {
+                            ev.preventDefault();
+                            ev.stopPropagation();
+                            var sen = $( '#random_sentence' ).val();
+                            if( sen.match( /\S/ ) ) {
+                                strip.reserve( [ mylogin ], function() {
+                                    strip.add_sentence( [ mylogin, sen ], function() {
+                                        msg( "added sentence" );
+                                        $( '#foundstrip' ).empty();
+                                    }, function(err) { msg(err) } );
+                                } );
+                            } else {
+                                msg( "sentence can't be empty" );
+                            }
+                        } );
+                        
+                        var files;
+                        $( '#panelUp' ).on( 'change', function( ev ) {
+                            files = ev.target.files;
+                        } );
+                        $( '#upload' ).on( 'click', function(ev) {
+                            ev.preventDefault();
+                            ev.stopPropagation();
+                            if( files && files.length == 1 ) {
+                                strip.reserve( [ mylogin ], function() {
+                                    strip.add_picture( [mylogin,yote.prepUpload( files ) ], function( ret ) {
+                                        msg( 'uploaded panel' );
+                                        $( '#foundstrip' ).empty();
+                                    } );
+                                }, function(err) { msg(err) }
+                                             );
+                            } else {
+                                msg( 'please select a file to upload' );
+                            }
+                        } );
+                        $( '#reserve_this' ).on( 'click', function( ev ) {
+                            ev.preventDefault();
+                            ev.stopPropagation();
+                            strip.reserve( [mylogin], function( strip ) {
+                                msg( "reserved strip" );
+                            } );
+                        } );
+                        $( '#submit_sentence' ).on( 'click', function( ev ) {
+                            ev.preventDefault();
+                            ev.stopPropagation();
+
+                        } );
+                    } else {
+                        msg( 'No strip seems available' );
+                    }
+                } );
+            } );
+            
+        } //init_login
+
+        function needs_login() {
+            $( '#loginsection' ).show();
+            $( '#logoutsection,.loggedinsection,#admin' ).hide();
+        } //needs_login
+
+        function logout() {
+            mylogin = undefined;
+            yote.logout( function(res) { 
+                msg( 'logged out' );
+                $( '#loginsection' ).show();
+                $( '#logoutsection,.loggedinsection' ).hide();
+                $( '#admin' ).hide();
+            } );
+        } //logout
+        $( '#logout' ).on( 'click', function( ev ) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            logout();
+        } );
+
+        $( '#username' ).on( 'change', function( ev ) {
+            $( '#password' ).blur();
+        } );
+
+        $( '#password' ).on( 'change', function( ev ) {
+            if( $( '#username' ).val().match( /\S/ ) && $( '#password' ).val().match( /\S/ ) ) {
+                login();
+            }
+        } );
+
+        function login() {
+            var un = $('#username').val();
+            var pw = $('#password').val();
+            $('#username').val('');
+            $('#password').val('');
+            myapp.login( [un,pw], function(acct) {
+                init_login( acct );
+            }, function( fail ) {
+                msg( 'failed : ' + fail );
+            });
+        }
+
+        $( '#login' ).on( 'click', function( ev ) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            login();
+        } );
+
+        $( '#resetpw' ).on( 'click', function( ev ) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            if( $('#newpw').val() == $('#newpw2').val() ) {
+                mylogin.reset_password( [$('#newpw').val(),$('#oldpw').val()], function(newacct) {
+                    msg( "reset password for " + newacct.get('user') );
+                    $('#newpw').val('');
+                    $('#oldpw').val('');
+                    $('#oldpw2').val('');
+                }, function( err ) { msg( err ); } );
+            } else {
+                msg( "Error, passwords do not match" );
+            }
+        } );
+
+        $( '#resetpassword' ).on( 'click', function( ev ) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            mylogin.reset_user_password( [$('#newusername').val(), $('#newpassword').val(),acct], function(newacct) {
+                msg( "reset password for " + newacct.get('user') );
+            }, function( err ) { msg( err ); } );
+        } );
+
+        $( '#createaccount' ).on( 'click', function( ev ) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            mylogin.create_user_account( [$('#newusername').val(), $('#newpassword').val()], function(newacct) {
+                msg( 'created new user account ' + newacct.get('user') );
+                $('#newusername,#newpassword').val('');
+                list_accounts();
+            }, function( fail ) {
+                msg( 'failed : ' + fail );
+            });
+        } );
+
+        $( '#createadmin' ).on( 'click', function( ev ) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            if( confirm( "Really create admin account" ) ) {
+                mylogin.create_user_account( [$('#newusername').val(), $('#newpassword').val(),1], function(newacct) {
+                    msg( 'created new admin account ' + newacct.get('user') );
+                    $('#newusername,#newpassword').val('');
+                    list_accounts();
+                }, function( fail ) {
+                    msg( 'failed : ' + fail );
+                });
+            }
+        } );
+
+        $( '#startstrip' ).on( 'click', function() {
+            var sent = $( '#newstrip' ).val();
+            if( sent.match( /\S/ ) ) {
+                mylogin.start_strip( [sent], function( succ ) {
+                    msg( 'started strip' );
+                    $( '#newstrip' ).val('');
+                } );
+            } else {
+                msg( 'needs starting sentence' );
+            }
+        } );
+        
+        var changers = {};
+        var setInfo = function( fld, txt, login ) {
+            return function() {
+                login.setInfo( [fld, txt] );
+            }
+        };
+        $( '.info' ).on( 'keyup', function(ev) {
+            var $this = $(this);
+            var fld = $this.data('field');
+            var txt = $this.val();
+            var oldid = changers[fld];
+            if( oldid ) {
+                clearTimeout( oldid );
+            }
+            changers[fld] = setTimeout( setInfo( fld, txt, mylogin ), 2000 );
+        } );
+
+        $( '#iconup' ).on( 'change', function( ev ) {
+            var files = ev.target.files;
+            if( files.length == 1 ) {
+                mylogin.uploadIcon( [yote.prepUpload( files )], function(er) {
+                    msg( 'uploaded icon' );
+                });
+            }
+        } );
+        
+        yote.init( {
+            yoteServerURL : '/cgi-bin/yote/yote_cgi.pl',
+            appName       : 'EPUC::App',
+            globalErrHandler : function() {},
+            handler       : function( root, app, login ) {
+                $( '#loginsection' ).show();
+                myapp = app;
+                if( login ) {
+                    console.log( ["on init, got login",login] );
+                    init_login( login );
+                } else {
+                    needs_login();
+                }
+
+                // public stuffs
+                show_strips( 'recent', app.get( 'recently_completed_strips' ), $( '#recent' ) );
+            }
+        } ); //init yote
+      } ); // --> init jquery
+    </script>
+  </head>
+  <body>
+    <h1>Eat Poop U Cat</h1>
+
+    <h2 id="welcome"></h2>
+    
+    <ul>
+      <li>admin accounts</li>
+      <li>regular accounts log in</li>
+      <li>log in</li>
+      <li></li>
+    </ul>
+
+    <section id="message"></section>
+    
+    <section id="loginsection">
+      Username <input id="username" placeholder="username" type="text">  <br>
+      Password <input id="password" placeholder="password" type="password">
+      <button type="button" id="login">Log In</button>
+    </section>
+
+    <section id="logoutsection">
+      <button type="button" id="logout">Log Out</button>
+    </section>
+
+    <section id="admin">
+      Admin stuff
+      <br>
+      Username <input id="newusername" placeholder="username" type="text"> 
+      Password <input id="newpassword" placeholder="password" type="password">
+          <button type="button" id="createaccount">create new account</button>
+          <button type="button" id="createadmin">create new admin</button>
+      <button type="button" id="resetpassword">reset password</button>
+      <br>
+      
+      <br>
+      remove account
+      <br>
+      list accounts <ul id="accounts"></ul>
+    </section>
+
+    <section class="loggedinsection">
+      update profile
+      <br>
+      <img id="icon" height=80 width=80> <br>
+      upload new icon <input type="file" name="iconup" id="iconup">
+      <br>
+      My Name : <input type="text" class="info" data-field="name"><br>
+      Details about me : <textarea class="info" data-field="about"></textarea> <br>
+      Reset password <blockquote> old password <input type="password" id="oldpw">
+        <br> new password <input type="password" id="newpw"> <br>
+        new password again <input type="password" id="newpw2"> <br>
+        <button type="button" id="resetpw">reset password</button>
+      </blockquote>
+    </section>
+    <section class="loggedinsection">
+      logged in so show stuff
+      <br>
+      reserved strips
+      <div id="reserved"></div>
+      <br>
+      my in progress strips
+      <div id="inprogress"></div>
+      <br>
+       my completed strips
+       <div id="completed"></div>
+      <br>
+      <input type="text" id="newstrip">
+      <button type="button" id="startstrip">start strip</button>
+      <br>
+         <a href="#" id="findstrip">Find a strip to play</a>
+         <div id="foundstrip"></div>
+    </section>
+    <section id="everyonesection">
+      Recent strips
+      <div id="recent"></div>
+    </section>
+  </body>
+</html>
