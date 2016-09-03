@@ -104,7 +104,14 @@ sub _make_page {
          vertical-align: top;
       }
       div.strip.detail {
-         display: block;
+         display: inline-block;
+      }
+      .paginator { width:36em; padding;1em; }
+      .prevnext { width:12em; padding;1em; }
+      .back,.prev { }
+      .forward,.next { float:right }
+      table.strips tr {
+         vertical-align: top;
       }
       div.strip {
          display: inline-block;
@@ -116,6 +123,7 @@ sub _make_page {
          font-size: x-large;
          text-align: center;
       }
+      .artist {  }
       .artist-link {
          font-family: cursive;
          font-style: oblique;
@@ -145,22 +153,24 @@ sub _make_page {
       .logged-in .enclosure {
         margin-left: 15em;
       }
+      .header {float:right; }
+      .top { text-align:left;padding:1em }
     </style>
   </head>
   
   <body class="$body_classes">
-    <div class="header" style="float:right">
+    <div class="header">
       <a href="/spuc/login" id="login-link">log in</a>
     </div>
     
 
-    <div class="top" style="text-align:left;padding:1em">
+    <div class="top">
       <a href="/spuc/about">
         <h1>Scarf Poutine U Clone</h1>
       </a>
     </div>
 
-    <div class="body" style="align-content:center">
+    <div class="body">
 
       <div class="side">
         <a href="/spuc/updateprefs"><img class="icon" src="$self->{icon_url}"><br></a>
@@ -312,28 +322,32 @@ sub detail {
         my $prevnext = '';
         if( ref $strips eq 'ARRAY' ) {
             if( @$strips > 1 ) {
-                $prevnext = '<div style="text-align:left;padding: 0em 3em 0em 3em">';
+                $prevnext = '<div class="prevnext">';
                 for( my $i=0; $i<@$strips; $i++ ) {
                     my $list_strip = $strips->[$i];
                     if( $strip == $list_strip ) {
                         if( $i > 0 ) {
                             my $prev = $strips->[$i-1];
-                            $prevnext .= sprintf( '<a href="/spuc/%s/detail/%s/%s">%s</a>',
+                            $prevnext .= sprintf( '<a class="prev" href="/spuc/%s/detail/%s/%s">%s</a>',
                                                   $page,
                                                   $prev->{ID},
                                                   $strips_id,
                                                   'prev' );
+                        } else {
+                            $prevnext .= '<span class="prev">prev</span>';
                         }
                         if( $i < $#$strips ) {
                             if( $i > 0 ) {
                                 $prevnext .= ' ';
                             }
                             my $next = $strips->[$i+1];
-                            $prevnext .= sprintf( '<a href="/spuc/%s/detail/%s/%s" style="float:right">%s</a>',
+                            $prevnext .= sprintf( '<a class="next" href="/spuc/%s/detail/%s/%s">%s</a>',
                                                   $page,
                                                   $next->{ID},
                                                   $strips_id,
                                                   'next' );
+                        } else {
+                            $prevnext .= '<span class="next">next</span>';
                         }
                         last;
                     }
@@ -410,8 +424,8 @@ END
                 $avatar->get_about );
 
             my $handle = $avatar->get_user;
-            if( $name ) { $name = "<h3>Given Name</h3>$name" }
-            if( $about ) { $about = "<h3>About</h3>$about" }
+            if( $name ) { $name = "<b>Given Name</b> $name" }
+            if( $about ) { $about = "<b>About</b> $about" }
             
             my $icon_url = $avatar->get_icon->url( '400x400' );
 
@@ -424,16 +438,17 @@ END
             }
             
             $self->{main} = <<"END";
- <h1>$handle</h1>
+ <h1 style="text-align:center">$handle</h1>
  <div>
-  <div style="float:left">
-   <img src="$icon_url"> <br>
-   $name
-   $about
-' </div>
+  <table class="artist">
+   <tr> <td rowspan="2"><img style="float:left" src="$icon_url"</td>
+   <td>$name</td> </tr>
+   <tr> <td>$about</td> </tr>
+  </table>
+  <hr>
   <div>
-    <h3>Recent Strips for $handle</h3>
-    $strips
+  <h3>Recent Strips for $handle</h3>
+  $strips
   </div>
  </div>
 END
@@ -801,7 +816,7 @@ sub recent_strips {
 sub strip_html {
     my( $self, $strip, $strips, $page ) = @_;
     my $strip_class = $self->{is_detail} ? "strip detail" : "strip";
-    my $strip_html = '<div class="$strip_class">';
+    my $strip_html = qq~<div class="$strip_class">~;
     if( $strip->get__reserved_by ) {
         $strip_html .= $self->play_panel( $strip->_last_panel );
     }
@@ -856,30 +871,36 @@ sub strips_html {
 
     if( $start > 0 || $end < @$strips ) {
         # needs pagination
-        $strip_html .= "<div>";
+        $strip_html .= '<div class="paginator">';
         if( $start > 0 ) {
             my $newstart = $start - $size;
             if( $newstart < 0 ) {
                 $newstart = 0;
             }
-            $strip_html .= qq~<a href="/spuc/$page/paginate/$newstart">&lt;&lt;back</a>~;
+            $strip_html .= qq~<a class="back" href="/spuc/$page/paginate/$newstart">&lt;&lt;back</a>~;
+        } else {
+            $strip_html .= qq~<span class="back">&lt;&lt;back</span>~;
         }
         if( $end < @$strips ) {
             if( $start > 0 ) {
                 $strip_html .= ' ';
             }
-            $strip_html .= qq~<a style="margin-left:2em;" href="/spuc/$page/paginate/$end">forward&gt;&gt;</a>~;
+            $strip_html .= qq~<a class="forward" href="/spuc/$page/paginate/$end">forward&gt;&gt;</a>~;
+        } else {
+            $strip_html .= qq~<span class="forward">forward&gt;&gt;</span>~;
         }
         $strip_html .= "</div>";
     }
 
     $self->{show_detail} = 1;
-    $strip_html .= '<div class="strips">';
+    $strip_html .= '<table class="strips"><tr>';
     for( my $i=$start; $i<$end; $i++ ) {
         my $strip = $strips->[$i];
+        $strip_html .= '<th>';
         $strip_html .= $self->strip_html( $strip, $strips, $page );
+        $strip_html .= '</th>';
     }
-    $strip_html .= '</div></div>';
+    $strip_html .= '</tr></table></div>';
     $strip_html;
 } #strips_html
 
