@@ -9,3 +9,8 @@ to make seamless between clien and server...
 
 on the other side, those functions come across as files
 
+____________________________________________________________
+
+mod perl?
+  apt install libapache2-mod-perl2
+  
