@@ -3,10 +3,9 @@ package EPUC::Strip;
 use strict;
 
 use Yote::Server;
+use base 'Yote::ServerObj';
 
-use base 'Yote::Server::Acct';
-
-use EPUC::Util;
+use EPUC::Picture;
 
 sub _init {
 
@@ -18,7 +17,7 @@ sub _load {
 
 # returns the panels on a strip
 sub panels {
-    my( $self, $acct ) = @_;
+    my( $self, $acct, $size ) = @_;
 
     #
     # completed, return the whole thing
@@ -26,23 +25,46 @@ sub panels {
     # 
     # 
     
+    my @shown_panels;
     if( $self->get__state eq 'pending' ) {
         # grab the panels up to the last panel
         # this account was the author of
 
         my $panels = $self->get__panels;
-        my( @shown_panels );
         my $found_panel_with_author;
         for my $panel (reverse @$panels) {
             if( $found_panel_with_author || $panel->get__artist == $acct ) {
-                push @shown_panels, $panel;
+                my $phash = {
+                    type => $panel->get_type,
+                };
+                if( $panel->get_type eq 'picture' ) {
+                    $phash->{url} = $panel->get_picture->url( $size );
+                } else {
+                    $phash->{sentence} = $panel->get_sentence;
+                }
+                print STDERR Data::Dumper->Dump([$phash,'WHUUf']);
+                push @shown_panels, $phash;
+                
                 $found_panel_with_author = 1;
             }
         }
         return [reverse @shown_panels ];
     }
     elsif( $self->get__state eq 'complete' ) {
-        return [@{$self->get__panels}]; #unroll into a normal array
+        for my $panel (@{$self->get__panels}) {
+            my $phash = {
+                type => $panel->get_type,
+                artist => $panel->get__artist,
+            };
+            if( $panel->get_type eq 'picture' ) {
+                $phash->{url} = $panel->get_picture->url( $size );
+            } else {
+                $phash->{sentence} = $panel->get_sentence;
+            }
+            push @shown_panels, $phash;
+        }
+
+        return \@shown_panels; #unroll into a normal array
     }
     die { err => 'unknown panels' };
 } #panels
@@ -101,7 +123,9 @@ sub _add_panel {
     if( $is_picture ) {
         die { err => "two pictures in a row" } if $self->_last_panel->get_type ne 'sentence';
         $panel->set_type( 'picture' );
-        $panel->set_picture( $obj );
+        my $picture = $self->{STORE}->newobj( {}, 'EPUC::Picture' );
+        $picture->develop( $obj, '50x50', '400x400', '700x700' );
+        $panel->set_picture( $picture );
     } else {
         die { err => "two sentences in a row" } if $self->_last_panel->get_type ne 'picture';
         $panel->set_type( 'sentence' );
@@ -129,6 +153,8 @@ sub _add_panel {
         if( @$recently_completed_strips > 20 ) {
             pop @$recently_completed_strips;
         }
+
+        # TODO - notify all the artists that this strip is completed
     }
     $self->add_to__panels( $panel );
     $panel;
@@ -154,8 +180,6 @@ print STDERR "GETPIC : ". $self->get__reserved_by. " == $acct\n";
     
     die { err => "need to reserve this strip to play it" }
         unless $self->get__reserved_by == $acct;
-
-    EPUC::Util::developPicture( $picture );
 
     $self->_add_panel( $acct, $picture, 'is_picture' );
 

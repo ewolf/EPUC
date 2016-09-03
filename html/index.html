@@ -48,6 +48,7 @@
                                                 $strip.empty();
                                                 var txt = '<ul>';
                                                 panels.forEach( function( panel ) {
+                                                    alert( panel );
                                                     txt += '<li>';
                                                     if( panel.get('type') === 'sentence' ) {
                                                         txt += panel.get('sentence');
@@ -259,10 +260,10 @@
         function login() {
             var un = $('#username').val();
             var pw = $('#password').val();
-            $('#username').val('');
-            $('#password').val('');
             myapp.login( [un,pw], function(acct) {
                 init_login( acct );
+                $('#username').val('');
+                $('#password').val('');
             }, function( fail ) {
                 msg( 'failed : ' + fail );
             });

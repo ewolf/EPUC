@@ -4,8 +4,10 @@ use strict;
 
 use Yote::Server;
 
-use base 'Yote::Server::Acct';
+use base 'Yote::ServerObj';
 
-
+sub _load {
+    my $self = shift;
+}
 
 1;

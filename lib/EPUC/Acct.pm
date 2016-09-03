@@ -9,20 +9,32 @@ use base 'Yote::Server::Acct';
 
 use EPUC::Panel;
 use EPUC::Strip;
-use EPUC::Util;
+use EPUC::Picture;
 
 sub _init {
     my $self = shift;
     $self->set_my_in_progress_strips( [] );
     $self->set_my_reserved_strips( [] );
     $self->set_my_completed_strips( [] );
+    $self->set_icon( $self->{STORE}->newobj( {}, 'EPUC::Picture' ) );
 }
 
 sub _load {
     my $self = shift;
-    $self->get_my_in_progress_strips( [] );
-    $self->get_my_completed_strips( [] );
-    $self->get_my_reserved_strips( [] );
+    $self->get_icon( $self->{STORE}->newobj( {}, 'EPUC::Picture' ) );
+    my $inpr = $self->get_my_in_progress_strips( [] );
+    my $comp = $self->get_my_completed_strips( [] );
+    my $res  = $self->get_my_reserved_strips( [] );
+    if( @$inpr ) {
+        $self->set__my_data( {
+            in_progress_strips => $inpr,
+            completed_strips   => $comp,
+            reserved_strips    => $res,
+                         } );
+        $self->set_my_in_progress_strips( [] );
+        $self->set_my_reserved_strips( [] );
+        $self->set_my_completed_strips( [] );
+    }
 }
 
 sub _onLogin {
@@ -52,8 +64,8 @@ sub getInfo {
 } #getInfo
 
 sub uploadIcon {
-    my( $self, $icon ) = @_;
-    EPUC::Util::developPicture( $icon );
+    my( $self, $image ) = @_;
+    my $icon = $self->get_icon->develop( $image, '80x80' );
     $self->set_icon( $icon );
 
     $icon;
