@@ -55,4 +55,13 @@ sub list_accounts {
     [values %{$self->get_app->get__accts({})}];
 }
 
+sub all_in_progress {
+    my $self = shift;
+    if( ! $self->get_is_super ) {
+        die { err =>  "Superuser only function for the moment" };
+    }
+    my $app = $self->get_app;
+    return $app->get__in_progress_strips;
+} #all_in_progress
+
 1;

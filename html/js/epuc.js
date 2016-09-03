@@ -144,6 +144,17 @@ var onTemplate = {
             var $cmplt_strips = $( '#completed-strips' ).empty();
             showStrips( $cmplt_strips, cmplt_strips );
         } //get_login
+    }, //completed
+    'admin-in-progress' : function() {
+        get_login().all_in_progress([], function( inProgStrips ) {
+            show_strips( { key : 'admin-in-progress',
+                           strips : inProgStrips,
+                           container : $('#in-progress-strips'),
+                           start : 0,
+                           end : 5,
+                           clickhandler : detailHandler
+                         } );
+        } );
     }
 }; //onTemplate actions
 
