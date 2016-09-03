@@ -13,8 +13,7 @@ use Data::Dumper;
 
 
 sub handler {
-    my $orig = shift;
-    my $r = Apache2::Request->new( $orig );
+    my $r = Apache2::Request->new( shift );
 
     #
     # For debug have this reload each time so I don't have to
@@ -25,7 +24,7 @@ sub handler {
     delete $INC{$dostuff};
     require $dostuff;
 
-    my $ret = EPUC::Operator::make_page( $r, $orig );
+    my $ret = EPUC::Operator::make_page( $r );
     
     return $ret;
 } #handler

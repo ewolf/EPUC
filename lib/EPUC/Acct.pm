@@ -69,7 +69,7 @@ sub getInfo {
 sub uploadIcon {
     my( $self, $image ) = @_;
     my $av = $self->get_avatar;
-    my $icon = $av->get_icon->develop( $image, '80x80' );
+    my $icon = $av->get_icon->develop( $image, '80x80', '400x400' );
     $av->set_icon( $icon );
 
     $icon;
@@ -88,11 +88,13 @@ sub start_strip {
         _title   => $sentence,
         _artist  => $self->get_avatar,
         _players => [ $self->get_avatar ],
-        panels_to_go => 8, #(8 is correct, there are 9 panels total)
+        panels_to_go => 2, #(8 is correct, there are 9 panels total)
         _next    => 'picture',
         _panels  => [ $panel ],
                                         }, 'EPUC::Strip' );
 
+    $panel->set__strip( $strip);
+    
     my $app = $self->get_app;
     $app->add_to__in_progress_strips( $strip );
     $self->add_to_in_progress_strips( $strip );

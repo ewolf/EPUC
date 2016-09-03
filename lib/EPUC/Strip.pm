@@ -9,6 +9,16 @@ use EPUC::Picture;
 
 sub _init {
     my $self = shift;
+    #
+    # _state (pending|complete)
+    # _title
+    # _artist
+    # _players
+    # panels_to_go
+    # _next (panel)
+    # _panels
+    # _reserved_by (Avatar)
+    #
 }
 
 sub _load {
@@ -136,35 +146,26 @@ sub reserved_panel {
     die { err => "Did not reserve this strip" };
 } #reserved_panel
 
-sub reserve {
-    my( $self, $acct, $admin ) = @_;
-    my $ava = $acct->get_avatar;
-    if( ($admin && $admin->get__is_admin) ||
-            ! $self->get__reserved_by ) {
-        die "non account trying to reserve" unless $acct->isa( 'EPUC::Acct' );
-        $self->set__reserved_by( $ava );
-        $acct->add_to_reserved_strips( $self );
-    } elsif( $self->get__reserved_by == $ava ) {
-        # already reserved, so do nothing, no error
-        $self;
-    } else {
-        _log( "$ava, ".$self->get__reserved_by );
-        die { err => 'strip already reserved' };
-    }
-    $self;
-} #reserve
 
 sub free {
     my( $self, $acct, $admin ) = @_;
     my $ava = $acct->get_avatar;
     if( $self->get__reserved_by == $ava || ($admin && $admin->get__is_admin) ) {
         $self->set__reserved_by(undef);
+        $self->_last_panel->set__reserved_by(undef);
         $acct->remove_from_reserved_strips( $self );
     } else {
         die { err => 'could not free strip' };
     }
     $self;
 } #free
+
+sub can_see {
+    my( $self, $acct ) = @_;
+    return $self->get__state eq 'complete' || 
+        ( $acct && 1 == grep { $acct->get_avatar == $_ } 
+          @{$self->get__players} );
+}
 
 sub _last_panel {
     my $pans = shift->get__panels([]);
@@ -177,8 +178,13 @@ sub _add_panel {
     my( $self, $acct, $obj, $is_picture ) = @_;
 
     my $ava = $acct->get_avatar;
+    
+    my $panels = $self->get__panels;
+
     my $panel = $self->{STORE}->newobj( {
         _artist  => $ava,
+        _strip   => $self,
+        _panel_number => @$panels,
     }, 'EPUC::Panel' );
     if( $is_picture ) {
         die { err => "two pictures in a row" } if $self->_last_panel->get_type ne 'sentence';
@@ -191,10 +197,10 @@ sub _add_panel {
         $panel->set_type( 'sentence' );
         $panel->set_sentence( $obj );
     }
-    if( 0 == grep { $ava == $_ } @{$self->get__players} ) {
-        $self->add_to__players( $ava );
-    }
+    $self->add_once_to__players( $ava );
+
     $self->set__reserved_by(undef);
+    $self->_last_panel->set__reserved_by(undef);
     $acct->remove_from_reserved_strips( $self );
     $acct->add_once_to_in_progress_strips( $self );    
 
@@ -202,9 +208,6 @@ sub _add_panel {
     $self->set_panels_to_go( $togo );
     if( $togo == 0 ) {
         $self->set__state( 'complete' );
-        $acct->remove_from_reserved_strips( $self );
-        $acct->remove_from_in_progress_strips( $self );
-        $ava->add_to_completed_strips( $self );
         my $app = $acct->get_app;
         $app->remove_from__in_progress_strips( $self );
         $app->add_to__completed_strips( $self );
@@ -214,9 +217,14 @@ sub _add_panel {
             pop @$recently_completed_strips;
         }
 
-        # TODO - notify all the artists that this strip is completed
+        for my $artist (@{$self->get__players}) {
+            $artist->get__account->remove_from_in_progress_strips( $self );
+            $artist->add_to_completed_strips( $self );
+        }
+        
+        # TODO - notify all the artists that this strip is completed?
     }
-    $self->add_to__panels( $panel );
+    push @$panels, $panel;
     $panel;
 } #_add_panel
 
@@ -243,5 +251,9 @@ sub add_picture {
 
 } #add_picture
 
+sub reserve {
+    my( $self, $acct, $admin ) = @_;
+    $self->_last_panel->reserve( $acct, $admin );
+} #reserve
 
 1;
