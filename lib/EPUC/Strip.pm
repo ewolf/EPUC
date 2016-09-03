@@ -25,7 +25,7 @@ sub _log {
 
 # returns the panels on a strip
 sub panels {
-    my( $self, $acct, $size ) = @_;
+    my( $self, $acct, $size, $override ) = @_;
 
     #
     # completed, return the whole thing
@@ -47,7 +47,23 @@ sub panels {
     }
     
     my @shown_panels;
-    if( $self->get__state eq 'pending' ) {
+    if( $self->get__state eq 'complete' || ($override&&$acct->get_is_admin) ) {
+        for my $panel (@{$self->get__panels}) {
+            my $phash = {
+                type => $panel->get_type,
+                artist => $panel->get__artist,
+            };
+            if( $panel->get_type eq 'picture' ) {
+                $phash->{url} = $panel->get_picture->url( $size );
+            } else {
+                $phash->{sentence} = $panel->get_sentence;
+            }
+            push @shown_panels, $phash;
+        }
+
+        return \@shown_panels; #unroll into a normal array
+    }    
+    elsif( $self->get__state eq 'pending' ) {
         # grab the panels up to the last panel
         # this account was the author of
 
@@ -74,22 +90,6 @@ sub panels {
             }
         }
         return [reverse @shown_panels ];
-    }
-    elsif( $self->get__state eq 'complete' ) {
-        for my $panel (@{$self->get__panels}) {
-            my $phash = {
-                type => $panel->get_type,
-                artist => $panel->get__artist,
-            };
-            if( $panel->get_type eq 'picture' ) {
-                $phash->{url} = $panel->get_picture->url( $size );
-            } else {
-                $phash->{sentence} = $panel->get_sentence;
-            }
-            push @shown_panels, $phash;
-        }
-
-        return \@shown_panels; #unroll into a normal array
     }
     die { err => 'unknown panels' };
 } #panels

@@ -101,9 +101,7 @@ var onTemplate = {
                 container : $( '#inprogress>#strips' ),
                 start : 0,
                 end : 5,
-                clickhandler : function( ev, strip, $str, idx, strips ) {
-                    alert( 'hi prog' );
-                }
+                clickhandler : detailHandler
             } );
         }
     },
@@ -152,21 +150,23 @@ var onTemplate = {
                            container : $('#in-progress-strips'),
                            start : 0,
                            end : 5,
-                           clickhandler : detailHandler
+                           clickhandler : detailHandler,
+                           override : 1
                          } );
         } );
     }
 }; //onTemplate actions
 
 // --------------- STRIPS -----------------
-function detailHandler(ev, strip, $str, idx, strips ) {
+function detailHandler(ev, strip, $str, idx, strips, override ) {
     /* // show detail strip
        $('.detail.artist').hide();
        $('.detail.strip').show(); */
     show_strip( {
         size  : 'big',
         strip : strip,
-        strip_container : $( '.detail-strip' ).empty()
+        strip_container : $( '.detail-strip' ).empty(),
+        override : override
     } ); //login for kudos maybe?
 
     // update navigation
@@ -189,7 +189,7 @@ function detailHandler(ev, strip, $str, idx, strips ) {
             var newstrip = strips.get( newidx );
             if( newstrip ) {
                 $nav.find( '.prev' ).on( 'click', function(ev) {
-                    detailHandler(ev,newstrip,$str,newidx,strips );
+                    detailHandler(ev,newstrip,$str,newidx,strips, override );
                 } );
             }
         })( idx - 1 );
@@ -200,7 +200,7 @@ function detailHandler(ev, strip, $str, idx, strips ) {
             var newstrip = strips.get( newidx );
             if( newstrip ) {
                 $nav.find( '.next' ).on( 'click', function(ev) {
-                    detailHandler(ev,newstrip,$str,newidx,strips );
+                    detailHandler(ev,newstrip,$str,newidx,strips, override );
                 } );
             }
         })( idx + 1 );
@@ -228,6 +228,7 @@ function show_strips( args ) {
     var end              = args.end;
     var clickhandler     = args.clickhandler;
     var sizes            = args.sizes || [];
+    var override         = args.override;
     yote.ui.updateListener( strips,
                             'strip_' + key,
                             function() {
@@ -240,13 +241,14 @@ function show_strips( args ) {
                                     show_strip( {
                                         strip           : strip,
                                         strip_container : $strip,
-                                        size            : sizes[ i ]
+                                        size            : sizes[ i ],
+                                        override        : override
                                     } );
                                     if( clickhandler ) {
                                         (function(str,$str,idx,ss) {
                                             $strip.on( 'click', function( ev ) {
                                                 var $str = $( this );
-                                                clickhandler( ev, str, $str, idx, ss );
+                                                clickhandler( ev, str, $str, idx, ss, override );
                                             } );
                                         }) (strip,$strip,i,strips);
                                     }
@@ -259,6 +261,7 @@ function show_strip(args) {
     var strip  = args.strip;
     var $strip = args.strip_container;
     var size   = args.size || 'thumb';
+    var override = args.override;
     var show_artists = false;
     var width = 600;
     var height = 450;
@@ -277,7 +280,7 @@ function show_strip(args) {
         width = 100;
         height = 58;
     }
-    strip.panels( [ get_login(), size ], function( panels ) {
+    strip.panels( [ get_login(), size, override ], function( panels ) {
 
         var $table = $( '<table>' ).appendTo( $strip );
         panels.forEach( function( panel ) {
