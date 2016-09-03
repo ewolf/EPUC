@@ -118,8 +118,10 @@ sub play_random_strip {
     for my $strip (@$strips) {
         _log( "RANDSTR RES BY : " . $strip->get__reserved_by );
 
-        if( (0 == grep { $ava == $_ }
-            @{$strip->get__players()} ) && $strip->get__reserved_by != $ava )
+        if( (0 == grep { $ava == $_ } @{$strip->get__players()} )
+            && $strip->get__reserved_by != $ava
+            && $strip != $exclude
+            )
         {
             push @new_strips, $strip;
         }
@@ -127,7 +129,7 @@ sub play_random_strip {
 
     return unless @new_strips;
 
-    my( $strip ) = sort { sprintf( "%.0f", rand(2)-1) } grep { $exclude != $_ } @new_strips;
+    my( $strip ) = sort { sprintf( "%.0f", rand(2)-1) } @new_strips;
 
     my $panels = $strip->get__panels;
 
