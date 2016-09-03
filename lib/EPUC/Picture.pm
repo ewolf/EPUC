@@ -10,6 +10,13 @@ use File::Copy;
 use File::Path 'make_path';
 use UUID::Tiny;
 
+sub _load {
+    my $self = shift;
+    my $url = $self->get_base_url;
+    $url =~ s!^/epuc/!/epuc_data/!;
+    $self->set_base_url( $url );
+}
+
 sub url {
     my( $self, $size ) = @_;
 
