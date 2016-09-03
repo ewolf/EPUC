@@ -13,8 +13,11 @@ use EPUC::Picture;
 
 sub _init {
     my $self = shift;
-    $self->set_my_in_progress_strips( [] );
-    $self->set_my_reserved_strips( [] );
+    $self->set__data( $self->{STORE}->newobj( {
+        in_progress_strips => [],
+        reserved_strips => [],
+        completed_strips => [],
+                                              } ) );
     $self->set_my_completed_strips( [] );
     my $icon = $self->{STORE}->newobj( {}, 'EPUC::Picture' );
     $icon->develop(  $self->{STORE}->newobj( {
@@ -30,12 +33,14 @@ sub _load {
     my $inpr = $self->get_my_in_progress_strips( [] );
     my $comp = $self->get_my_completed_strips( [] );
     my $res  = $self->get_my_reserved_strips( [] );
+    $self->set__my_data( $self->{STORE}->newobj );
+
     if( @$inpr ) {
-        $self->set__my_data( {
+        $self->set__my_data( $self->{STORE}->newobj( {
             in_progress_strips => $inpr,
             completed_strips   => $comp,
             reserved_strips    => $res,
-                         } );
+                         } ) );
         $self->set_my_in_progress_strips( [] );
         $self->set_my_reserved_strips( [] );
         $self->set_my_completed_strips( [] );
@@ -44,7 +49,6 @@ sub _load {
 
 sub _onLogin {
     my $self = shift;
-    print STDERR Data::Dumper->Dump([$self->{DATA},$self->isa("EPUC::AdminAcct"),"ONLOGIN"]);
 }
 
 our %fields = map { $_ => 1 } ('name','about');
@@ -96,7 +100,7 @@ sub start_strip {
 
     my $app = $self->get_app;
     $app->add_to__in_progress_strips( $strip );
-    $self->add_to_my_in_progress_strips( $strip );
+    $self->get__my_data->add_to_in_progress_strips( $strip );
 
     $strip;
 } #start_strip

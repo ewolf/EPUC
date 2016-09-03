@@ -85,7 +85,7 @@ sub reserve {
             ! $self->get__reserved_by ) {
         die "non account trying to reserve" unless $acct->isa( 'EPUC::Acct' );
         $self->set__reserved_by( $acct );
-        $acct->add_to_my_reserved_strips( $self );
+        $acct->get__my_data->add_to_reserved_strips( $self );
     } elsif( $self->get__reserved_by == $acct ) {
         print STDERR "ALREADY RESERVED\n";
         # already reserved, so do nothing, no error
@@ -100,7 +100,7 @@ sub free {
     my( $self, $acct, $admin ) = @_;
     if( $self->get__reserved_by == $acct || ($admin && $admin->get__is_admin) ) {
         $self->set__reserved_by(undef);
-        $acct->remove_from_my_reserved_strips( $self );
+        $acct->get__my_data->remove_from_reserved_strips( $self );
     } else {
         die { err => 'could not free strip' };
     }
@@ -135,16 +135,16 @@ sub _add_panel {
         $self->add_to__players( $acct );
     }
     $self->set__reserved_by(undef);
-    $acct->remove_from_my_reserved_strips( $self );
-    $acct->add_once_to_my_in_progress_strips( $self );    
+    $acct->get__my_data->remove_from_reserved_strips( $self );
+    $acct->get__my_data->add_once_to_in_progress_strips( $self );    
 
     my $togo = $self->get_panels_to_go - 1;
     $self->set_panels_to_go( $togo );
     if( $togo == 0 ) {
         $self->set__state( 'complete' );
-        $acct->remove_from_my_reserved_strips( $self );
-        $acct->remove_from_my_in_progress_strips( $self );
-        $acct->add_to_my_completed_strips( $self );
+        $acct->get__my_data->remove_from_reserved_strips( $self );
+        $acct->get__my_data->remove_from_in_progress_strips( $self );
+        $acct->get__my_data->add_to_completed_strips( $self );
         my $app = $acct->get_app;
         $app->remove_from__in_progress_strips( $self );
         $app->add_to__completed_strips( $self );

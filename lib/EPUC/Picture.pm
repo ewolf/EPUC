@@ -14,7 +14,6 @@ sub url {
     my( $self, $size ) = @_;
 
     my $image = $self->get_image;
-    print STDERR Data::Dumper->Dump([$image,$self->{DATA},"?? ($self)"]);
     my $ext   = $image->get_file_extension;
     my $sizes = $image->get_sizes;
     if( @$sizes ) {
@@ -52,7 +51,6 @@ sub develop {
     }
 
     $image->set_base_url( "/epuc/images/$relative_path/$filename" );
-    print STDERR Data::Dumper->Dump([$self->{DATA},"DEVELOP ($self)"]);
     $self;
 } #develop
 

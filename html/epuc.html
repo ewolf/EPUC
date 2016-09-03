@@ -121,14 +121,19 @@
               } else {
                   $( '.has-icon' ).hide();
               }
+              
+              $( '.main' ).empty();
+              fill_with_template( $('.main'), 'section.about' );              
+              fill_with_template( $('.main'), 'section.recent' );
+              fill_with_template( $('.main'), 'section.user-prefs' );
+              
               setupUserPrefs(login);
           } //onLogin
 
           // TODO - have this behave like the links are really links. have the links go to the same page, but store the 'destination' in localstorage or
           // the link url
           
-          function setupUserPrefs(login) {
-              fill_with_template( $('.main'), 'section.user-prefs' );
+      function setupUserPrefs(login) {
               updateToggles( '.main .toggle-prefs' );
             $( '.info' ).each( function() {
                 var $this = $(this);
@@ -182,6 +187,11 @@
             handler       : function( root, app, login ) {
                 $body.addClass( 'yote-init' );
 
+                $( '.main' ).empty();
+                fill_with_template( $('.main'), 'section.about' );              
+                fill_with_template( $('.main'), 'section.recent' );
+
+                
                 // see where this is going by looking at the url ( or local storage maybe, not sure )
                 if( login ) {
                     onLogin( login );
@@ -263,6 +273,7 @@
                     var show_artists = false;
                     var width = 600;
                     var height = 450;
+
                     if( size === 'big' ) {
                         show_artists = true;
                         size = '700x700';
@@ -278,7 +289,6 @@
                         height = 58;
                     }
                     strip.panels( [ login, size ], function( panels ) {
-                        
                         var $table = $( '<table>' ).appendTo( $strip );
                         panels.forEach( function( panel ) {
                             var $tr = $( '<tr>' ).appendTo( $table );
@@ -335,6 +345,7 @@
                                start : 0,
                                end : 5,
                                clickhandler : function( ev, strip, $str ) {
+
                                    // show detail strip
                                    $('.detail.artist').hide();
                                    $('.detail.strip').show();
@@ -412,7 +423,7 @@
       </section> <!-- about -->
 
       
-      <section>
+      <section class="recent">
         <h3>Browse</h3>
         <div>
           <h4>recent strips</h4>
@@ -451,16 +462,18 @@
         </div>
       </section>
 
-      <div class="detail strip">
-        <a href="#" class="close">close</a>
-        <div id="detail-strip" class="strip"></div>
-      </div>
-
-      <div class="detail artist">
-        <a href="#" class="close">close</a>
-        <div id="detail-artist" class="strip"></div>
-        <div id="artist-recent-strips" class="strip"></div>
-      </div>
     </div>
+
+    <div class="detail strip">
+      <a href="#" class="close">close</a>
+      <div id="detail-strip" class="strip"></div>
+    </div>
+
+    <div class="detail artist">
+      <a href="#" class="close">close</a>
+      <div id="detail-artist" class="strip"></div>
+      <div id="artist-recent-strips" class="strip"></div>
+    </div>
+
   </body>
 </html>
