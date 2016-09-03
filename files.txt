@@ -20,4 +20,13 @@ PerlPostConfigRequire /home/wolf/open_source/EPUC/setup.pl
         SetHandler perl-script
         PerlHandler EPUC::Test
     </Location>
-  
+
+find if a request method is attached or not? try
+
+ perl -MModPerl::MethodLookup -e print_method content_type
+ perl -MModPerl::MethodLookup -e print_method print
+
+sudo apt install libapache2-mod-perl2-dev
+sudo apt install libapache2-mod-apreq2
+apt-get install apache2-dev
+get Apache2::Cookie from cpan
