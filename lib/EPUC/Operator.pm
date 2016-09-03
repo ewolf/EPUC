@@ -2,15 +2,34 @@ package EPUC::Operator;
 
 use strict;
 
-use Apache2::Cookie;
-use Apache2::Const qw(:common);
-use Apache2::Upload;
 
 use APR::Request::Param;
 
 use UUID::Tiny;
 
 use Yote::Server;
+
+
+use Apache2::Cookie;
+use Apache2::Const qw(:common);
+use Apache2::Request;
+use Apache2::RequestIO;
+use Apache2::RequestRec;
+use Apache2::Upload;
+use APR::Request::Param;
+use APR::Request::Apache2;
+
+use Data::Dumper;
+
+
+sub handler {
+    my $r = Apache2::Request->new( shift );
+
+    my $ret = EPUC::Operator::make_page( $r );
+    
+    return $ret;
+} #handler
+
 
 sub new {
     my( $class, $r ) = @_;
