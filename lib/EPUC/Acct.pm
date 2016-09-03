@@ -16,7 +16,12 @@ sub _init {
     $self->set_my_in_progress_strips( [] );
     $self->set_my_reserved_strips( [] );
     $self->set_my_completed_strips( [] );
-    $self->set_icon( $self->{STORE}->newobj( {}, 'EPUC::Picture' ) );
+    my $icon = $self->{STORE}->newobj( {}, 'EPUC::Picture' );
+    $icon->develop(  $self->{STORE}->newobj( {
+        extension => 'png',
+        file_path => '/home/wolf/proj/EPUC/html/images/question.png',
+                                             } ), '80x80' );
+    $self->set_icon( $icon );
 }
 
 sub _load {

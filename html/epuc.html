@@ -16,72 +16,96 @@
   body {
       background-color:#CEF;
   }
+
   body.login-requested .login-requested,body.logged-in .logged-in,body.yote-init .needs-yote {
       display: block;
   }
     .toggle-div {
         display: none;
-    }
+  }
   body .login-requested, body .logged-in, body .needs-yote,
   body.logged-in .needs-login {
       display: none;
   }
+  
   .login-requested.has-password.has-user .login {
       background-color: green;
   }
   .warning {
         background-color: orange;
-    }
-    .message {
-        background-color: lightgreen;
-    }
-    .preferences {
-        margin-top: 8px;
-        margin-left: 10px;
-    }
-    .strip {
-        border: solid 3px black;
-        display: inline-block;
-        vertical-align: top;
-        margin: 10px;
-        padding: 5px;
-    }
-    .strip ul {
-        list-style-type: none;
-    }
-    .detail {
-        display: none;
-        border: solid 5px blue;
-        padding: 10px;
-        position:absolute;
-        top:0px;
-        left:0px;
-        background-color: lightblue;
-    }
-    .sentence {
-        background-color: lightgrey;
-        border: solid 3px lightgreen;
-        margin:4px;
-    }
-    .picture {
-        margin:4px;
-        border: solid 3px lightgreen;
-    }
-    .strip .artist {
-        text-align: right;
-    }
+  }
+  .message {
+      background-color: lightgreen;
+  }
+  .preferences {
+      margin-top: 8px;
+      margin-left: 10px;
+  }
+  .strip {
+      border: solid 3px black;
+      display: inline-block;
+      vertical-align: top;
+      margin: 10px;
+      padding: 5px;
+  }
+  .strip ul {
+      list-style-type: none;
+  }
+  .detail {
+      display: none;
+      border: solid 5px blue;
+      padding: 10px;
+      position:absolute;
+      top:0px;
+      left:0px;
+      background-color: lightblue;
+  }
+  .sentence {
+      background-color: lightgrey;
+      border: solid 3px lightgreen;
+      margin:4px;
+  }
+  .picture {
+      margin:4px;
+      border: solid 3px lightgreen;
+  }
+  .strip .artist {
+      text-align: right;
+  }
+  .templates {
+      display: none;
+  }
   </style>
 
     <script>
+
+      function updateToggles( sele ) {
+          $( sele ).each( function() {
+              var $a = $( this );
+              var txt = $a.text();
+              $a.empty().append( '[<span class="not-updating">+</span><span class="updating">-</span>] ' + txt );
+              $a.find( '.updating' ).hide();
+              $a.off( 'click' ).on( 'click', function(ev) {
+                  var $a = $(this);
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                  var $div = $( $a.data( 'div' ) );
+                  $div.toggle();
+                  $a.find( '.updating,.not-updating' ).toggle();
+              } )
+          } );
+      } //toggleUpdates
+
+      function msg( msg, where ) {
+          $( where || '.message-receiver' ).empty().append( msg ).removeClass( 'warning' ).addClass( 'message' );
+      }
+      function warn( msg, where ) {
+          $( where || '.message-receiver' ).empty().append( msg ).addClass( 'warning' ).removeClass( 'message' );
+      }
+
       $().ready( function() {
       
           var $body = $('body');
-          function msg( msg, where ) {
-              $( where || '.message-receiver' ).empty().append( msg ).removeClass( 'warning' ).addClass( 'message' );
-          }
-          function warn( msg, where ) {
-              $( where || '.message-receiver' ).empty().append( msg ).addClass( 'warning' ).removeClass( 'message' );
-          }
           
           function onLogin( login ) {
               $body.addClass( 'logged-in' );
@@ -97,13 +121,15 @@
               } else {
                   $( '.has-icon' ).hide();
               }
-              setupUserPrefs();
+              setupUserPrefs(login);
           } //onLogin
 
           // TODO - have this behave like the links are really links. have the links go to the same page, but store the 'destination' in localstorage or
           // the link url
           
-          function setupUserPrefs() {
+          function setupUserPrefs(login) {
+              fill_with_template( $('.main'), 'section.user-prefs' );
+              updateToggles( '.main .toggle-prefs' );
             $( '.info' ).each( function() {
                 var $this = $(this);
                 var fld = $this.data( 'field' );
@@ -116,7 +142,7 @@
                 var txt = $this.val();
                 login.setInfo( [fld, txt] );
             } );
-            $( '#iconup' ).on( 'change', function( ev ) {
+              $( '#iconup' ).on( 'change', function( ev ) {
                 var files = ev.target.files;
                 if( files.length == 1 ) {
                     login.uploadIcon( [yote.prepUpload( files )], function(icon) {
@@ -142,7 +168,13 @@
                 }
             } );            
         } //setupUserPrefs
-        
+
+          function fill_with_template( $destination, template_name  ) {
+              var $template = $( '.templates' ).find( template_name );
+              var $clone = $template.clone();
+              $destination.append( $clone );
+          }
+          
         yote.init( {
             yoteServerURL : '/cgi-bin/yote/yote_cgi.pl',
             appName       : 'EPUC::App',
@@ -318,27 +350,15 @@
                 } );
             } // handler
         } ); // yote init
-        function updateToggles() {
-            $( '.div-toggle' ).each( function() {
-                var $a = $( this );
-                var txt = $a.text();
-                $a.empty().append( '[<span class="not-updating">+</span><span class="updating">-</span>] ' + txt );
-                $a.find( '.updating' ).hide();
-                $a.off( 'click' ).on( 'click', function(ev) {
-                    var $a = $(this);
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    var $div = $( $a.data( 'div' ) );
-                    $div.toggle();
-                    $a.find( '.updating,.not-updating' ).toggle();
-                } )
-            } );
-        }
-        updateToggles();
+
+        fill_with_template( $('.main'), 'section.about' );
+          
     } ); // jQuery init
   </script>
   
   <body>
+
+    <!-- ---------- HEADER AND MASTHEAD ---------->
     <div class="needs-yote" style="float:right">
       <div class="needs-login">
         <a href="#" id="loginreq">Log In</a>
@@ -360,79 +380,87 @@
 
     <h1>Eat Poop U Clone</h1>
 
+    <div class="main">
+    </div>
     
-    <h2>A low power clone</h2>
 
-    <p>
-      <img class="starticon" src="/epuc/images/coyo.jpg"> Coyo here. I really miss the the <i><b>eat poop u cat</b></i> site,
-      so I made this little clone of it. This site, madyote.com doesn&#39;t have much in the way of horsepower
-      or even storage, so this is by necessity a small affair. The framework the site runs on requires javascript
-      to use and is experimental so potentially buggy. For this reason, there are a few limitations on strips.
-    </p>
-    <p>To get an account, <a href="mailto:coyocanid@gmail.com">contact me</a>  or any of the admins of the site. 
-    </p>
-
-    <section class="logged-in">
-      <h3>Play</h3>
-      <p>
-      <a href="#">start strip</a> 
-      </p>
-      <p>
-        <a href="#" id="findstrip">Find a strip to play</a>
-        <div id="foundstrip"></div>
-      </p>
-      
-    </section>
-
-    <section>
-      <h3>Browse</h3>
-      <div>
-        <h4>recent strips</h4>
-        <div id="recent-strips"></div>
-      </div>
-      <div>
-        <h4>search for strips</h4>
-      </div>
-    </section>
-
-    
-    <section class="logged-in">
-      <a href="#" class="div-toggle" data-div=".updating.preferences">Update Account</a>
-      <div class="toggle-div updating preferences">
-        <span class="message-receiver"></span>
-        <div>
-          <div class="has-icon">
-            <img class="icon">
-          </div>
-          <div class="icon">
-            upload icon <input type="file" id="iconup">
-          </div>
-        </div>
-        <div>
-          My Name : <input type="text" class="info" data-field="name"><br>
-          Details about me : <textarea class="info" data-field="about"></textarea> <br>
-
-          Reset password <blockquote> old password <input type="password" id="oldpw">
-            <br> new password <input type="password" id="newpw"> <br>
-            new password again <input type="password" id="newpw2"> <br>
-            <button type="button" id="resetpw">reset password</button>
-          </blockquote>
-
-        </div>
+    <div class="templates">
+      <section class="logged-in">
+        <h3>Play</h3>
+        <p>
+          <a href="#">start strip</a> 
+        </p>
+        <p>
+          <a href="#" id="findstrip">Find a strip to play</a>
+          <div id="foundstrip"></div>
+        </p>
         
+      </section>
+
+      <section class="about">
+        <h2>A low power clone</h2>
+
+        <p>
+          <img class="starticon" src="/epuc/images/coyo.jpg"> Coyo here. I really miss the the <i><b>eat poop u cat</b></i> site,
+          so I made this little clone of it. This site, madyote.com doesn&#39;t have much in the way of horsepower
+          or even storage, so this is by necessity a small affair. The framework the site runs on requires javascript
+          to use and is experimental so potentially buggy. For this reason, there are a few limitations on strips.
+        </p>
+        <p>
+          To get an account, <a href="mailto:coyocanid@gmail.com">contact me</a>  or any of the admins of the site. 
+        </p>
+      </section> <!-- about -->
+
+      
+      <section>
+        <h3>Browse</h3>
+        <div>
+          <h4>recent strips</h4>
+          <div id="recent-strips"></div>
+        </div>
+        <div>
+          <h4>search for strips</h4>
+        </div>
+      </section>
+
+      
+      <section class="logged-in user-prefs">
+        <a href="#" class="toggle-prefs" data-div=".updating.preferences">Update Account</a>
+        <div class="toggle-div updating preferences">
+          <span class="message-receiver"></span>
+          <div>
+            <div class="has-icon">
+              <img class="icon">
+            </div>
+            <div class="icon">
+              upload icon <input type="file" id="iconup">
+            </div>
+          </div>
+          <div>
+            My Name : <input type="text" class="info" data-field="name"><br>
+            Details about me : <textarea class="info" data-field="about"></textarea> <br>
+
+            Reset password <blockquote> old password <input type="password" id="oldpw">
+              <br> new password <input type="password" id="newpw"> <br>
+              new password again <input type="password" id="newpw2"> <br>
+              <button type="button" id="resetpw">reset password</button>
+            </blockquote>
+
+          </div>
+          
+        </div>
+      </section>
+
+      <div class="detail strip">
+        <a href="#" class="close">close</a>
+        <div id="detail-strip" class="strip"></div>
       </div>
-    </section>
 
-    <div class="detail strip">
-      <a href="#" class="close">close</a>
-      <div id="detail-strip" class="strip"></div>
+      <div class="detail artist">
+        <a href="#" class="close">close</a>
+        <div id="detail-artist" class="strip"></div>
+        <div id="artist-recent-strips" class="strip"></div>
+      </div>
     </div>
-
-    <div class="detail artist">
-      <a href="#" class="close">close</a>
-      <div id="detail-artist" class="strip"></div>
-      <div id="artist-recent-strips" class="strip"></div>
-    </div>
-
   </body>
 </html>
