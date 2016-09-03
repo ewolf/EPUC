@@ -1,3 +1,7 @@
+
+<form method="POST" action="/epucc/upload" enctype="multipart/form-data">
+
+
 to make seamless between clien and server...
   pass in arguments to the called function
    normal scalars, lists, hashes and yote objects
