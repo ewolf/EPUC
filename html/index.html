@@ -10,12 +10,15 @@
     <script>
       $().ready( function() {
           yote.init( {
-            yoteServerURL : '/cgi-bin/yote/yote_cgi.pl',
-            appName       : 'EPUC::App',
-            globalErrHandler : function() {},
-            handler       : function( root, app, login ) {
+              yoteServerURL : '/cgi-bin/yote/yote_cgi.pl',
+              appName       : 'EPUC::App',
+              globalErrHandler : function() {},
+              handler       : function( root, app, login ) {
                 init_page( root, app, login );
-            }
+              },
+              resyncHander : function( root, app, login ) {
+                  init_page( root, app, login );
+              }
           } );
       } );
     </script>
@@ -140,6 +143,7 @@
       </div>
 
       <div id="startstrip" class="content">
+        <span class="message"></span><br>
         Start a new strip <input type="text" id="startsentence"> <button type="button" id="doStart">Start</button>
       </div>
 

@@ -485,6 +485,7 @@ function init_page( root, app, login ) {
             get_login().start_strip( [ starting ],
                                function( strip ) {
                                    $( '.message' ).empty().append( "started strip" ).removeClass( 'error' );
+                                   $( '#startsentence' ).val('');
                                },
                                function( err ) {
                                    $( '.message' ).empty().append( err ).addClass( 'error' );
