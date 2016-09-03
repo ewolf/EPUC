@@ -13,4 +13,11 @@ ____________________________________________________________
 
 mod perl?
   apt install libapache2-mod-perl2
+
+PerlPostConfigRequire /home/wolf/open_source/EPUC/setup.pl
+
+    <Location /epucc>
+        SetHandler perl-script
+        PerlHandler EPUC::Test
+    </Location>
   
