@@ -58,6 +58,10 @@ sub panels {
                 my $phash = {
                     type => $panel->get_type,
                 };
+                if( $acct && $acct->get_is_super ) {
+                    $phash->{artist} = $panel->get__artist;
+                }
+                
                 if( $panel->get_type eq 'picture' ) {
                     $phash->{url} = $panel->get_picture->url( $size );
                 } else {
