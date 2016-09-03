@@ -73,28 +73,37 @@
   </style>
 
     <script>
-    $().ready( function() {
-        var $body = $('body');
-        function msg( msg, where ) {
-            $( where || '.message-receiver' ).empty().append( msg ).removeClass( 'warning' ).addClass( 'message' );
-        }
-        function warn( msg, where ) {
-            $( where || '.message-receiver' ).empty().append( msg ).addClass( 'warning' ).removeClass( 'message' );
-        }
-        function onLogin( login ) {
-            $body.addClass( 'logged-in' );
-            msg( "welcome " + login.get('user'), '.login-message-receiver' );
-            $('#user').val('');
-            $('#pw').val('');
-            
-            var icon = login.get( 'icon' );
-            if( icon ) {
-                icon.url( ['80x80'], function( url ) {
-                    $( '.icon' ).attr( 'src', url );
-                } );
-            } else {
-                $( '.has-icon' ).hide();
-            }
+      $().ready( function() {
+      
+          var $body = $('body');
+          function msg( msg, where ) {
+              $( where || '.message-receiver' ).empty().append( msg ).removeClass( 'warning' ).addClass( 'message' );
+          }
+          function warn( msg, where ) {
+              $( where || '.message-receiver' ).empty().append( msg ).addClass( 'warning' ).removeClass( 'message' );
+          }
+          
+          function onLogin( login ) {
+              $body.addClass( 'logged-in' );
+              msg( "welcome " + login.get('user'), '.login-message-receiver' );
+              $('#user').val('');
+              $('#pw').val('');
+              
+              var icon = login.get( 'icon' );
+              if( icon ) {
+                  icon.url( ['80x80'], function( url ) {
+                      $( '.icon' ).attr( 'src', url );
+                  } );
+              } else {
+                  $( '.has-icon' ).hide();
+              }
+              setupUserPrefs();
+          } //onLogin
+
+          // TODO - have this behave like the links are really links. have the links go to the same page, but store the 'destination' in localstorage or
+          // the link url
+          
+          function setupUserPrefs() {
             $( '.info' ).each( function() {
                 var $this = $(this);
                 var fld = $this.data( 'field' );
@@ -132,7 +141,7 @@
                     warn( "Error, passwords do not match" );
                 }
             } );            
-        } //onLogin
+        } //setupUserPrefs
         
         yote.init( {
             yoteServerURL : '/cgi-bin/yote/yote_cgi.pl',
@@ -141,6 +150,7 @@
             handler       : function( root, app, login ) {
                 $body.addClass( 'yote-init' );
 
+                // see where this is going by looking at the url ( or local storage maybe, not sure )
                 if( login ) {
                     onLogin( login );
                 }
@@ -171,11 +181,6 @@
                                    warn( err );
                                } );
                 } ); //login click
-
-                // -------- updating account controls ----
-                $( '#toggleupdate' ).on( 'click', function() {
-                    $body.toggleClass( 'updating-account' );
-                } );
 
                 // -------- public strips / recent strips ---
                 //                function show_strips( key, strips, $strip_container, login, start, end, clickhandler ) {
