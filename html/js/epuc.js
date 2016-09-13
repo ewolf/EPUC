@@ -206,7 +206,7 @@ function detailHandler(ev, strip, $str, idx, strips ) {
         })( idx + 1 );
     }
 
-}
+} //detailHandler
 function showStrips( $container, showStrips) {
     
     show_strips( { key : 'recent',
@@ -312,25 +312,21 @@ function show_strip(args) {
             txt += '</td>'; //</tr>';
             $tr.append( txt );
             if( artist ) {
-                (function (author) { 
+                (function (avatar) { 
                     $tr.find( '.artist-link' ).on( 'click', function(ev) {
-                        ev.preventDefault();
-                        ev.stopPropagation();
-                        $( '.detail' ).hide();
-                        $( '.detail.artist' ).show();
-                        var icon = author.get('icon');
-                        if( icon ) {
-                            icon.url( ['80x80'], function( url ) {
-                                var name = author.get('name');
-                                var about = author.get('about');
-                                $( '#detail-artist' ).empty().append(
-                                    ['<img src="' + url + '"> ' + author.get('user'),
-                                     (name ? 'aka <b>' + author.get( 'name' ) + '</b>' : ''),
-                                     about,
-                                    ].join( '<br>' )
-                                );
-                            } );
-                        }                                        
+                        
+                        set_template( 'artist-detail' );
+                        var $tmpl = $( '#artist-detail' );
+                        var handle = $tmpl.find( '#artist-handle' ).empty().append( avatar.get('user') );
+                        avatar.get( 'icon' ).url( [], function( url ) {
+                            var ava = $tmpl.find( '#artist-avatar' ).attr( 'src', url );
+                        } );
+                        var name = $tmpl.find( '#artist-name' ).empty().append( avatar.get('name') );
+                        var about = $tmpl.find( '#artist-about' ).empty().append( avatar.get('about') );
+                        var strips = $tmpl.find( '#artist-recent-strips' ).empty();
+
+                        var artist_strips = avatar.get('completed_strips');
+                        showStrips( $('#artist-recent-strips'), artist_strips );
                     } );
                 } )(artist);
             }
