@@ -164,7 +164,8 @@ sub can_see {
     my( $self, $acct ) = @_;
     return $self->get__state eq 'complete' || 
         ( $acct && 1 == grep { $acct->get_avatar == $_ } 
-          @{$self->get__players} );
+          @{$self->get__players} ) ||
+              ( $acct && $acct->get_is_super );
 }
 
 sub _last_panel {

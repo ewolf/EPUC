@@ -112,7 +112,7 @@ sub play_random_strip {
     my $strips = $app->get__in_progress_strips([]);
 
     
-    my( @new_strips );
+    my( @new_strips, @playing_strips );
     my $ava = $self->get_avatar;
 
     _log( "RAND : AVA $ava" );
@@ -120,19 +120,29 @@ sub play_random_strip {
     for my $strip (@$strips) {
         _log( "RANDSTR RES BY : " . $strip->get__reserved_by );
 
-        if( (0 == grep { $ava == $_ } @{$strip->get__players()} )
-            && $strip->get__reserved_by != $ava
+        if( $strip->get__reserved_by != $ava
             && $strip != $exclude
             )
         {
-            push @new_strips, $strip;
+            if(0 == grep { $ava == $_ } @{$strip->get__players()} ) {
+                push @new_strips, $strip;
+            } elsif( $strip->_last_panel->get__artist != $ava ) {
+                push @playing_strips, $strip;
+            }
         }
     }
 
-    return unless @new_strips;
+    return unless @new_strips || @playing_strips;
 
     my( $strip ) = sort { sprintf( "%.0f", rand(2)-1) } @new_strips;
 
+    unless( $strip ) {
+        # pick a strip you are already in last unless you did the last
+        # panel. This will only come into play if nothing else is
+        # available.
+        ( $strip ) = sort { sprintf( "%.0f", rand(2)-1) } @playing_strips;
+    }
+    
     my $panels = $strip->get__panels;
 
     return ( $strip, $panels->[$#$panels] );
