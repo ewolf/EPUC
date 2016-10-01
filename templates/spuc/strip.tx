@@ -27,17 +27,12 @@ rate this strip RATINGBAR &star; <span style="color:red">&#9733;</span>
         </a>
       </span>
        <: $panel.kudocount :> kudos
-:     if $panel.hasKudoFrom( $login ) {
+:     if ! $panel.can_kudo( $login ) {
          <span class="redheart heart">&hearts;</span>
 :     } else {
-         <form class="" method="POST" action="/<:$pag_path:>">
-           : my $id = $op.id($panel)
-           
+         <form class="" method="POST" action="/<:$pag_path:>/s/<:$strip_start:>/d/<: $detail_strip :>">
            <input type="hidden" name="action" value="kudo">
-           <input type="hidden" name="strip" value="<: $id :>">
-           <: $session.fetch($id) :>,
-             <: $id :>,
-               <: $panel.id :>
+           <input type="hidden" name="strip" value="<: $session.id($panel) :>">
           <button type="submit" class="link-like heart">&hearts;</a>
         </form>
 :     }

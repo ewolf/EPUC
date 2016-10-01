@@ -45,6 +45,7 @@ sub _check_actions {
     my $path_args = $self->{path_args};
     my $req = $self->{req};
     my $app = $self->{app};
+    my $sess = $self->{session};
 
     my $subtemplate = $path_args->{'p'} || 'welcome';
     my $action = $req->param( 'action' );
@@ -137,7 +138,6 @@ sub _check_actions {
                             $last_strip->reserve( $login );
                             $self->msg( 'Reserved Strip' );
                         };
-                        print STDERR Data::Dumper->Dump([$login->reserves_available,"RESERVED 1"]);
                     } else {
                         $@ = { err => "out of strips to reserve" };
                     }
@@ -156,7 +156,6 @@ sub _check_actions {
                             $@ = { err => "error uploading" };
                         }
                     };
-                    print STDERR Data::Dumper->Dump([$login->reserves_available,$@,"RESERVED 2"]);
                 }
                 elsif( $action eq 'caption' ) {
                     eval {
@@ -164,7 +163,6 @@ sub _check_actions {
                             $self->msg( 'added caption' );
                         }
                     };
-                    print STDERR Data::Dumper->Dump([$login->reserves_available,"RESERVED 3"]);
                     if( $@ ) {
                         $last_strip->free($login);
                     }
@@ -195,7 +193,6 @@ sub _check_actions {
                         $@ = { err => $strip ? "error uploading" : "strip not found" };
                     }
                 };
-                print STDERR Data::Dumper->Dump([$login->reserves_available,"RESERVED 4"]);
             }
             elsif( $action eq 'unreserve' ) {
                 eval {
@@ -234,6 +231,18 @@ sub _check_actions {
                         }
                     }
                 };
+            }
+        } #myinprogress
+        if( $action eq 'kudo' ) {
+            my $panel = $sess->fetch( $req->param('pan') );
+            print STDERR Data::Dumper->Dump([$panel,"PAN"]);
+            if( $panel && $panel->can_kudo( $login ) ) {
+                $panel->add_kudo( $login );
+                $self->{msg} = 'added kudo';
+                print STDERR Data::Dumper->Dump(["ADDED"]);
+            } else {
+                print STDERR Data::Dumper->Dump(["NEIEN"]);
+                $@ = { err => 'Error trying to kudo caption' };
             }
         }
 

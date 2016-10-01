@@ -27,14 +27,14 @@ sub kudocount {
     scalar( keys %{$self->get_kudos({})} );
 }
 
-sub addkudo {
+sub add_kudo {
     my( $self, $acct ) = @_;
     $self->get_kudos({})->{$acct} = 1;
 }
 
-sub hasKudoFrom {
+sub can_kudo {
     my( $self, $acct ) = @_;
-    $self->get_kudos({})->{$acct};
+    ! $self->get_kudos({})->{$acct} && $acct->get_avatar != $self->get__artist;
 }
 
 sub is_active_panel {
