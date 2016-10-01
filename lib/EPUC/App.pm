@@ -108,7 +108,7 @@ sub completed_strips {
     # many, keep a running list that is updated
     # also, look at iterators, because they're dope
     if( $sort eq 'rating' ) {
-        return [ sort { $b->get_rating_avg <=> $a->get_rating_avg } @{$self->get__completed_strips} ];
+        return [ sort { $b->get_rating_avg <=> $a->get_rating_avg } @{$self->get__completed_strips([])} ];
     }
     $self->get__completed_strips;
 }

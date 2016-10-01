@@ -244,17 +244,17 @@ sub _add_panel {
 sub add_sentence {
     my( $self, $acct, $sentence ) = @_;
 
-    die "Error obtaining strip"
+    die { err => "Error obtaining strip" }
         unless $self->get__reserved_by == $acct->get_avatar;
 
-    die "Must supply sentence" unless $sentence =~ /\S/;
+    die { err => "Must supply sentence" } unless $sentence =~ /\S/;
     $self->_add_panel( $acct, $sentence );
 } #add_sentence
 
 sub add_picture {
     my( $self, $acct, $picture ) = @_;
 
-    die "Error obtaining strip"
+    die { err => "Error obtaining strip" }
         unless $self->get__reserved_by == $acct->get_avatar;
 
     $self->_add_panel( $acct, $picture, 'is_picture' );

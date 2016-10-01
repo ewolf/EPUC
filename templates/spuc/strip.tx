@@ -1,10 +1,4 @@
-: my $strip = $op.getStateVar( $state, 'strip' )
 : my $panels = $strip.get__panels
-: my $panel_size = $op.getStateVar( $state, 'panel-size' )
-: my $pag_path = $op.getStateVar($state, 'pag_path' )
-
-: #check for kudos
-: 
 
 <div class="strip">
 : for [0..($panels.size()-1)] -> $p_idx {
@@ -17,10 +11,10 @@
     </span>
 :   } else {
     <span class="picture">
-      <img src="<: $panel.get_picture.url($panel_size) :>">
+      <img src="<: $panel.get_picture.url($panelsize) :>">
     </span>
 :   }
-:   if $op.getStateVar( $state, 'show-kudos' ) {
+:   if $showkudos {
     <div class="kudos">
       <span style="font-size:large; float:left">
         <a href="/<:$app_path:>/p/showplayer/a/<:$panel.get__artist().get__account().get_user():>">

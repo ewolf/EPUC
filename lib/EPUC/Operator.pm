@@ -28,7 +28,7 @@ use base 'Yote::Server::ModperlOperatorStateManager';
 sub err {
     my( $self, $err ) = @_;
     $err //= $@;
-    $self->{err} = $err;
+    $self->{err} = ref $err ? $err->{err} : $err;
 }
 
 sub msg {
@@ -43,8 +43,7 @@ sub _check_actions {
     my $req = $self->{req};
     my $app = $self->{app};
 
-    my $subtemplate = $path_args->{'p'};
-    $self->{state}{subtemplate} = $subtemplate;
+    my $subtemplate = $path_args->{'p'} || 'welcome';
     my $action = $req->param( 'action' );
 
     my $login = $self->{login};
@@ -96,11 +95,11 @@ sub _check_actions {
                 my $icon = $self->upload( 'iconup' );
                 if( $icon ) {
                     eval {
-                        $login->get_avatar->get_icon->develop( $icon, '80x80' );N
+                        $login->get_avatar->get_icon->develop( $icon, '80x80' );
                         $self->msg( 'Uploaded Icon' );
                     };
                 } else {
-                    $@ = 'Error in Uploading Icon';
+                    $@ = { err =>'Error in Uploading Icon'};
                 }
             }
             elsif( $action eq 'updateinfo' ) {
@@ -113,15 +112,17 @@ sub _check_actions {
                 my( $curr_pw, $pw1, $pw2 ) = ( $req->param('pw'), $req->param('pw1'), $req->param('pw2') );
                 
                 if( $pw1 ne $pw2 ) {
-                    $@ = 'passwords do not match';
+                    $@ = { err => 'passwords do not match' };
                 }
-                if( length( $pw1 ) < 6 ) {
-                    $@ = 'password too short';
+                elsif( length( $pw1 ) < 6 ) {
+                    $@ =  { err => 'password too short' };
                 }
-                eval {
-                    $login->reset_password( $pw1, $curr_pw);
-                    $self->msg( 'reset password' );
-                };
+                else {
+                    eval {
+                        $login->reset_password( $pw1, $curr_pw);
+                        $self->msg( 'reset password' );
+                    };
+                }
             }	
         }
         elsif( $subtemplate eq 'findstrip' ) {
@@ -133,7 +134,7 @@ sub _check_actions {
                         $self->msg(  'Reserved Strip' );
                     };
                 } else {
-                    $@ = "could not find strip to reserve";
+                    $@ = { err => "could not find strip to reserve" };
                 }
             }
             elsif( $last_strip ) {
@@ -143,7 +144,7 @@ sub _check_actions {
                         if( $upload  && $last_strip->reserve($login) && $last_strip->add_picture( $login, $upload ) ) {
                             $self->msg( 'uploaded picure' );
                         } else {
-                            $@ = "error uploading";
+                            $@ = { err => "error uploading" };
                         }
                     };
                 }
@@ -168,7 +169,7 @@ sub _check_actions {
                     if( $upload && $last_strip  && $last_strip->reserve($login) && $last_strip->add_picture( $login, $upload ) ) {
                         $self->msg( 'uploaded picure' );
                     } else {
-                        $@ = $last_strip ? "error uploading" : "strip not found";
+                        $@ = { err => $last_strip ? "error uploading" : "strip not found" };
                     }
                 };
             }
@@ -178,7 +179,7 @@ sub _check_actions {
                     if( $path_args->{'do'} == 'unreserve' && $reserved->[ $path_args->{'s'} ] && $reserved->[ $path_args->{'s'} ]->free( $login ) ) {
                         $self->msg( 'Unreserved Caption' );
                     } else {
-                        $@ = 'Error trying to Unreserve Caption';
+                        $@ = { err => 'Error trying to Unreserve Caption' };
                     }
                 };
             }
@@ -191,8 +192,35 @@ sub _check_actions {
                 };
             }
         }
+        
+        # if( $subtemplate eq 'paginate_strips' ) {
+        #     if( $path_args->{'delete'} ) {
+        #         eval {
+        #             my $strip = $strip_list->[$path_args->{'d'}];
+        #             $strip->delete_strip( $login );
+        #             if( @$strip_list > 0 ) {
+        #                 if( $path_args->{'d'} > 0 ) {
+        #                     $path_args->{'d'}--;
+        #                 }
+        #         };
+        #     }
+        # }
     } #if login
+
+    if( $subtemplate eq 'welcome' || $subtemplate eq 'recent' ) {
+        $self->{strip_list} = $app->completed_strips;
+        $self->{pag_path} = "$self->{app_path}/p/$subtemplate";
+    } elsif( $subtemplate eq 'top_rated' ) {
+        $self->{strip_list} = $app->completed_strips('rating');
+        $self->{pag_path} = "$self->{app_path}/p/top_rated";
+    } elsif( $subtemplate eq 'showplayer' ) {
+        my $player = $app->lookup_player( $path_args->{'a'} );
+        $self->{strip_list} = $player->get_completed_strips;
+        $self->{pag_path} = "$self->{app_path}/p/show_player/a/$path_args->{'a'}";
+    }
+
     $self->err;
+    $self->{state}{subtemplate} = $subtemplate;
 
 } #_check_actions
 

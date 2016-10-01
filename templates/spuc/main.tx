@@ -64,7 +64,8 @@
       <h1>Scarf Poutine You Clone</h1>
 
       : my $subtemplate = $path_args.p || 'welcome';
-      : include $op.tmpl( "spuc", $subtemplate )
+
+      : include $op.tmpl( $app_path, $subtemplate )
 
     </main>
     <footer style="margin:2em;bottom:0px;position:fixed">

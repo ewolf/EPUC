@@ -30,7 +30,7 @@ sub create_user_account {
         if( $self->get_is_super ) {
             $acct = $app->_create_account( $username, $password, 'EPUC::AdminAcct' );
         } else {
-            die "Couldn't create admin account from non-superuser account";
+            die { err =>  "Couldn't create admin account from non-superuser account" };
         }
     } else {
         $acct = $app->_create_account( $username, $password );
@@ -41,11 +41,11 @@ sub create_user_account {
 
 sub reset_user_password {
     my( $self, $username, $pw ) = @_;
-    die "Password required" unless $pw;
+    die { err => "Password required" } unless $pw;
     my $accts = $self->get_app->get__accts({});
     my $acct = $accts->{$username};
-    die "Account not found"  unless $acct;
-    die "Cannot set password of superuser" if $acct->get_is_super && ! $self->get_is_super;
+    die { err => "Account not found" } unless $acct;
+    die { err => "Cannot set password of superuser" } if $acct->get_is_super && ! $self->get_is_super;
     $acct->set__password_hash( crypt( $pw, length( $pw ) . Digest::MD5::md5_hex($acct->{ID} ) )  );
     $acct;
 }

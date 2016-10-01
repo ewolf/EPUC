@@ -79,7 +79,7 @@ sub uploadIcon {
 
 sub start_strip {
     my( $self, $sentence ) = @_;
-    die "Must include sentence" unless $sentence =~ /\S/;
+    die { err => "Must include sentence" } unless $sentence =~ /\S/;
     my $panel = $self->{STORE}->newobj( {
         type     => 'sentence',
         sentence => $sentence,
@@ -158,8 +158,8 @@ sub reset_password {
 
     my $old_hash = crypt( $oldpw, length( $oldpw ) . Digest::MD5::md5_hex($self->{ID} ) );
 
-    die "incorrect current password" unless $old_hash eq $self->get__password_hash;
-    die "bad password. Password should be at least 6 characters long" unless length($newpw) > 5;
+    die { err => "incorrect current password" } unless $old_hash eq $self->get__password_hash;
+    die { err => "bad password. Password should be at least 6 characters long" } unless length($newpw) > 5;
 
     my $new_hash = crypt( $newpw, length( $newpw ) . Digest::MD5::md5_hex($self->{ID} ) );
 

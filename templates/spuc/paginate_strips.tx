@@ -1,35 +1,12 @@
-: my $strip_list = $op.getStateVar($state, 'strip_list' )
-: my $pag_path = $op.getStateVar($state, 'pag_path' )
 : my $strip_start = $path_args['s']
 
 : my $is_detail = $path_args['d'] == '0' || $path_args['d'] > 0
 
-: if $masthead {
-:   include $op.tmpl( $app_path, $masthead )  
-: }
 : if $is_detail {
 :   my $detail_strip = $path_args['d']
 :   my $str = $strip_list[$detail_strip];
 
-
-:   $op.setStateVar($state,'strip',$str)
-:   my $show_delete = $op.getStateVar($state,'show_delete')
-
-:   if $show_delete && $path_args['delete'] && $str.can_delete($login) {
-:       $str.delete_strip( $login )
-        <span class="msg">Deleted Strip</span>
-:       if $detail_strip > 0 {
-:          $op.setStateVar($state,'strip',$strip_list[ $detail_strip -1])
-:       } elsif $strip_list.size() > 0 {
-:          $op.setStateVar($state,'strip',$strip_list[0])
-:       } else {
-:          $op.removeStateVar($state,'strip')
-:       }
-:   } #if a delete
-
-:   my $strip = $op.getStateVar( $state, 'strip' )
-        
-:   if $strip {
+:   if $str {
       <div class="detail">
         <div style="display:block;text-align:center;font-size:large">
 :     if $detail_strip > 0 {
@@ -45,9 +22,7 @@
 :     }
         </div>
 
-:   $op.setStateVar($state,'panel-size','700x700' )
-:   $op.setStateVar($state,'show-kudos', 1 )
-:    include $op.tmpl( $app_path, 'strip' )
+:    include $op.tmpl( $app_path, 'strip' ) { showkudos => 1, panelsize => '700x700', strip => $str }
 
 :    if $show_delete && $strip.can_delete($login) {
      <div>
@@ -88,14 +63,9 @@
      : my $strip = $strip_list[$idx]
      
      : if $strip {
-:       $op.setStateVar($state,'panel-size','400x400' )
-:       $op.setStateVar($state,'strip', $strip )
-:       $op.setStateVar($state,'strip_idx', $idx )
-:       $op.setStateVar($state,'include-top-link', 1 )
-
         <a class="strip" href="/<: $pag_path :>/s/<:$path_args['s']:>/d/<:$idx:>">
         <div style="display:inline-block;vertical-align:top;max-width:420px;margin:1em;">
-:       include $op.tmpl( $app_path, 'strip' )
+:       include $op.tmpl( $app_path, 'strip' ) { panelsize => '400x400', 'strip' => $strip, 'strip_idx' => $strip_idx, 'include-top-link' => 1 }
         </div>
 </a>
      : }

@@ -1,10 +1,8 @@
 : my $strip_list = $login.get_completed_strips
-: $op.setStateVar( $state, 'strip_list', $strip_list )
-: $op.setStateVar( $state, 'pag_path', $app_path ~ '/p/mycompleted' )
 
 : if $strip_list.size() > 0 {
     <h2>My Completed Strips</h2>
-:   include $op.tmpl( $app_path, 'paginate_strips' )
+:   include $op.tmpl( $app_path, 'paginate_strips' )  { strip_list => $strip_list, pag_path => $app_path ~ '/p/mycompleted' }
 : } else {
     <h2>No Completed Strips Yet</h2>
 : }

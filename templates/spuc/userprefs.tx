@@ -25,8 +25,8 @@
 <form method="POST" action="/spuc/p/userprefs">
   <input type="hidden" name="action" value="updateinfo">
   <table>
-    <tr> <th>My Name</th> <td><input type="text" class="info" name="name" value="<: $avatar.get_name() :>"></td></tr>
-    <tr> <th>Details about me</th> <td><textarea class="info" name="about"><: $avatar.get_about() :></textarea> </td></tr>
+    <tr> <th>My Name</th> <td><input type="text" class="info" name="name" value="<: $login.get_avatar.get_name() :>"></td></tr>
+    <tr> <th>Details about me</th> <td><textarea class="info" name="about"><: $login.get_avatar.get_about() :></textarea> </td></tr>
   </table> <br>
   <input type="submit" value="update">
 </form>

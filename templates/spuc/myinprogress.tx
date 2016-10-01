@@ -1,11 +1,8 @@
 : my $strip_list = $login.get_in_progress_strips
-: $op.setStateVar( $state, 'strip_list', $strip_list )
-: $op.setStateVar( $state, 'pag_path', $app_path ~ '/p/myinprogress' )
-: $op.setStateVar( $state, 'show_delete', 1 )
 
 : if $strip_list.size() > 0 {
     <h2>My In Progress Strips</h2>
-:   include $op.tmpl( $app_path, 'paginate_strips' )
+:   include $op.tmpl( $app_path, 'paginate_strips' ) { strip_list => $strip_list, pag_path => $app_path ~ '/p/myinprogress', show_delete => 1 }
 : } else {
     <h2>No In Progress Strips</h2>
 : }
