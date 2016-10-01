@@ -11,9 +11,14 @@ use APR::Request::Param;
 use APR::Request::Apache2;
 use Data::Dumper;
 
+use EPUC::Operator;
 
 sub handler {
     my $r = Apache2::Request->new( shift );
+
+#    my $op = '/home/wolf/proj/Yote/ServerYote/lib/Yote/Server/ModperlOperator.pm';
+#    delete $INC{$op};
+#    require $op;
 
     #
     # For debug have this reload each time so I don't have to
@@ -24,13 +29,10 @@ sub handler {
     my $SNARK;
     map {
         my $p = "$basedir$_";
-        delete $INC{$p};
-        require $p;
+#        delete $INC{$p};
+#        require $p;
     } grep { /pm$/ } readdir( $dir );
 
-    my $op = '/home/wolf/proj/Yote/ServerYote/lib/Yote/Server/ModperlOperator.pm';
-    delete $INC{$op};
-    require $op;
 
     my $operator = new EPUC::Operator(
         template_path => '/opt/yote/templates',

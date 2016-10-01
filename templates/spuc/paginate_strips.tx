@@ -1,66 +1,104 @@
-: if $is_detail {
-  <div style="display:inline-block;">
-    <div style="display:block;text-align:center;font-size:large">
-    : if $detail_strip > 0 {
-      <a href="/spuc/<:$listtype:>/<:$strip_start:>/<:($detail_strip-1):>">prev</a>
-    : }
-    : if $detail_strip < $strip_list.size() {
-      <a href="/spuc/<:$listtype:>/<:$strip_start:>/<:($detail_strip+1):>">next</a>
-    : }
-    </div>
-  : my $strip = $strip_list[$detail_strip];
-  : for $strip.get__panels -> $panel {
-    <div style="padding: .3em">
-       <span style="font-size:x-large; ">
-             <i><a href="/epuc/showplayer/<:$panel.get__artist:>">
-               <: $panel.get__artist().get__account().get_user() :>
-             </a></i> :
-       </span>
-    : if $panel.get_type == 'sentence' {
-       <span style="font-size:xx-large; background-color: wheat; display:block;text-align:center">
-       : html_encode( $panel.get_sentence )
-       </span>
-    : } else {
-       <br>
-       <img src="<: $panel.get_picture.url('700x700') :>">
-    : }
-    </div>
-    <br>
-  : }
-  </div>
-: } else {
-  <h3>Showing Strips</h3>
+: my $strip_list = $op.getStateVar($state, 'strip_list' )
+: my $pag_path = $op.getStateVar($state, 'pag_path' )
+: my $strip_start = $path_args['s']
 
+: my $is_detail = $path_args['d'] == '0' || $path_args['d'] > 0
+
+: if $masthead {
+:   include $op.tmpl( $app_path, $masthead )  
+: }
+: if $is_detail {
+:   my $detail_strip = $path_args['d']
+:   my $str = $strip_list[$detail_strip];
+
+
+:   $op.setStateVar($state,'strip',$str)
+:   my $show_delete = $op.getStateVar($state,'show_delete')
+
+:   if $show_delete && $path_args['delete'] && $str.can_delete($login) {
+:       $str.delete_strip( $login )
+        <span class="msg">Deleted Strip</span>
+:       if $detail_strip > 0 {
+:          $op.setStateVar($state,'strip',$strip_list[ $detail_strip -1])
+:       } elsif $strip_list.size() > 0 {
+:          $op.setStateVar($state,'strip',$strip_list[0])
+:       } else {
+:          $op.removeStateVar($state,'strip')
+:       }
+:   } #if a delete
+
+:   my $strip = $op.getStateVar( $state, 'strip' )
+        
+:   if $strip {
+      <div class="detail">
+        <div style="display:block;text-align:center;font-size:large">
+:     if $detail_strip > 0 {
+           <a href="/<: $pag_path :>/s/<:$strip_start || '0':>/d/<:($detail_strip-1):>">&lt;prev</a>
+:     } else {
+           prev
+:     }
+           <a href="/<: $pag_path :>/s/<:$strip_start||'0':>" style="margin:0 3em 0 3em">^back^</a>
+:     if $detail_strip < ($strip_list.size()-1) {
+           <a href="/<: $pag_path :>/s/<:$strip_start||'0':>/d/<:($detail_strip+1):>">next&gt;</a>
+:     } else {
+           next
+:     }
+        </div>
+
+:   $op.setStateVar($state,'panel-size','700x700' )
+:   $op.setStateVar($state,'show-kudos', 1 )
+:    include $op.tmpl( $app_path, 'strip' )
+
+:    if $show_delete && $strip.can_delete($login) {
+     <div>
+       You may <a href="/<: $pag_path :>/s/<:$strip_start||'0':>/d/<:$detail_strip:>/delete/1">delete this strip</a>
+     </div>
+:    } #may delete
+
+  </div>
+:  } else {  #the case where the last one was deleted
+    No strips
+:  }
+: } else { # multiple strips
+  <div class="paginated-strips">
+
+    <div style="display:block;text-align:center;font-size:large">
   : if $strip_start > 0 {
       : if $strip_start - 3 >= 0 {
-          <a href="/spuc/<:$listtype:>/<:($strip_start-3):>">
+          <a href="/<: $pag_path :>/s/<:($strip_start-3):>">
       : } else {
-          <a href="/spuc/<:$listtype:>/0">
+          <a href="/<: $pag_path :>/s/0">
       : }
-      previous</a>
+      &lt;prev</a>
+  : } else {
+      &lt;prev
   : }
+      <span style="margin:0 3em 0 3em"> </span>
   : if (3+$strip_start) < $strip_list.size() {
-      <a href="/spuc/<:$listtype:>/<:(3+$strip_start):>">next</a>    
+      <a href="/<: $pag_path :>/s/<:(3+$strip_start):>">next&gt;</a>
+  : } else {
+      next&gt;
   : }
+    </div>
   <br>
+     
+  <div style="display:inline-block;vertical-align:top;min-width:1500px;">
   : for [$strip_start..(2+$strip_start)] -> $idx {
+
      : my $strip = $strip_list[$idx]
-     : my $panels = $strip.get__panels
-     <div style="display:inline-block;border: solid 3px; padding: 4px; vertical-align: top">
-     : for [0..($panels.size()-1)] -> $i {
-       : if $panels[$i].get_type == 'sentence' {
-         : if $i == 0 {
-             <a href="/spuc/<:$listtype:>/<:$strip_start:>/<:$idx:>">
-             : html_encode( $panels[$i].get_sentence )
-             </a>
-         : } else {
-             : html_encode( $panels[$i].get_sentence )
-         : }
-       : } else {
-          <img src="<: $panels[$i].get_picture.url('400x400') :>">
-       : }
-       <br>
+     
+     : if $strip {
+:       $op.setStateVar($state,'panel-size','400x400' )
+:       $op.setStateVar($state,'strip', $strip )
+:       $op.setStateVar($state,'strip_idx', $idx )
+:       $op.setStateVar($state,'include-top-link', 1 )
+
+        <a class="strip" href="/<: $pag_path :>/s/<:$path_args['s']:>/d/<:$idx:>">
+        <div style="display:inline-block;vertical-align:top;max-width:420px;margin:1em;">
+:       include $op.tmpl( $app_path, 'strip' )
+        </div>
+</a>
      : }
-     </div>
   : }
+  </div>
 : }

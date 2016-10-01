@@ -1,0 +1,30 @@
+<h2>Reserved Captions</h2>
+: if $err {
+   <span class="err"><: $err :></span>
+: }
+: if $msg {
+   <span class="msg"><: $msg :></span>
+: }
+<div style="display:inline-block">
+: for [0..($reserved.size()-1)] -> $idx {
+:  my $strip = $reserved[$idx]
+   <div style="margin:4px; padding:3px; border: 3px solid black">
+     <span class="caption"><: $strip._last_panel.get_sentence :></span>
+     <br>
+     <form method="POST" enctype="multipart/form-data" action="/spuc/p/showreserved">
+       <input type="hidden" name="action" value="upload">
+       <input type="hidden" name="panel" value="<: $strip._last_panel.id:>">
+       <input type="hidden" name="strip" value="<: $strip.id :>">
+       <h4>Upload Picture
+	 <input type="file" name="pictureup">
+	 <input type="submit" value="upload">
+       </h4>
+     </form>
+     <br>
+     <a href="/spuc/p/showreserved/do/unreserve/s/<:$idx:>">Unreserve</a>
+   </div>
+   <br>
+: } else {
+   <span class="msg">No reserved strips</span>
+: }
+</div>

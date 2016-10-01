@@ -20,7 +20,8 @@ sub _log {
 
 sub _init {
     my $self = shift;
-
+    $self->SUPER::_init;
+    
     my $icon = $self->{STORE}->newobj( {}, 'EPUC::Picture' );
     $icon->develop(  $self->{STORE}->newobj( {
         extension => 'png',
@@ -43,6 +44,7 @@ sub _load {
 
 sub _onLogin {
     my $self = shift;
+    $self->set_has_initial_login(1);
 }
 
 our %fields = map { $_ => 1 } ('name','about');
@@ -77,7 +79,7 @@ sub uploadIcon {
 
 sub start_strip {
     my( $self, $sentence ) = @_;
-    die { err =>  "Needs a starting sentence" } unless $sentence =~ /\S/;
+    die "Must include sentence" unless $sentence =~ /\S/;
     my $panel = $self->{STORE}->newobj( {
         type     => 'sentence',
         sentence => $sentence,
@@ -91,7 +93,7 @@ sub start_strip {
         panels_to_go => 8,   # 9 panels total
         _next    => 'picture',
         _panels  => [ $panel ],
-                                        }, 'epuc::strip' );
+                                        }, 'EPUC::Strip' );
 
     $panel->set__strip( $strip);
     
@@ -102,9 +104,13 @@ sub start_strip {
     $strip;
 } #start_strip
 
+sub allowed_reserve_count {
+    3 - @{shift->get_reserved_strips};
+}
+
 # returns strip and panel objects
 sub play_random_strip {
-    my( $self, $exclude ) = @_;
+    my( $self ) = @_;
 
     my $app = $self->get_app;
 
@@ -120,8 +126,8 @@ sub play_random_strip {
     for my $strip (@$strips) {
         _log( "RANDSTR RES BY : " . $strip->get__reserved_by );
 
-        if( $strip->get__reserved_by != $ava
-            && $strip != $exclude
+        if( ! $strip->get__reserved_by # != $ava
+            && $strip != $self->get_last_random_strip
             )
         {
             if(0 == grep { $ava == $_ } @{$strip->get__players()} ) {
@@ -143,9 +149,8 @@ sub play_random_strip {
         ( $strip ) = sort { sprintf( "%.0f", rand(2)-1) } @playing_strips;
     }
     
-    my $panels = $strip->get__panels;
-
-    return ( $strip, $panels->[$#$panels] );
+    $self->set_last_random_strip( $strip );
+    return $strip;
 } #play_random_strip
 
 sub reset_password {
@@ -153,8 +158,8 @@ sub reset_password {
 
     my $old_hash = crypt( $oldpw, length( $oldpw ) . Digest::MD5::md5_hex($self->{ID} ) );
 
-    die { err => "must supply old password" } unless $old_hash eq $self->get__password_hash;
-#    die { err => "bad password" } unless length($newpw) > 5;
+    die "incorrect current password" unless $old_hash eq $self->get__password_hash;
+    die "bad password. Password should be at least 6 characters long" unless length($newpw) > 5;
 
     my $new_hash = crypt( $newpw, length( $newpw ) . Digest::MD5::md5_hex($self->{ID} ) );
 

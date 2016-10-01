@@ -1,4 +1,4 @@
 Menu
-<ul>
-  <li><A href="/spuc/login">Log In</a></li>
+<ul class="menu">
+  <li><A href="/spuc/p/login">Log In</a></li>
 </ul>

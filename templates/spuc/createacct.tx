@@ -1,12 +1,12 @@
 : if $login && $login.get_is_admin {
 <h3>Create Account</h3>
-  : if $err {
-     <span class="err"><: $err :></span>
-  : }
-  : if $msg {
-     <span class="msg"><: $msg :></span>
-  : }
-<form method="POST" action="/spuc/createacct">
+: if $msg {
+   <span class="msg"><:$msg:></span>
+: }
+: if $err {
+    <span class="err"><:$err:></span>
+: }
+<form method="POST" action="/spuc/p/createacct">
   <input type="hidden" name="action" value="createacct">
   <table>
     <tr> <th>handle </th> <td> <input type="text" name="un" value="<: $req.param("un") :>"></td> </tr>

@@ -2,25 +2,72 @@
 <html>
   <head>
     <title>SPUC</title>
+    <style>
+      .caption {
+         font-size:xx-large;
+         background-color: wheat;
+ 	 text-align:center;
+	 display:block;
+      }
+      .picture > img {
+         border: solid 1px black;
+      }
+      .picture {
+ 	 text-align:center;
+	 display:block;
+      }
+      .strip {
+         text-decoration: none;
+         color: black;
+      }
+      .menu {
+	  list-style-type: none;
+	  -webkit-padding-start: 0;
+      }
+      .detail {
+	  display:inline-block;
+      }
+      .paginated-strips {
+	  padding:3px 0 3px 3em;
+	  display:block;
+      }
+      .redheart {
+         color: #E00;
+      }
+      .kudos {
+          background-color: #EEE;
+          font-size: large;
+          padding: 6px;
+          text-align: right;
+      }
+      .panel {
+          background-color: #EEE;
+          border: solid 3px #661;
+          padding: .3em;
+      }
+      .paginated-strips {
+          margin-left: 10em;
+      }
+      .msg { padding: 3px; margin: 1px; border: solid grey 3px; background-color: lightgrey  }
+      .err { padding: 3px; margin: 1px; border: solid red 3px; background-color: pink  }
+   </style>
   </head>
   <body>
     <header>
       <a href="/spuc">SPUC</a>
     </header>
     <main>
+      
       <section style="float:left;padding:1em;margin:.5em;">
-        : if $menutemplate {
-        :   include $op.tmpl( $app_path, $menutemplate )
-        : }
-        : #menu stuff goes here
+        : include $op.tmpl( 'spuc/playermenu' )
       </section>
       <h1>Scarf Poutine You Clone</h1>
 
-      : if $subtemplate {
-      :   include $op.tmpl( $app_path, $subtemplate )
-      : }
+      : my $subtemplate = $path_args.p || 'welcome';
+      : include $op.tmpl( "spuc", $subtemplate )
+
     </main>
-    <footer style="margin:2em">
+    <footer style="margin:2em;bottom:0px;position:fixed">
       footsie
     </footer>
   </body>

@@ -1,5 +1,10 @@
 : if $login && $login.get_is_admin {
 <h3>User Accounts</h3>
+
+<p>
+	maybe be able to put accountson hold or remove accounts
+</p>
+
   : for $app.get__accts.values() -> $acct {
      : $acct.get_user
 

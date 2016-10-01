@@ -1,0 +1,10 @@
+<h2>Top Rated</h2>
+: my $strip_list = $app.completed_strips( 'rating' )
+: $op.setStateVar( $state, 'strip_list', $strip_list )
+: $op.setStateVar( $state, 'pag_path', $app_path ~ '/p/welcome' )
+
+: if $strip_list.size() > 0 {
+:   include $op.tmpl( $app_path, 'paginate_strips' )
+: } else {
+    <h4>No Completed Strips Yet</h4>
+: }

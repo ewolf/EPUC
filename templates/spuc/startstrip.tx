@@ -1,6 +1,16 @@
-<h3>start a new strip</h3>
-<form method="POST" action="/spuc/startstrip">
-  <input type="hidden" name="action" value="startstrip">
-  <input type="text" name="start-sentence" value="<: $req.param("start-sentence") :>">
-  <input type="submit" value="start strip">
-</form>
+: if $login {
+	<h3>start a new strip</h3>
+        : if $err {
+             <span class="err"><: $err :></span>
+        : }
+        : if $msg {
+             <span class="msg"><: $msg :></span>
+        : }
+	<form method="POST" action="/spuc/p/startstrip">
+          <input type="hidden" name="action" value="startstrip">
+	  <input type="text" name="start-sentence">
+	  <input type="submit" value="start strip">
+	</form>
+: } else {
+      : include $op.tmpl( $app_path, 'login' )
+: }

@@ -23,6 +23,13 @@ sub _init {
 
 sub _load {
     my $self = shift;
+
+    my $panels = $self->get__panels;
+    for( my $i=0; $i<@$panels; $i++ ) {
+        $panels->[$i]->set__panel_number( $i );
+    }
+#    print STDERR Data::Dumper->Dump([$self->{DATA},$self->_last_panel->{DATA},"WOOSTRIPLO"]);
+
 }
 
 sub _log {
@@ -148,7 +155,8 @@ sub reserved_panel {
 
 sub can_delete {
     my( $self, $acct ) = @_;
-    return $acct->get_is_admin || (@{$self->get__panels} == 1 && $acct->get_avatar == $self->get__artist );
+
+    return $acct && (@{$self->get__panels} == 1 && $acct->get_avatar == $self->get__artist && !$self->get__reserved_by );
 }
 
 sub free {
@@ -159,7 +167,7 @@ sub free {
         $self->_last_panel->set__reserved_by(undef);
         $acct->remove_from_reserved_strips( $self );
     } else {
-        die { err => 'could not free strip' };
+        return;
     }
     $self;
 } #free
@@ -189,7 +197,7 @@ sub _add_panel {
     my $panel = $self->{STORE}->newobj( {
         _artist  => $ava,
         _strip   => $self,
-        _panel_number => @$panels,
+        _panel_number => scalar( @$panels ),
     }, 'EPUC::Panel' );
     if( $is_picture ) {
         die { err => "two pictures in a row" } if $self->_last_panel->get_type ne 'sentence';
@@ -236,20 +244,17 @@ sub _add_panel {
 sub add_sentence {
     my( $self, $acct, $sentence ) = @_;
 
-    die { err => "need to reserve this strip to play it" }
+    die "Error obtaining strip"
         unless $self->get__reserved_by == $acct->get_avatar;
 
-    if( $sentence =~ /\S/ ) {
-        return $self->_add_panel( $acct, $sentence );
-    } else {
-        die { err => "cannot use blank sentence" };
-    }
+    die "Must supply sentence" unless $sentence =~ /\S/;
+    $self->_add_panel( $acct, $sentence );
 } #add_sentence
 
 sub add_picture {
     my( $self, $acct, $picture ) = @_;
 
-    die { err => "need to reserve this strip to play it" }
+    die "Error obtaining strip"
         unless $self->get__reserved_by == $acct->get_avatar;
 
     $self->_add_panel( $acct, $picture, 'is_picture' );
@@ -257,8 +262,17 @@ sub add_picture {
 } #add_picture
 
 sub reserve {
-    my( $self, $acct, $admin ) = @_;
-    $self->_last_panel->reserve( $acct, $admin );
+    my( $self, $acct ) = @_;
+    $self->_last_panel->reserve( $acct );
 } #reserve
+
+sub rate {
+    my( $self, $acct, $new_rating ) = @_;
+    my $ratings = $self->get__ratings({});
+    my $old_rating = $ratings->{$acct};
+    $ratings->{$acct} = $new_rating;
+    my $tot = $self->set_rating_total( $self->get_rating_total + ( $new_rating - $old_rating ) );
+    $self->set_rating_avg( $tot / scalar( keys %$ratings ) );
+}
 
 1;

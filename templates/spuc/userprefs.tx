@@ -1,0 +1,46 @@
+: if $login {
+
+<h2>User Preferences</h2>
+
+: if $err {
+   <span class="err"><: $err :></span>
+: }
+: if $msg {
+   <span class="msg"><: $msg :></span>
+: }
+
+<h3>Change Icon</h3>
+
+<img src="<: $login.get_avatar.get_icon.url('80x80') :>">
+<form method="POST" enctype="multipart/form-data"  action="/spuc/p/userprefs">
+  <input type="hidden" name="action" value="iconup">
+  <h4>Upload Picture
+    <input type="file" name="iconup">
+    <input type="submit" value="upload">
+  </h4>
+</form>
+
+<h3>Update Info</h3>
+
+<form method="POST" action="/spuc/p/userprefs">
+  <input type="hidden" name="action" value="updateinfo">
+  <table>
+    <tr> <th>My Name</th> <td><input type="text" class="info" name="name" value="<: $avatar.get_name() :>"></td></tr>
+    <tr> <th>Details about me</th> <td><textarea class="info" name="about"><: $avatar.get_about() :></textarea> </td></tr>
+  </table> <br>
+  <input type="submit" value="update">
+</form>
+
+<h3>Change Password</h3>
+
+<form method="POST" action="/spuc/p/userprefs">
+  <input type="hidden" name="action" value="resetpw">
+  <table>
+    <tr> <th>current password</th> <td> <input type="password" name="pw"></td> </tr>	
+    <tr> <th>password </th> <td> <input type="password" name="pw1"></td> </tr>
+    <tr> <th>password (again) </th> <td> <input type="password" name="pw2"></td> </tr>
+  </table>
+  <input type="submit" value="update password">
+</form>
+
+: }

@@ -54,7 +54,7 @@ sub develop {
             `convert $orig_file_path -resize $size ${file_path}_$size.$ext`;
         }
     } else {
-        copy( $image->get_file_path, $file_path ) or die "$@ $!";
+        copy( $image->get_file_path, $file_path ) or return undef;
     }
 
     $image->set_base_url( "/epuc_data/images/$relative_path/$filename" );

@@ -1,0 +1,40 @@
+: my $strip = $op.getStateVar( $state, 'strip' )
+: my $panels = $strip.get__panels
+: my $panel_size = $op.getStateVar( $state, 'panel-size' )
+: my $pag_path = $op.getStateVar($state, 'pag_path' )
+
+: #check for kudos
+: 
+
+<div class="strip">
+: for [0..($panels.size()-1)] -> $p_idx {
+:  my $panel = $panels[$p_idx]
+
+ <div class="panel">
+:   if $panel.get_type == 'sentence' {
+    <span class="caption">
+:        html_encode( $panel.get_sentence )
+    </span>
+:   } else {
+    <span class="picture">
+      <img src="<: $panel.get_picture.url($panel_size) :>">
+    </span>
+:   }
+:   if $op.getStateVar( $state, 'show-kudos' ) {
+    <div class="kudos">
+      <span style="font-size:large; float:left">
+        <a href="/<:$app_path:>/p/showplayer/a/<:$panel.get__artist().get__account().get_user():>">
+:         $panel.get__artist().get__account().get_user()
+        </a>
+      </span>
+:     if $panel.hasKudoFrom( $login ) {
+       <span class="redheart">&hearts;</span> kudos
+:     } else {
+        <a href="/<:$pag_path:>/s/<:$strip_start||'0':>/pa/<:$p_idx:>/act/kudos/pa/<:$panel.get__artist().get__account().get_user():>">&hearts;</a> kudos
+:     }
+    </div>
+:   }
+</div>
+<br>
+: } #each panel
+</div>

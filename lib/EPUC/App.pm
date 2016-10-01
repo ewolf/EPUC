@@ -14,6 +14,7 @@ sub _acct_class { "EPUC::Acct" }
 
 sub _init {
     my $self = shift;
+    $self->SUPER::init;
     # TODO - way to update a password for an account
     my $first_admin = $self->_create_account( 'epuc', 'slatherSLAPTY---+', 'EPUC::AdminAcct' );
     $first_admin->get_avatar->set_user( 'epuc' );
@@ -95,5 +96,21 @@ sub _load {
 
 } #_load
 
+sub lookup_player {
+    my( $self, $name ) = @_;
+    my $accts = $self->get__accts({});
+    $accts->{lc($name)};
+}
+
+sub completed_strips {
+    my( $self, $sort ) = @_;
+    # search thru all. if there become too
+    # many, keep a running list that is updated
+    # also, look at iterators, because they're dope
+    if( $sort eq 'rating' ) {
+        return [ sort { $b->get_rating_avg <=> $a->get_rating_avg } @{$self->get__completed_strips} ];
+    }
+    $self->get__completed_strips;
+}
 
 1;

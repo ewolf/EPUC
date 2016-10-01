@@ -2,7 +2,7 @@
 : if $err {
    <span class="err"><: $err :></span>
 : }
-<form method="POST" action="/spuc/login">
+<form method="POST" action="/spuc/p/login">
   <input type="hidden" name="action" value="login">
   <table>
     <tr> <th>handle </th> <td> <input type="text" name="un" value="<: $req.param("un") :>"></td> </tr>

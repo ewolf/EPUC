@@ -1,1 +1,31 @@
-WOOT
+: my $player = $app.lookup_player($path_args['a'])
+<hr>
+<div>
+  <img src="<: $player.get_avatar.get_icon.url('80x80'):>">
+  <br>
+  <span style="font-size:large">
+<b style="font-size:xx-large"><i> <: $player.get_user :> </i></b>
+:if $player.get_avatar.get_name {      
+<br>
+<b>name :</b>
+    <: $player.get_avatar.get_name :>
+:}
+:if $player.get_avatar.get_about {
+<br>
+<b>about :</b>
+    <: $player.get_avatar.get_about :>
+:}
+  </span>
+</div>
+<br>
+<h3>Recent Strips</h3>
+: my $strip_list = $player.get_avatar.get_completed_strips
+: $op.setStateVar( $state, 'strip_list', $strip_list )
+: $op.setStateVar( $state, 'pag_path', $app_path ~ '/p/showplayer/a/' ~ $path_args['a'] )
+
+: if $strip_list.size() > 0 {
+:   include $op.tmpl( $app_path, 'paginate_strips' )
+: } else {
+    <h4>No Strips Yet</h4>
+: }
+

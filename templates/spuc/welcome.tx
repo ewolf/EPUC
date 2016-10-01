@@ -1,3 +1,9 @@
+: if $err {  
+  <span class="err"><: $err :></span>
+: }
+: if $msg {
+  <span class="msg"><: $msg :></span>
+: }
 <p>
   <img class="starticon" src="/epuc_data/images/coyo.jpg"> Coyo here. I really miss the the <i><b>eat poop u cat</b></i> site,
   so I made this little clone of it. This site, madyote.com doesn&#39;t have much in the way of horsepower
@@ -9,8 +15,12 @@
   the user handle you would like.
 </p>
 <h3>Recent Strips</h3>
-<p class="recent-strips">
-  : if $app.get_recently_completed_strips {
-   show some of those strips here with pagination
-  : }
-</p>
+: my $strip_list = $app.get__completed_strips
+: $op.setStateVar( $state, 'strip_list', $strip_list )
+: $op.setStateVar( $state, 'pag_path', $app_path ~ '/p/welcome' )
+
+: if $strip_list.size() > 0 {
+:   include $op.tmpl( $app_path, 'paginate_strips' )
+: } else {
+    <h4>No Completed Strips Yet</h4>
+: }
