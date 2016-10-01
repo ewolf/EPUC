@@ -26,3 +26,5 @@ sub init {
     my $cgi = CGI->new;
     return( $main::yote_server, $cgi );
 } #init
+
+1;

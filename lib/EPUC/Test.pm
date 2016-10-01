@@ -19,14 +19,23 @@ sub handler {
     # For debug have this reload each time so I don't have to
     # retstart the f%^&n server.
     #
-    
-    my $dostuff = "/home/wolf/proj/EPUC/lib/EPUC/Operator.pm";
-    delete $INC{$dostuff};
-    require $dostuff;
+    my $basedir = "/home/wolf/proj/EPUC/lib/EPUC/";
+    opendir my $dir, $basedir;
+    my $SNARK;
+    map {
+        my $p = "$basedir$_";
+        delete $INC{$p};
+        require $p;
+    } grep { /pm$/ } readdir( $dir );
 
-    my $ret = EPUC::Operator::make_page( $r );
-    
-    return $ret;
+    my $op = '/home/wolf/proj/Yote/ServerYote/lib/Yote/Server/ModperlOperator.pm';
+    delete $INC{$op};
+    require $op;
+
+    my $operator = new EPUC::Operator(
+        template_path => '/opt/yote/templates',
+        );
+    $operator->handle_request( $r );
 } #handler
 
 1;

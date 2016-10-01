@@ -27,9 +27,11 @@ sub _init {
 
 sub _load {
     my $self = shift;
+#    print STDERR $self->_DUMP_ALL;
+#    print STDERR ")_))))))\n";
 
     unless( $self->get__has_all_strips ) {
-        
+        $self->get__all_strips([]);
         # update to make sure all strip and panel states are accurate
         for my $strip (@{$self->get_recently_completed_strips},@{$self->get__in_progress_strips}) {
             $self->add_once_to__all_strips( $strip );

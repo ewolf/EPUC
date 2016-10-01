@@ -146,6 +146,10 @@ sub reserved_panel {
     die { err => "Did not reserve this strip" };
 } #reserved_panel
 
+sub can_delete {
+    my( $self, $acct ) = @_;
+    return $acct->get_is_admin || (@{$self->get__panels} == 1 && $acct->get_avatar == $self->get__artist );
+}
 
 sub free {
     my( $self, $acct, $admin ) = @_;

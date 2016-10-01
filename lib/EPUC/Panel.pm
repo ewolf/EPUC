@@ -19,6 +19,18 @@ sub _init {
 
 sub _load {
     my $self = shift;
+    my $s = $self->get_sentence;
+    if( $s =~ /bears on/ ) {
+        # bears is in an internal perl format?
+        print STDERR ")))$s\n";
+        my $sen = 'Le Déjeuner sur l’herbe, featuring bears on drugs.';
+        $sen = Encode::decode( 'utf8', $sen );
+ my $osen = Encode::encode( 'utf8', $sen );
+        my $tosen = encode_entities( $osen );
+        print STDERR Data::Dumper->Dump([$sen,$osen,$tosen]);
+#        $self->set_sentence( $sen );
+       print STDERR "2)))$s\n";
+    }
 }
 
 sub is_active_panel {
@@ -48,6 +60,26 @@ sub reserve {
     }
     $self;
 } #reserve
+
+sub sentence {
+    my $self = shift;
+    my $s = $self->get_sentence;
+    use Encode;
+    use HTML::Entities;
+    use Text::Xslate qw(mark_raw);
+    my $is_utf8 = Encode::is_utf8( $s );
+    
+    print STDERR ">>>($is_utf8) $s\n"; # <--- s is octets
+    
+    $s = Encode::decode( 'utf8', $s ); # <--- to internal perl
+    $is_utf8 = Encode::is_utf8( $s );
+    print STDERR ">>>($is_utf8) $s\n";
+    
+    $s = encode_entities( $s );
+    $is_utf8 = Encode::is_utf8( $s );
+    print STDERR ">>>($is_utf8) $s\n"; 
+    mark_raw($s);
+}
 
 sub free {
     my( $self, $acct, $admin ) = @_;

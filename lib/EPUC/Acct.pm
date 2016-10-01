@@ -88,10 +88,10 @@ sub start_strip {
         _title   => $sentence,
         _artist  => $self->get_avatar,
         _players => [ $self->get_avatar ],
-        panels_to_go => 2, #(8 is correct, there are 9 panels total)
+        panels_to_go => 8,   # 9 panels total
         _next    => 'picture',
         _panels  => [ $panel ],
-                                        }, 'EPUC::Strip' );
+                                        }, 'epuc::strip' );
 
     $panel->set__strip( $strip);
     

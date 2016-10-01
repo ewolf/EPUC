@@ -1,33 +1,146 @@
 package EPUC::Operator;
 
 use strict;
+use warnings;
 
-use Yote::Server;
+use base 'Yote::Server::ModperlOperator';
 
-use Apache2::Cookie;
-use Apache2::Const qw(:common);
-use Apache2::Request;
-use Apache2::RequestIO;
-use Apache2::RequestRec;
-use Apache2::Upload;
-use APR::Request::Param;
-use APR::Request::Apache2;
+sub new {
+    my( $pkg, %options ) = @_;
+    $options{apps}{spuc} = {
+        app_name      => 'EPUC::App',
+        cookie_path   => 'spuc',
+        main_template => 'spuc/main',
+        template_path => "spuc",
+    };
+    my $self = $pkg->SUPER::new( %options );
+    bless $self, $pkg;
+}
 
-use Data::Dumper;
-use DateTime;
-use Encode;
-use UUID::Tiny;
+sub err {
+    my( $self, $state ) = @_;
+    if( ref $@ ) {
+        $state->{err} = $@->{err};
+        return $state->{err};
+    }
+    elsif( $@ ) {
+        print STDERR Data::Dumper->Dump([$@]);
+        $state->{err} = "ERR";
+        return $state->{err};
+    }
+}
 
-
-sub handler {
-    my $r = Apache2::Request->new( shift );
-
-    my $ret = EPUC::Operator::make_page( $r );
+sub _check_actions {
+    my( $self, $state ) = @_;
+    my $req = $state->{req};
     
-    return $ret;
-} #handler
+    my( $subtemplate, @res ) = @{$state->{path}};
 
+    my $action = $req->param( 'action' );
+    
+    my $app = $state->{app};
+    my $login = $state->{login};
 
+    if( $login ) {
+        $state->{avatar} = $login->get_avatar;
+    }
+
+    if( $subtemplate eq 'index.html' ) {
+        undef $subtemplate;
+    }
+
+    $subtemplate ||= $login ? 'welcomeplayer' : 'welcome';
+    my $menutemplate = $login ? 'playermenu' : 'welcomemenu';
+    if( $subtemplate eq 'logout' ) {
+        $self->logout( $state );
+        $state->{redirect} = '/spuc';
+        return;
+    }
+    
+    elsif( $subtemplate eq 'login' ) {
+        unless( $app ) {
+            $state->{subtemplate} = 'welcome';
+            return;
+        }
+        if( $action eq 'login' ) {
+            # if the login is successfull, then switch the
+            # subtemplate to either what it was or to the
+            # user login page
+            my( $un, $pw ) = ( $req->param('un'), $req->param('pw') );
+            if( $un && $pw ) {
+                eval {
+                    undef $login;
+                    $login = $app->login( $un, $pw );
+                };
+                $self->err( $state );
+                if( $login ) {
+                    $state->{msg} = "Logged in as " . $login->get_user;
+                    $state->{redirect} = shift @res || '/spuc';
+                }
+            }
+        } #login action
+    } #login
+
+    # login actions
+    if( $login ) {
+        # admin actions
+        if( $login->get_is_admin ) {
+            if( $action eq 'resetuesrpw' ) {
+                my( $un, $pw ) = ( $req->param('un'), $req->param('pw') );
+                eval {
+                    $login->reset_user_password( $un, $pw );
+                    $state->{msg} = "Reset password for '$un'";
+                };
+                $self->err( $state );
+            }
+            elsif( $action eq 'createacct' ) {
+                my( $un, $pw ) = ( $req->param('un'), $req->param('pw') );
+                if( length( $pw ) < 5 ) {
+                    $@ = 'password must be at least 5 characters long';
+                    $self->err( $state );
+                } elsif( length( $un ) < 3 ) {
+                    $@ = 'user handle must be at least 3 characters long';
+                    $self->err( $state );
+                } else {
+                    my $is_admin = $login->get_is_super && $req->param('is_admin');
+                    $login->create_user_account( $un, $pw, $is_admin );
+                    $state->{msg} = "created account '$un'";
+                }
+            } elsif( $subtemplate eq 'in_progress_strips' ) {
+                print STDERR Data::Dumper->Dump(["NARF"]);
+                if( $login->get_is_super ) {
+                    my( $start, $detail ) = @res;
+                    $start //= 0;
+                    $state->{is_detail} = @res > 1;
+                    print STDERR Data::Dumper->Dump([scalar(@res),$state->{is_detail},"SNAO"]);
+                    $state->{strip_list} = $app->get__in_progress_strips;
+                    $state->{strip_start} = $start;
+                    $state->{detail_strip} = $detail;
+                    $state->{listtype} = $subtemplate;
+                    $subtemplate = 'paginate_strips';
+                }
+            }
+        }
+        if( $action eq 'startstrip' ) {
+            my $sentence = $req->param('start-sentence');
+            my $strip = $login->start_strip( $sentence );
+            $state->{msg} = "started strip with sentence '$sentence'";
+            $subtemplate = 'welcomeplayer';
+        } elsif( $subtemplate eq 'myinprogress' ) {
+            my $start = shift( @res ) || 0;
+            $state->{strip_start} = $start;
+            $state->{strip_list} = $login->get_in_progress_strips;
+            $state->{listtype} = $subtemplate;
+            $subtemplate = 'paginate_strips';
+        }
+    }
+    $state->{menutemplate} = $menutemplate;
+    $state->{subtemplate} = $subtemplate;
+    
+} #_check_actions
+
+1;
+__END__
 sub new {
     my( $class, $r ) = @_;
     my( $app, $page, @rest ) = grep { $_ } split /\//, $r->uri;
