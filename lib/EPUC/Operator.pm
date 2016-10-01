@@ -2,13 +2,7 @@ package EPUC::Operator;
 
 use strict;
 
-
-use APR::Request::Param;
-
-use UUID::Tiny;
-
 use Yote::Server;
-
 
 use Apache2::Cookie;
 use Apache2::Const qw(:common);
@@ -20,6 +14,9 @@ use APR::Request::Param;
 use APR::Request::Apache2;
 
 use Data::Dumper;
+use DateTime;
+use Encode;
+use UUID::Tiny;
 
 
 sub handler {
@@ -42,7 +39,7 @@ sub new {
         r     => $r,
         page  => $page,
         path  => [@rest],
-        initial_path  => \@rest,
+        initial_path  => $r->uri,
         token => $token,
     }, $class;
 }
@@ -360,6 +357,49 @@ sub detail {
 $prevnext
 $strip_html
 END
+        # discussion
+        my $login = $self->{login};
+        if( $login ) {
+            if( $self->{r}->param( 'newmsg' ) ) {
+                my $comment = $self->{store}->newobj( {
+                    when => time,
+                    by   => $login->get_avatar,
+                    msg  => $self->{r}->param( 'newmsg' ),
+                                                      } );
+                unshift @{$strip->get__discussion([])}, $comment;
+            }
+        }            
+            $self->{main} .= <<"END";
+<h3>discussion</h3>
+<div>
+END
+        my $disc = $strip->get__discussion([]);
+        if( @$disc) {
+            for my $msg (@$disc) {
+                my $who = $msg->get_by;
+                my $when = $msg->get_when;
+                eval { $when = DateTime->from_epoc( epoch => $msg->get_when ); };
+                $self->{main} .= sprintf( '<div><a href="/spuc/artist/%s"><img src="%s"> [%s]</a> (%s) &quot;%s&quot;</div>',
+                                          $who->{ID},
+                                          $who->get_icon->url('80x80'),
+                                          $who->get_user,
+                                          $when,
+                                          $msg->get_msg,
+                    );
+                
+                    # build href avatar quotes and when
+            }
+        }
+        $self->{main} .= "</div>";
+        if( $login ) {
+            # add message
+            $self->{main} .= <<"END";
+<form action="$self->{initial_path}" method="POST">
+   <textarea name="newmsg"></textarea>
+   <input type="submit" value="add comment">
+</form>
+END
+        }
     } else {
         $self->{message} = "Cannot view incomplete strip";
         $self->{main} = '';
@@ -833,7 +873,6 @@ sub strip_html {
             }
             if( $panel->get_type eq 'sentence' ) {
                 if( $i == 0 && $self->{show_detail} ) {
-                    use Encode;
                     $strip_html .= sprintf( qq~<div class="sentence"><a href="/spuc/$page/detail/%s/%s">%s</a></div>~, 
                                             $strip->{ID},
                                             $self->{store}->_get_id( $strips ),
@@ -846,7 +885,7 @@ sub strip_html {
                 $strip_html .= qq~<img src="$url">~;
             }
             $strip_html .= "<br>";
-        }
+        } # each panel
     }
     $strip_html .= '</div>';
     $strip_html;

@@ -84,6 +84,13 @@ sub _load {
         $self->set__panels_have_numbers( 1 );
     } # _panels_have_numbers
 
+    unless( $self->get__avatars_have_names ) {
+        for my $acct ( values %{$self->get__accts({})} ) {
+            $acct->get_avatar->set_user( $acct->get_user );
+        }
+        $self->set__avatars_have_names( 1 );
+    }
+
 } #_load
 
 
