@@ -16,7 +16,9 @@
     <li><a href="/spuc/p/startstrip">start a strip</a></li>
     <li><a href="/spuc/p/myinprogress">in progress strips</a></li>
     <li><a href="/spuc/p/findstrip">find a strip to play</a></li>
-    <li><a href="/spuc/p/showreserved">Show reserved strips</a></li>
+    : if $login.reserved_count > 0 {
+      <li><a href="/spuc/p/showreserved">Show <:$login.reserved_count:> reserved strips</a></li>
+    : }
     <li></li>
   </ul>
   : if $login.get_is_admin {

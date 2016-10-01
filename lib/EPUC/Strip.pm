@@ -7,6 +7,8 @@ use base 'Yote::ServerObj';
 
 use EPUC::Picture;
 
+use Scalar::Util qw( refaddr );
+
 sub _init {
     my $self = shift;
     #
@@ -39,15 +41,15 @@ sub _log {
     print $out "$msg\n";
 }
 
-sub can_change {
+sub can_delete {
     my( $self, $acct ) = @_;
     my $panels = $self->get__panels;
     return @$panels == 1 && $panels->[0]->get__artist->get__account == $acct && ! $panels->[0]->get__reserved_by;
-} #can_change
+} #can_delete
 
 sub delete_strip {
     my( $self, $acct ) = @_;
-    die { err => "Cannot remove" } unless $self->can_change($acct);
+    die { err => "Cannot remove" } unless $self->can_delete($acct);
     my $app = $acct->get_app;
     $acct->remove_from_in_progress_strips( $self );
     $app->remove_from__in_progress_strips( $self );
@@ -146,39 +148,24 @@ sub panels {
 # returns the last panel of this strip to the one reserving it
 sub reserved_panel {
     my( $self, $acct ) = @_;
-
+    
     if( $self->get__reserved_by == $acct->get_avatar ) {
         return $self->_last_panel;
     }
     die { err => "Did not reserve this strip" };
 } #reserved_panel
 
-sub can_delete {
-    my( $self, $acct ) = @_;
-
-    return $acct && (@{$self->get__panels} == 1 && $acct->get_avatar == $self->get__artist && !$self->get__reserved_by );
-}
-
 sub free {
     my( $self, $acct, $admin ) = @_;
     my $ava = $acct->get_avatar;
+
     if( $self->get__reserved_by == $ava || ($admin && $admin->get__is_admin) ) {
         $self->set__reserved_by(undef);
         $self->_last_panel->set__reserved_by(undef);
-        $acct->remove_from_reserved_strips( $self );
-    } else {
-        return;
     }
+    $acct->remove_from_reserved_strips( $self );
     $self;
 } #free
-
-sub can_see {
-    my( $self, $acct ) = @_;
-    return $self->get__state eq 'complete' || 
-        ( $acct && 1 == grep { $acct->get_avatar == $_ } 
-          @{$self->get__players} ) ||
-              ( $acct && $acct->get_is_super );
-}
 
 sub _last_panel {
     my $pans = shift->get__panels([]);
@@ -254,6 +241,7 @@ sub add_sentence {
 sub add_picture {
     my( $self, $acct, $picture ) = @_;
 
+    print STDERR Data::Dumper->Dump([$self->{DATA},refaddr( $self )," add picture ($self) ".$self->get__reserved_by. " , ".$acct->get_avatar." DAAA", $self->get__reserved_by == $acct->get_avatar]);
     die { err => "Error obtaining strip" }
         unless $self->get__reserved_by == $acct->get_avatar;
 
@@ -263,7 +251,13 @@ sub add_picture {
 
 sub reserve {
     my( $self, $acct ) = @_;
-    $self->_last_panel->reserve( $acct );
+    
+    print STDERR Data::Dumper->Dump([$self->{DATA},refaddr($self),
+                                     exists( $self->{STORE}{_WEAK_REFS}{$self->{ID}} ),
+                                     $self->{STORE}{_WEAK_REFS}{$self->{ID}},
+                                     refaddr($self->_last_panel->get__strip),"RESERVE STRIP ($self) ".exists $self->{STORE}{_WEAKREFS}{$self->_last_panel->{DATA}{_strip}}]);
+
+    $self->_last_panel->reserve( $acct, $self );
 } #reserve
 
 sub rate {

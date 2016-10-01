@@ -1,3 +1,5 @@
+: my $reserved = $login.get_reserved_strips
+
 <h2>Reserved Captions</h2>
 : if $err {
    <span class="err"><: $err :></span>
@@ -5,26 +7,28 @@
 : if $msg {
    <span class="msg"><: $msg :></span>
 : }
-<div style="display:inline-block">
+
+  <h4>Used <: $reserved.size() :> out of <: $login.reserves_allowed :> Strip Reservations</h4>
+
 : for [0..($reserved.size()-1)] -> $idx {
 :  my $strip = $reserved[$idx]
-   <div style="margin:4px; padding:3px; border: 3px solid black">
-     <span class="caption"><: $strip._last_panel.get_sentence :></span>
+   <div class="reserved-strip">
+     <span class="caption"><: html_encode($strip._last_panel.get_sentence) :></span>
      <br>
      <form method="POST" enctype="multipart/form-data" action="/spuc/p/showreserved">
        <input type="hidden" name="action" value="upload">
-       <input type="hidden" name="panel" value="<: $strip._last_panel.id:>">
-       <input type="hidden" name="strip" value="<: $strip.id :>">
+       <input type="hidden" name="strip_idx" value="<: $idx :>">
        <h4>Upload Picture
 	 <input type="file" name="pictureup">
 	 <input type="submit" value="upload">
        </h4>
      </form>
-     <br>
-     <a href="/spuc/p/showreserved/do/unreserve/s/<:$idx:>">Unreserve</a>
+     <form method="POST" enctype="multipart/form-data" action="/spuc/p/showreserved">
+       <input type="hidden" name="action" value="unreserve">
+       <input type="hidden" name="strip-idx" value="<: $idx :>">
+       <button type="submit" class="link-like">Unreserve this Strip</button>
+     </form>
    </div>
-   <br>
 : } else {
-   <span class="msg">No reserved strips</span>
+   <h3>No reserved strips</h3>
 : }
-</div>

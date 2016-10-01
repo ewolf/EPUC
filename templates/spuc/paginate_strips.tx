@@ -8,7 +8,7 @@
 
 :   if $str {
       <div class="detail">
-        <div style="display:block;text-align:center;font-size:large">
+        <div class="paginate-bar">
 :     if $detail_strip > 0 {
            <a href="/<: $pag_path :>/s/<:$strip_start || '0':>/d/<:($detail_strip-1):>">&lt;prev</a>
 :     } else {
@@ -24,10 +24,12 @@
 
 :    include $op.tmpl( $app_path, 'strip' ) { showkudos => 1, panelsize => '700x700', strip => $str }
 
-:    if $show_delete && $strip.can_delete($login) {
-     <div>
-       You may <a href="/<: $pag_path :>/s/<:$strip_start||'0':>/d/<:$detail_strip:>/delete/1">delete this strip</a>
-     </div>
+:   if $show_delete && $str.can_delete($login) {
+      <form method="POST" action="/<: $pag_path :>/s/<:$strip_start||'0':>/d/<:$detail_strip:>">
+        <input type="hidden" name="action" value="delete">
+        <input type="hidden" name="strip-number" value="<:$detail_strip:>">
+        You may <button class="link-like" type="submit">delete this strip</button>
+      </form>
 :    } #may delete
 
   </div>
@@ -35,7 +37,7 @@
     No strips
 :  }
 : } else { # multiple strips
-  <div class="paginated-strips">
+  <div class="right-pane">
 
     <div style="display:block;text-align:center;font-size:large">
   : if $strip_start > 0 {
@@ -57,7 +59,7 @@
     </div>
   <br>
      
-  <div style="display:inline-block;vertical-align:top;min-width:1500px;">
+  <div class="paginated-strips">
   : for [$strip_start..(2+$strip_start)] -> $idx {
 
      : my $strip = $strip_list[$idx]

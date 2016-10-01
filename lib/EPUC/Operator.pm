@@ -29,6 +29,7 @@ sub err {
     my( $self, $err ) = @_;
     $err //= $@;
     $self->{err} = ref $err ? $err->{err} : $err;
+    $self->{has_err} = 1 if $err;
 }
 
 sub msg {
@@ -39,6 +40,8 @@ sub msg {
 sub _check_actions {
     my( $self ) = @_;
 
+    $self->{has_err} = 0;
+    
     my $path_args = $self->{path_args};
     my $req = $self->{req};
     my $app = $self->{app};
@@ -48,7 +51,7 @@ sub _check_actions {
 
     my $login = $self->{login};
     my $avatar = $login ? $login->get_avatar : undef;
-    
+
     if( $subtemplate eq 'login' ) {
 	if( $action eq 'login' ) {
 	    my( $un, $pw ) = ( $req->param('un'), $req->param('pw') );
@@ -110,7 +113,7 @@ sub _check_actions {
             }
             elsif( $action eq 'resetpw' ) {
                 my( $curr_pw, $pw1, $pw2 ) = ( $req->param('pw'), $req->param('pw1'), $req->param('pw2') );
-                
+
                 if( $pw1 ne $pw2 ) {
                     $@ = { err => 'passwords do not match' };
                 }
@@ -123,16 +126,21 @@ sub _check_actions {
                         $self->msg( 'reset password' );
                     };
                 }
-            }	
+            }
         }
         elsif( $subtemplate eq 'findstrip' ) {
             my $last_strip = $login->get_last_random_strip;
-            if( $path_args->{'do'} eq 'reserve' ) {
+            if( $action eq 'reserve' ) {
                 if( $last_strip ) {
-                    eval {
-                        $last_strip->reserve( $login );
-                        $self->msg(  'Reserved Strip' );
-                    };
+                    if( $login->reserves_available > 0 ) {
+                        eval {
+                            $last_strip->reserve( $login );
+                            $self->msg( 'Reserved Strip' );
+                        };
+                        print STDERR Data::Dumper->Dump([$login->reserves_available,"RESERVED 1"]);
+                    } else {
+                        $@ = { err => "out of strips to reserve" };
+                    }
                 } else {
                     $@ = { err => "could not find strip to reserve" };
                 }
@@ -144,9 +152,11 @@ sub _check_actions {
                         if( $upload  && $last_strip->reserve($login) && $last_strip->add_picture( $login, $upload ) ) {
                             $self->msg( 'uploaded picure' );
                         } else {
+                            $last_strip->free($login);
                             $@ = { err => "error uploading" };
                         }
                     };
+                    print STDERR Data::Dumper->Dump([$login->reserves_available,$@,"RESERVED 2"]);
                 }
                 elsif( $action eq 'caption' ) {
                     eval {
@@ -154,6 +164,10 @@ sub _check_actions {
                             $self->msg( 'added caption' );
                         }
                     };
+                    print STDERR Data::Dumper->Dump([$login->reserves_available,"RESERVED 3"]);
+                    if( $@ ) {
+                        $last_strip->free($login);
+                    }
                 }
             }
             my $strip = $login->play_random_strip;
@@ -163,21 +177,32 @@ sub _check_actions {
         } #findstrip
         elsif( $subtemplate eq 'showreserved' ) {
             if( $action eq 'upload' ) {
-                eval {
-                    my $last_strip = $login->get_last_random_strip;
-                    my $upload = $self->upload( 'pictureup' );
-                    if( $upload && $last_strip  && $last_strip->reserve($login) && $last_strip->add_picture( $login, $upload ) ) {
-                        $self->msg( 'uploaded picure' );
+                my $strip_idx = $req->param('strip_idx');
+                if( defined( $strip_idx ) ) {
+                    my $reserved = $login->get_reserved_strips;
+                    my $strip = $reserved->[$strip_idx];
+                    if( $strip ) {
+                        eval {
+                            my $upload = $self->upload( 'pictureup' );
+                            if( $upload && $strip->reserve($login) ) {
+                                $strip->add_picture( $login, $upload );
+                                $self->msg( 'uploaded picure' );
+                            } else {
+                                $@ = { err => "Error in Strip for Upload" };
+                            }
+                        };
                     } else {
-                        $@ = { err => $last_strip ? "error uploading" : "strip not found" };
+                        $@ = { err => $strip ? "error uploading" : "strip not found" };
                     }
                 };
+                print STDERR Data::Dumper->Dump([$login->reserves_available,"RESERVED 4"]);
             }
             elsif( $action eq 'unreserve' ) {
                 eval {
                     my $reserved = $login->get_reserved_strips;
-                    if( $path_args->{'do'} == 'unreserve' && $reserved->[ $path_args->{'s'} ] && $reserved->[ $path_args->{'s'} ]->free( $login ) ) {
-                        $self->msg( 'Unreserved Caption' );
+                    my $strip = $reserved->[ $req->param('strip-idx') ];
+                    if( $strip && $strip->free( $login ) ) {
+                        $self->{msg} = "freed strip reserveation";
                     } else {
                         $@ = { err => 'Error trying to Unreserve Caption' };
                     }
@@ -192,19 +217,26 @@ sub _check_actions {
                 };
             }
         }
-        
-        # if( $subtemplate eq 'paginate_strips' ) {
-        #     if( $path_args->{'delete'} ) {
-        #         eval {
-        #             my $strip = $strip_list->[$path_args->{'d'}];
-        #             $strip->delete_strip( $login );
-        #             if( @$strip_list > 0 ) {
-        #                 if( $path_args->{'d'} > 0 ) {
-        #                     $path_args->{'d'}--;
-        #                 }
-        #         };
-        #     }
-        # }
+        elsif( $subtemplate eq 'myinprogress' ) {
+            if( $action eq 'delete' ) {
+                eval {
+                    my $strips = $login->get_in_progress_strips;
+                    my $strip = $strips->[$req->param('strip-number')];
+                    if( $strip->can_delete( $login ) ) {
+                        $strip->delete_strip( $login );
+                        $self->msg( 'deleted strip' );
+                        my $idx = $path_args->{'d'} - 1;
+                        if( @$strips > 0 ) {
+                            $idx = 0 if $idx < 0;
+                            $self->{redirect} = "/spuc/p/myinprogress/s/$path_args->{s}/d/$idx";
+                        } else {
+                            $self->{redirect} = "/spuc/p/myinprogress";
+                        }
+                    }
+                };
+            }
+        }
+
     } #if login
 
     if( $subtemplate eq 'welcome' || $subtemplate eq 'recent' ) {
@@ -222,6 +254,8 @@ sub _check_actions {
     $self->err;
     $self->{state}{subtemplate} = $subtemplate;
 
+    return ! $self->{has_err};
+    
 } #_check_actions
 
 1;

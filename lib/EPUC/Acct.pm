@@ -153,6 +153,26 @@ sub play_random_strip {
     return $strip;
 } #play_random_strip
 
+sub reserves_available {
+    my $self = shift;
+    return $self->reserves_allowed - scalar( @{$self->get_reserved_strips([])} );
+}
+
+sub reserved_count {
+    my $self = shift;
+    scalar( @{$self->get_reserved_strips([])} );
+}
+
+sub reserves_allowed {
+    3;
+}
+
+sub starts_available {
+    my $self = shift;
+    # 5 starts available until strips are finished
+    
+}
+
 sub reset_password {
     my( $self, $newpw, $oldpw ) = @_;
 

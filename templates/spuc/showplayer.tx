@@ -1,10 +1,9 @@
 : my $player = $app.lookup_player($path_args['a'])
-<hr>
 <div>
   <img src="<: $player.get_avatar.get_icon.url('80x80'):>">
   <br>
-  <span style="font-size:large">
-<b style="font-size:xx-large"><i> <: $player.get_user :> </i></b>
+  <span>
+<span> <: $player.get_user :> </span>
 :if $player.get_avatar.get_name {      
 <br>
 <b>name :</b>

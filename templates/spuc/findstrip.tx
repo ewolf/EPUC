@@ -9,10 +9,10 @@
   : }
 
 :   if $strip {
- <div style="display:inline-block">
+ <div class="right-pane">
 :    if $panel.get_type == 'sentence' {
  <h3>Add a picture for this caption</h3>
-        <span class="caption"> &ldquo;
+        <span class="caption groovy"> &ldquo;
 :      html_encode( $panel.get_sentence )
         &rdquo;
         </span>
@@ -25,25 +25,30 @@
        <input type="submit" value="upload">
        </h4>
      </form>
-     
+
+: my $allowed = 3 - $login.get_reserved_strips.size()
+
 :    if $allowed > 0 {
-       <h4><a href="/spuc/p/findstrip/do/reserve">Reserve this sentence for later ( may reserve <: $allowed :> more)</a></h4>
+<form method="POST" action="/spuc/p/findstrip">
+      <input type="hidden" name="action" value="reserve">
+       <h4><button class="link-like" type="submit" href="/do/reserve">Reserve this sentence for later ( may reserve <: $allowed :> more)</button></h4>
+</form>
 :    } else {
        <h4>out of strip reservations</h4>
 :    }
 :   } # panel was sentence needing picture
 :   else {
 :    #submit a caption
-     <img src="<: $panel.get_picture.url('700x700') :>">
      <form method="POST" action="/spuc/p/findstrip">
        <input type="hidden" name="action" value="caption">
        <input type="hidden" name="panel" value="<: $panel.id :>">
        <input type="hidden" name="strip" value="<: $strip.id :>">
-       <h3>Add a caption</h3>
+       <h3>Caption this strip</h3>
        <input type="text" name="caption" value="<:$req.param("caption"):>">
-       <br>
        <input type="submit" value="Add Caption">
      </form>
+     <br>
+     <img src="<: $panel.get_picture.url('700x700') :>">
 :   } #panel was a picture needing caption
   <h4>
   <a href="/spuc/p/findstrip/not/<:$strip.id:>">Find a different strip</a></h4>

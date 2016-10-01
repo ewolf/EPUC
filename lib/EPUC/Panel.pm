@@ -3,6 +3,7 @@ package EPUC::Panel;
 use strict;
 
 use Yote::Server;
+use Scalar::Util qw( refaddr );
 
 use base 'Yote::ServerObj';
 
@@ -21,8 +22,19 @@ sub _load {
     my $self = shift;
 }
 
+sub kudocount {
+    my $self = shift;
+    scalar( keys %{$self->get_kudos({})} );
+}
+
+sub addkudo {
+    my( $self, $acct ) = @_;
+    $self->get_kudos({})->{$acct} = 1;
+}
+
 sub hasKudoFrom {
-    0;
+    my( $self, $acct ) = @_;
+    $self->get_kudos({})->{$acct};
 }
 
 sub is_active_panel {
@@ -33,18 +45,20 @@ sub is_active_panel {
 }
 
 sub reserve {
-    my( $self, $acct ) = @_;
-    die "Not active panel" unless $self->is_active_panel;
-    die "Incorrect login" unless $acct->isa( 'EPUC::Acct' );
+    my( $self, $acct, $ostrip ) = @_;
+    die { err =>  "Not active panel" } unless $self->is_active_panel;
+    die { err =>  "Incorrect login" } unless $acct->isa( 'EPUC::Acct' );
     my $ava = $acct->get_avatar;
     my $strip = $self->get__strip;
+
     if( ! $strip->get__reserved_by ) {
         $self->set__reserved_by( $ava );
         $strip->set__reserved_by( $ava );
-        $acct->add_to_reserved_strips( $strip );
+        print STDERR Data::Dumper->Dump(["ADDING TO ReSrVD ($strip)"]);
+        $acct->add_once_to_reserved_strips( $strip );
     } elsif( $self->get__reserved_by != $ava ) {
         _log( "$ava, ".$self->get__reserved_by );
-        die "Strip was just reserved by someone else";
+        die { err =>  "Strip was just reserved by someone else" };
     }
     $self;
 } #reserve
