@@ -1,1 +1,8 @@
 All In Progress Strips
+: if $login.get_is_admin && $login.get_is_super {
+  :  my $strip_list = $app.get__in_progress_strips
+
+  :   include $op.tmpl( $app_path, 'paginate_strips' ) { pag_path => $app_path ~ '/p/allinprogress', strip_list => $strip_list }
+: } else {
+  Nothing to see here. Move along citizen.
+: }

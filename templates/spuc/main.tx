@@ -151,7 +151,7 @@
                 
     </main>
     <footer>
-      <div class="footer">footsie</div>
+      <div class="footer"></div>
     </footer>
   </body>
 </html>

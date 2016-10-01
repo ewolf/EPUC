@@ -28,7 +28,7 @@
     <li><a href="/spuc/p/resetuserpw">reset user password</a></li>
     <li><a href="/spuc/p/listaccounts">list accounts</a></li>
     : if $login.get_is_super {  
-    <li><a href="/spuc/p/in_progress_strips">in progress strips</a></li>
+    <li><a href="/spuc/p/allinprogress/s/0">in progress strips</a></li>
     : }
   </ul>
   : }
