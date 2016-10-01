@@ -1,0 +1,25 @@
+: if $login && $login.get_is_admin {
+<h3>Create Account</h3>
+  : if $err {
+     <span class="err"><: $err :></span>
+  : }
+  : if $msg {
+     <span class="msg"><: $msg :></span>
+  : }
+<form method="POST" action="/spuc/createacct">
+  <input type="hidden" name="action" value="createacct">
+  <table>
+    <tr> <th>handle </th> <td> <input type="text" name="un" value="<: $req.param("un") :>"></td> </tr>
+    <tr> <th>password </th> <td> <input type="password" name="pw" value="<: $req.param("pw") :>"></td> </tr>
+  : if $login.get_is_super {
+     <tr> <th>is admin</th> <td> <input type="checkbox" name="is_admin"> </td> </tr>
+  : }
+  </table>
+  <input type="submit" value="create">
+</form>
+
+: } elsif $login {
+:   include $op.tmpl( $app_path, 'welcomeplayer' )
+: } else {
+:   include $op.tmpl( $app_path, 'welcome' )
+: }

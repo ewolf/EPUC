@@ -1,0 +1,6 @@
+<h3>start a new strip</h3>
+<form method="POST" action="/spuc/startstrip">
+  <input type="hidden" name="action" value="startstrip">
+  <input type="text" name="start-sentence" value="<: $req.param("start-sentence") :>">
+  <input type="submit" value="start strip">
+</form>

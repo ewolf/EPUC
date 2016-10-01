@@ -1,0 +1,15 @@
+: if $login && $login.get_is_admin {
+<h3>User Accounts</h3>
+  : for $app.get__accts.values() -> $acct {
+     : $acct.get_user
+
+     : if $acct.get_is_admin {
+         * admin
+     : }
+     <br>
+  : }
+: } elsif $login {
+:   include $op.tmpl( $app_path, 'welcomeplayer' )
+: } else {
+:   include $op.tmpl( $app_path, 'welcome' )
+: }

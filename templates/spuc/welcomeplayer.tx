@@ -1,0 +1,7 @@
+<h3>You are logged in as <: $login.get_user :></h3>
+: if $err {  
+  <span class="err"><: $err :></span>
+: }
+: if $msg {
+  <span class="msg"><: $msg :></span>
+: }

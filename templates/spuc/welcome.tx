@@ -1,0 +1,16 @@
+<p>
+  <img class="starticon" src="/epuc_data/images/coyo.jpg"> Coyo here. I really miss the the <i><b>eat poop u cat</b></i> site,
+  so I made this little clone of it. This site, madyote.com doesn&#39;t have much in the way of horsepower
+  or even storage, so this is by necessity a small affair. The framework the site runs on requires javascript
+  to use and is experimental so potentially buggy. For this reason, there are a few limitations on strips.
+</p>
+<p>
+  To get an account, <a href="mailto:coyocanid\@gmail.com">contact me</a>  or any of the admins of the site. Include
+  the user handle you would like.
+</p>
+<h3>Recent Strips</h3>
+<p class="recent-strips">
+  : if $app.get_recently_completed_strips {
+   show some of those strips here with pagination
+  : }
+</p>

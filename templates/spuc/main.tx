@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SPUC</title>
+  </head>
+  <body>
+    <header>
+      <a href="/spuc">SPUC</a>
+    </header>
+    <main>
+      <section style="float:left;padding:1em;margin:.5em;">
+        : if $menutemplate {
+        :   include $op.tmpl( $app_path, $menutemplate )
+        : }
+        : #menu stuff goes here
+      </section>
+      <h1>Scarf Poutine You Clone</h1>
+
+      : if $subtemplate {
+      :   include $op.tmpl( $app_path, $subtemplate )
+      : }
+    </main>
+    <footer style="margin:2em">
+      footsie
+    </footer>
+  </body>
+</html>

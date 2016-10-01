@@ -1,0 +1,66 @@
+: if $is_detail {
+  <div style="display:inline-block;">
+    <div style="display:block;text-align:center;font-size:large">
+    : if $detail_strip > 0 {
+      <a href="/spuc/<:$listtype:>/<:$strip_start:>/<:($detail_strip-1):>">prev</a>
+    : }
+    : if $detail_strip < $strip_list.size() {
+      <a href="/spuc/<:$listtype:>/<:$strip_start:>/<:($detail_strip+1):>">next</a>
+    : }
+    </div>
+  : my $strip = $strip_list[$detail_strip];
+  : for $strip.get__panels -> $panel {
+    <div style="padding: .3em">
+       <span style="font-size:x-large; ">
+             <i><a href="/epuc/showplayer/<:$panel.get__artist:>">
+               <: $panel.get__artist().get__account().get_user() :>
+             </a></i> :
+       </span>
+    : if $panel.get_type == 'sentence' {
+       <span style="font-size:xx-large; background-color: wheat; display:block;text-align:center">
+       : html_encode( $panel.get_sentence )
+       </span>
+    : } else {
+       <br>
+       <img src="<: $panel.get_picture.url('700x700') :>">
+    : }
+    </div>
+    <br>
+  : }
+  </div>
+: } else {
+  <h3>Showing Strips</h3>
+
+  : if $strip_start > 0 {
+      : if $strip_start - 3 >= 0 {
+          <a href="/spuc/<:$listtype:>/<:($strip_start-3):>">
+      : } else {
+          <a href="/spuc/<:$listtype:>/0">
+      : }
+      previous</a>
+  : }
+  : if (3+$strip_start) < $strip_list.size() {
+      <a href="/spuc/<:$listtype:>/<:(3+$strip_start):>">next</a>    
+  : }
+  <br>
+  : for [$strip_start..(2+$strip_start)] -> $idx {
+     : my $strip = $strip_list[$idx]
+     : my $panels = $strip.get__panels
+     <div style="display:inline-block;border: solid 3px; padding: 4px; vertical-align: top">
+     : for [0..($panels.size()-1)] -> $i {
+       : if $panels[$i].get_type == 'sentence' {
+         : if $i == 0 {
+             <a href="/spuc/<:$listtype:>/<:$strip_start:>/<:$idx:>">
+             : html_encode( $panels[$i].get_sentence )
+             </a>
+         : } else {
+             : html_encode( $panels[$i].get_sentence )
+         : }
+       : } else {
+          <img src="<: $panels[$i].get_picture.url('400x400') :>">
+       : }
+       <br>
+     : }
+     </div>
+  : }
+: }

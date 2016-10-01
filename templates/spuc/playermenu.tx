@@ -1,0 +1,29 @@
+Welcome <b><: $login.get_user :></b> <br>
+<img src="<: $avatar.get_icon.url('80x80') :>"><br>
+: if $login.get_is_super {
+  <span class="important">You are a super admin</span>
+: } elsif $login.get_is_admin {
+  <span class="important">You are an admin</span>
+: }
+<ul>
+  <li><a href="/spuc/logout">log out</a></li>
+</ul>
+<h3>Artwork</h3>
+<ul>
+  <li><a href="/spuc/startstrip">start a strip</a></li>
+  <li><a href="/spuc/myinprogress/<:$strip_start:>">in progress strips</a></li>
+  <li></li>
+  <li></li>
+  <li></li>
+</ul>
+: if $login.get_is_admin {
+<h3>Admin</h3>
+<ul>
+  <li><a href="/spuc/createacct">create account</a></li>
+  <li><a href="/spuc/resetuserpw">reset user password</a></li>
+  <li><a href="/spuc/listaccounts">list accounts</a></li>
+  : if $login.get_is_super {  
+  <li><a href="/spuc/in_progress_strips/0">in progress strips</a></li>
+  : }
+</ul>
+: }

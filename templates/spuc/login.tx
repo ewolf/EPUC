@@ -1,0 +1,12 @@
+<h3>log in</h3>
+: if $err {
+   <span class="err"><: $err :></span>
+: }
+<form method="POST" action="/spuc/login">
+  <input type="hidden" name="action" value="login">
+  <table>
+    <tr> <th>handle </th> <td> <input type="text" name="un" value="<: $req.param("un") :>"></td> </tr>
+    <tr> <th>password </th> <td> <input type="password" name="pw" value="<: $req.param("pw") :>"></td> </tr>
+  </table>
+  <input type="submit" value="log in">
+</form>

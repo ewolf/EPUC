@@ -1,0 +1,19 @@
+: if $login && $login.get_is_admin {
+<h3>reset user password</h3>
+  : if $err {
+     <span class="err"><: $err :></span>
+  : }
+  : if $msg {
+     <span class="msg"><: $msg :></span>
+  : }
+<form method="POST" action="/spuc/resetuserpw">
+  <input type="hidden" name="action" value="resetuesrpw">
+  <table>
+    <tr> <th>handle </th> <td> <input type="text" name="un" value="<: $req.param("un") :>"></td> </tr>
+    <tr> <th>password </th> <td> <input type="password" name="pw" value="<: $req.param("pw") :>"></td> </tr>
+  </table>
+  <input type="submit" value="set password">
+</form>
+: } else { # not admin, so give user their normal reset own password link
+:   include $op.tmpl( $app_path, 'resetpw' )  
+: }
