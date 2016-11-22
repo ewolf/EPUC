@@ -22,7 +22,7 @@
 :  my $strip_list = $app.completed_strips
 
 : if $strip_list.size() > 0 {
-:   include $op.tmpl( $app_path, 'paginate_strips' ) { strip_list => $strip_lits, pag_path => $app_path ~ '/p/welcome' }
+:   include $op.tmpl( $app_path, 'paginate_strips' ) { strip_list => $strip_list, pag_path => $app_path ~ '/p/welcome' }
 : } else {
     <h4>No Completed Strips Yet</h4>
 : }
