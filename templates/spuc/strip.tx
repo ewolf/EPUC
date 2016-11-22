@@ -1,6 +1,6 @@
 : my $panels = $strip.get__panels
 
-: if 0 && $showkudos {
+: if $showkudos {
 <div class="rating">
  rate this strip RATINGBAR &star; <span style="color:red">&#9733;</span>
 </div>
@@ -27,13 +27,13 @@
         </a>
       </span>
        <: $panel.kudocount :> kudos
-:     if 1 || ! $panel.can_kudo( $login ) {
+:     if ! $panel.can_kudo( $login ) {
          <span class="redheart heart">&hearts;</span>
 :     } else {
          <form class="" method="POST" action="/<:$pag_path:>/s/<:$strip_start:>/d/<: $detail_strip :>">
            <input type="hidden" name="action" value="kudo">
            <input type="hidden" name="strip" value="<: $session.id($panel) :>">
-          <button type="submit" class="link-like heart">&hearts;</a>
+          <button type="submit" class="link-like heart">&hearts;</button>
         </form>
 :     }
     </div>
@@ -41,4 +41,25 @@
 </div>
 <br>
 : } #each panel
+: if $showkudos {
+    <h4>Discussion</h4>
+    : my $discussion = $strip.get_discussion;
+
+    : if $discussion && $discussion.size() > 0 {
+    <ul>
+    :   for $discussion -> $line {
+    <li><img src="<:$line.get_player.get_avatar.get_icon.url('80x80'):>"> <: $line.get_message :>
+    :   }
+    </ul>
+    : } else {
+       Nobody has said anything yet
+    : }
+    <hr>
+    <form method="POST" action="/<:$pag_path:>/s/<:$strip_start:>/d/<:$detail_strip:>">
+      <input type="hidden" name="action" value="message">
+      <input type="hidden" name="strip" value="<: $session.id($strip) :>">
+      <textarea cols="80" rows="5" name="message"></textarea><br>
+      <button type="submit">Say something</button>
+    </form>
+: }
 </div>

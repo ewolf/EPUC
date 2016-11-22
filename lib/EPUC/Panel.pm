@@ -30,7 +30,8 @@ sub kudocount {
 sub add_kudo {
     my( $self, $acct ) = @_;
     $self->get_kudos({})->{$acct} = 1;
-    $self->get__artist->set_kudo_count( 1 + $self->get__artist->get_kudo_count );
+    my $artist = $self->get__artist->get__account;
+    $artist->set_kudo_count( 1 + $artist->get_kudo_count );
 }
 
 sub can_kudo {

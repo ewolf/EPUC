@@ -22,7 +22,7 @@
 :     }
         </div>
 
-:    include $op.tmpl( $app_path, 'strip' ) { showkudos => 1, panelsize => '700x700', strip => $str }
+:    include $op.tmpl( $app_path, 'strip' ) { showkudos => 1, panelsize => '700x700', strip => $str, detail_strip => $detail_strip, strip_start => $strip_start }
 
 :   if $show_delete && $str.can_delete($login) {
       <form method="POST" action="/<: $pag_path :>/s/<:$strip_start||'0':>/d/<:$detail_strip:>">

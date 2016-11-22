@@ -235,14 +235,26 @@ sub _check_actions {
         } #myinprogress
         if( $action eq 'kudo' ) {
             my $panel = $sess->fetch( $req->param('pan') );
-            print STDERR Data::Dumper->Dump([$panel,"PAN"]);
             if( $panel && $panel->can_kudo( $login ) ) {
                 $panel->add_kudo( $login );
                 $self->{msg} = 'added kudo';
-                print STDERR Data::Dumper->Dump(["ADDED"]);
             } else {
-                print STDERR Data::Dumper->Dump(["NEIEN"]);
                 $@ = { err => 'Error trying to kudo caption' };
+            }
+        }
+        elsif( $action eq 'message' ) {
+            my $msg = $req->param('message');
+            my $strip = $sess->fetch( $req->param('strip') );
+            if( $strip && $msg =~ /\S/ ) {
+                my $disc = $strip->get_discussion([]);
+                unshift @$disc, $sess->{STORE}->newobj( {
+                    message => $msg,
+                    player  => $login,
+                    time    => time(),
+                                                        } );
+                $self->{msg} = 'message added';
+            } else {
+                $@ = { err => 'Error adding message' };
             }
         }
 
