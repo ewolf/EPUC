@@ -1,6 +1,12 @@
 <h2>Recent Strips</h2>
 : my $strip_list = $app.completed_strips
 
+:# my $pend = $app.get__pending_strips
+:# $app.add_to__in_progress_strips( $pend[0] )
+:# $strip_list[1].set__state('pending');
+:# $app.add_to__pending_strips( $strip_list[1] )
+:# $app.remove_from__completed_strips( $strip_list[1] )
+
 : if $strip_list.size() > 0 {
 :   include $op.tmpl( $app_path, 'paginate_strips' ) { pag_path => $app_path ~ '/p/recent', strip_list => $strip_list }
 : } else {

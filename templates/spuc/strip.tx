@@ -26,6 +26,11 @@
 :   if $showkudos {
     <div class="kudos">
       <span class="kudo">
+      
+      :# $panel.get__artist().get__account().add_once_to_in_progress_strips( $strip )
+      
+      :# $app.get__accts['coyo'].get_in_progress_strips.size()
+
         <a href="/<:$app_path:>/p/showplayer/a/<:$panel.get__artist().get__account().get_user():>">
 :         $panel.get__artist().get__account().get_user()
         </a>
