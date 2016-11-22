@@ -36,7 +36,7 @@ sub add_kudo {
 
 sub can_kudo {
     my( $self, $acct ) = @_;
-    ! $self->get_kudos({})->{$acct} && $acct->get_avatar != $self->get__artist;
+    return ! ($self->get_kudos({})->{$acct} ) && $acct->get_avatar != $self->get__artist;
 }
 
 sub is_active_panel {
@@ -56,7 +56,6 @@ sub reserve {
     if( ! $strip->get__reserved_by ) {
         $self->set__reserved_by( $ava );
         $strip->set__reserved_by( $ava );
-        print STDERR Data::Dumper->Dump(["ADDING TO ReSrVD ($strip)"]);
         $acct->add_once_to_reserved_strips( $strip );
     } elsif( $self->get__reserved_by != $ava ) {
         _log( "$ava, ".$self->get__reserved_by );

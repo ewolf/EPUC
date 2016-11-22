@@ -1,6 +1,6 @@
 : my $panels = $strip.get__panels
 
-: if $showkudos {
+: if 0 && $showkudos {
 <div class="rating">
  rate this strip RATINGBAR &star; <span style="color:red">&#9733;</span>
 </div>
@@ -27,14 +27,14 @@
         </a>
       </span>
        <: $panel.kudocount :> kudos
-:     if ! $panel.can_kudo( $login ) {
-         <span class="redheart heart">&hearts;</span>
-:     } else {
+:     if $panel.can_kudo( $login ) {
          <form class="" method="POST" action="/<:$pag_path:>/s/<:$strip_start:>/d/<: $detail_strip :>">
            <input type="hidden" name="action" value="kudo">
-           <input type="hidden" name="strip" value="<: $session.id($panel) :>">
+           <input type="hidden" name="panel" value="<: $session.id($panel) :>">
           <button type="submit" class="link-like heart">&hearts;</button>
         </form>
+         :     } else {
+       <span class="redheart heart">&hearts;</span>
 :     }
     </div>
 :   }
@@ -46,11 +46,17 @@
     : my $discussion = $strip.get_discussion;
 
     : if $discussion && $discussion.size() > 0 {
-    <ul>
+
     :   for $discussion -> $line {
-    <li><img src="<:$line.get_player.get_avatar.get_icon.url('80x80'):>"> <: $line.get_message :>
+    <div style="margin-bottom:.4em;border:solid 1px black;background-color:#DEDEEF; font-size: x-large;">
+      <img style="vertical-align:middle" src="<:$line.get_player.get_avatar.get_icon.url('80x80'):>">
+      &ldquo;
+        <: $line.get_message :>
+      &rdquo;
+      - <: $line.get_player.get_user :>
+        </div>
     :   }
-    </ul>
+
     : } else {
        Nobody has said anything yet
     : }

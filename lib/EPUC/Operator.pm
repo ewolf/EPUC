@@ -234,7 +234,7 @@ sub _check_actions {
             }
         } #myinprogress
         if( $action eq 'kudo' ) {
-            my $panel = $sess->fetch( $req->param('pan') );
+            my $panel = $sess->fetch( $req->param('panel') );
             if( $panel && $panel->can_kudo( $login ) ) {
                 $panel->add_kudo( $login );
                 $self->{msg} = 'added kudo';
