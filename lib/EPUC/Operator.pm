@@ -248,13 +248,7 @@ sub _check_actions {
 
     } #if login
 
-    if( $subtemplate eq 'welcome' || $subtemplate eq 'recent' ) {
-#        $self->{strip_list} = $app->completed_strips;
-        $self->{pag_path} = "$self->{app_path}/p/$subtemplate";
-    } elsif( $subtemplate eq 'top_rated' ) {
-        $self->{strip_list} = $app->completed_strips('rating');
-        $self->{pag_path} = "$self->{app_path}/p/top_rated";
-    } elsif( $subtemplate eq 'showplayer' ) {
+    if( $subtemplate eq 'showplayer' ) {
         my $player = $app->lookup_player( $path_args->{'a'} );
         $self->{strip_list} = $player->get_completed_strips;
         $self->{pag_path} = "$self->{app_path}/p/show_player/a/$path_args->{'a'}";

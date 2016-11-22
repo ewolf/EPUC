@@ -1,8 +1,8 @@
 : my $panels = $strip.get__panels
 
-: if $showkudos {
+: if 0 && $showkudos {
 <div class="rating">
-rate this strip RATINGBAR &star; <span style="color:red">&#9733;</span>
+ rate this strip RATINGBAR &star; <span style="color:red">&#9733;</span>
 </div>
 : }
 <div class="strip">
@@ -27,7 +27,7 @@ rate this strip RATINGBAR &star; <span style="color:red">&#9733;</span>
         </a>
       </span>
        <: $panel.kudocount :> kudos
-:     if ! $panel.can_kudo( $login ) {
+:     if 1 || ! $panel.can_kudo( $login ) {
          <span class="redheart heart">&hearts;</span>
 :     } else {
          <form class="" method="POST" action="/<:$pag_path:>/s/<:$strip_start:>/d/<: $detail_strip :>">

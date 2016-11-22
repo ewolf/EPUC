@@ -37,9 +37,8 @@
     No strips
 :  }
 : } else { # multiple strips
-  <div class="right-pane">
 
-    <div style="display:block;text-align:center;font-size:large">
+    <div class="prevnext">
   : if $strip_start > 0 {
       : if $strip_start - 3 >= 0 {
           <a href="/<: $pag_path :>/s/<:($strip_start-3):>">
@@ -72,5 +71,4 @@
 </a>
      : }
   : }
-  </div>
 : }

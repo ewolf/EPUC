@@ -19,8 +19,10 @@
 <br>
 <h3>Recent Strips</h3>
 
+: my $strip_list = $player.get_completed_strips
+
 : if $strip_list.size() > 0 {
-:   include $op.tmpl( $app_path, 'paginate_strips' )
+:   include $op.tmpl( $app_path, 'paginate_strips' ) { strip_list => $strip_list, pag_path => $app_path ~ '/p/showplayer/a/' ~ $path_args['a'] }
 : } else {
     <h4>No Strips Yet</h4>
 : }

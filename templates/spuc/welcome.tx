@@ -14,6 +14,10 @@
   To get an account, <a href="mailto:coyocanid\@gmail.com">contact me</a>  or any of the admins of the site. Include
   the user handle you would like.
 </p>
+<h3>News</h3>
+
+: include $op.tmpl( $app_path, 'news' )
+
 <h3>Recent Strips</h3>
 :  my $strip_list = $app.completed_strips
 
