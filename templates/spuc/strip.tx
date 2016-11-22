@@ -60,6 +60,7 @@
     : } else {
        Nobody has said anything yet
     : }
+    : if $login {
     <hr>
     <form method="POST" action="/<:$pag_path:>/s/<:$strip_start:>/d/<:$detail_strip:>">
       <input type="hidden" name="action" value="message">
@@ -67,5 +68,6 @@
       <textarea cols="80" rows="5" name="message"></textarea><br>
       <button type="submit">Say something</button>
     </form>
+     :}
 : }
 </div>
