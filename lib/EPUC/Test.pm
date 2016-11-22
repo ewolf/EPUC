@@ -16,24 +16,6 @@ use EPUC::Operator;
 sub handler {
     my $r = Apache2::Request->new( shift );
 
-#    my $op = '/home/wolf/proj/Yote/ServerYote/lib/Yote/Server/ModperlOperator.pm';
-#    delete $INC{$op};
-#    require $op;
-
-    #
-    # For debug have this reload each time so I don't have to
-    # retstart the f%^&n server.
-    #
-    my $basedir = "/home/wolf/proj/EPUC/lib/EPUC/";
-    opendir my $dir, $basedir;
-    my $SNARK;
-    map {
-        my $p = "$basedir$_";
-#        delete $INC{$p};
-#        require $p;
-    } grep { /pm$/ } readdir( $dir );
-
-
     my $operator = new EPUC::Operator(
         template_path => '/opt/yote/templates',
         );

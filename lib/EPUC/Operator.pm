@@ -249,7 +249,7 @@ sub _check_actions {
     } #if login
 
     if( $subtemplate eq 'welcome' || $subtemplate eq 'recent' ) {
-        $self->{strip_list} = $app->completed_strips;
+#        $self->{strip_list} = $app->completed_strips;
         $self->{pag_path} = "$self->{app_path}/p/$subtemplate";
     } elsif( $subtemplate eq 'top_rated' ) {
         $self->{strip_list} = $app->completed_strips('rating');
