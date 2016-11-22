@@ -1,6 +1,6 @@
 : my $panels = $strip.get__panels
 
-: if 0 && $showkudos {
+: if $showkudos && $strip.get__state == 'complete' {
 <div class="rating">
  rate this strip RATINGBAR &star; <span style="color:red">&#9733;</span>
 </div>
@@ -16,7 +16,11 @@
     </span>
 :   } else {
     <span class="picture">
+    : if $showkudos {
       <img src="<: $panel.get_picture.url($panelsize) :>">
+    : } else {
+      <img width="300" src="<: $panel.get_picture.url($panelsize) :>">
+    : }
     </span>
 :   }
 :   if $showkudos {

@@ -21,6 +21,17 @@
     : }
     <li></li>
   </ul>
+: }
+
+<h3>Show</h3>
+<ul class="menu">
+  <li><A href="/spuc/p/recent">Recent Strips</a></li>
+  <li><A href="/spuc/p/mycomplteted">My Completed Strips</a></li>
+  <li><A href="/spuc/p/top_rated">Top Rated Strips</a></li>
+  <li><A href="/spuc/p/search">Search For Strip</a></li>
+</ul>
+
+: if $login {
   : if $login.get_is_admin {
   <h3>Admin</h3>
   <ul class="menu">
@@ -32,17 +43,7 @@
     : }
   </ul>
   : }
-: }
-
-<h3>Show</h3>
-<ul class="menu">
-  <li><A href="/spuc/p/recent">Recent Strips</a></li>
-  <li><A href="/spuc/p/mycomplteted">My Completed Strips</a></li>
-  <li><A href="/spuc/p/top_rated">Top Rated Strips</a></li>
-  <li><A href="/spuc/p/search">Search For Strip</a></li>
-</ul>
-
-: if ! $login {
+: } else {
 <h3>Action</h3>
 <ul class="menu">
   <li><A href="/spuc/p/login">Log In</a></li>

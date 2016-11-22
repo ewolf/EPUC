@@ -9,6 +9,7 @@
   : }
 
 :   if $strip {
+  <h4><a href="/spuc/p/findstrip/not/<:$strip.id:>">Find a different strip</a></h4>
  <div class="right-pane">
 :    if $panel.get_type == 'sentence' {
  <h3>Add a picture for this caption</h3>
@@ -43,15 +44,15 @@
        <input type="hidden" name="action" value="caption">
        <input type="hidden" name="panel" value="<: $panel.id :>">
        <input type="hidden" name="strip" value="<: $strip.id :>">
-       <h3>Caption this strip</h3>
-       <input type="text" name="caption" value="<:$req.param("caption"):>">
+       <h3><a href="#add">Caption this strip</a></h3>
+       <img src="<: $panel.get_picture.url('700x700') :>">
+       <textarea cols="80" rows="5" name="caption"><:$req.param("caption"):></textarea>
+       <br>
+       <a name="add">
        <input type="submit" value="Add Caption">
      </form>
      <br>
-     <img src="<: $panel.get_picture.url('700x700') :>">
 :   } #panel was a picture needing caption
-  <h4>
-  <a href="/spuc/p/findstrip/not/<:$strip.id:>">Find a different strip</a></h4>
   </div>
 : } else {
    No strip found

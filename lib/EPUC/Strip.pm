@@ -234,6 +234,10 @@ sub add_sentence {
     die { err => "Error obtaining strip" }
         unless $self->get__reserved_by == $acct->get_avatar;
 
+    $sentence =~ s/[\n\r]+/ /gs;
+    $sentence =~ s/^\s*//;
+    $sentence =~ s/\s*$//;
+    
     die { err => "Must supply sentence" } unless $sentence =~ /\S/;
     $self->_add_panel( $acct, $sentence );
 } #add_sentence
