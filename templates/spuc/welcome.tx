@@ -5,15 +5,24 @@
   <span class="msg"><: $msg :></span>
 : }
 <p>
-  <img class="starticon" src="/epuc_data/images/coyo.jpg"> Coyo here. I really miss the the <i><b>eat poop u cat</b></i> site,
-  so I made this little clone of it. This site, madyote.com doesn&#39;t have much in the way of horsepower
-  or even storage, so this is by necessity a small affair. The framework the site runs on requires javascript
-  to use and is experimental so potentially buggy. For this reason, there are a few limitations on strips.
+  <img class="starticon" src="/epuc_data/images/coyo.jpg"> Coyo here. I really miss the the <i><b>eat poop u cat</b></i> site, so I've made this clone of a site. The original site and this one is a way to create collaborative comic strips.
 </p>
 <p>
   To get an account, <a href="mailto:coyocanid\@gmail.com">contact me</a>  or any of the admins of the site. Include
   the user handle you would like.
 </p>
+<h3>How to Play</h3>
+<p>
+Log in and click the
+: if $login {
+    <a href="/spuc/p/findstrip">find a strip to play</a>
+: } else {
+    <b>find a strip to play</b>
+: }
+link. This will show you either a picture or a caption. If you have a picture, you can play by
+writing a caption for that picture. If you have a caption, you can upload a picture for it, or reserve it so that you can work on the picture in your lesiure without worrying that someone else will draw the picture. You can reserve up to three captions this way. Also, you can click on a strip to show who drew which panels and also give kudos.
+</p>
+
 <h3>News</h3>
 
 : include $op.tmpl( $app_path, 'news' )

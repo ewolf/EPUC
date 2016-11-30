@@ -16,7 +16,6 @@ use URI::Escape;
 use EPUC::Operator;
 
 sub handler {
-    print STDERR Data::Dumper->Dump(["JSHANDLER"]);
     my $r = Apache2::Request->new( shift );
 
     my $operator = new EPUC::Operator(

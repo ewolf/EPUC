@@ -1,18 +1,4 @@
 <ul>
-  <li>
-    <b> new look</b> I'll be asking for input, suggestions and maybe even
-    artwork for the site</li>
-
-  <li>
-    <b>kudos</b> Basic kudos are working.
-  </li>
-
-  <li>
-    <b>discussions</b> Basic discussions are working.
-  </li>
-
-  <li>
-    <b>strip ratings</b>. I will be working on that.
-  </li>
-  
+  <li><b>new look</b> still collecting suggestions</li>
+  <li><b>smoother controls</b> I've started to introduce javascript for things like kudos and uploading user icons. I want the site to work with or without javascript.</li>
 </ul>
