@@ -2,10 +2,10 @@
 
 <h2>Reserved Captions</h2>
 : if $err {
-   <span class="err"><: $err :></span>
+   <span class="err has-text"><: $err :></span>
 : }
 : if $msg {
-   <span class="msg"><: $msg :></span>
+   <span class="msg has-text"><: $msg :></span>
 : }
 
   <h4>Used <: $reserved.size() :> out of <: $login.reserves_allowed :> Strip Reservations</h4>

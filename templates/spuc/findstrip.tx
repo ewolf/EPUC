@@ -2,10 +2,10 @@
 
   <h2>Find a Strip to Play</h2>
   : if $err {
-     <span class="err"><: $err :></span>
+     <span class="err has-text"><: $err :></span>
   : }
   : if $msg {
-     <span class="msg"><: $msg :></span>
+     <span class="msg has-text"><: $msg :></span>
   : }
 
 :   if $strip {
