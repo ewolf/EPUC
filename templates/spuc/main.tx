@@ -150,8 +150,8 @@
       .has-js .no-js {
           display: none;
       }
-      .has-js .msg,
-      .has-js .err {
+      .msg,
+      .err {
           display: none;
       }
       .has-js .disabled {

@@ -43,7 +43,7 @@ sub add_kudo {
 
 sub can_kudo {
     my( $self, $acct ) = @_;
-    return ! ($self->get_kudos({})->{$acct} ) && $acct->get_avatar != $self->get__artist;
+    return ! ($acct && $self->get_kudos({})->{$acct} && $acct->get_avatar != $self->get__artist );
 }
 
 sub is_active_panel {

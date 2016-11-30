@@ -142,13 +142,13 @@ sub play_random_strip {
 
     return unless @new_strips || @playing_strips;
 
-    my( $strip ) = sort { sprintf( "%.0f", rand(2)-1) } @new_strips;
+    my( $strip ) = sort { sprintf( "%d", rand(3) )-1 } @new_strips;
 
     unless( $strip ) {
         # pick a strip you are already in last unless you did the last
         # panel. This will only come into play if nothing else is
         # available.
-        ( $strip ) = sort { sprintf( "%.0f", rand(2)-1) } @playing_strips;
+        ( $strip ) = sort { sprintf( "%d", rand(3) )-1 } @playing_strips;
     }
     
     $self->set_last_random_strip( $strip );

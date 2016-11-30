@@ -259,7 +259,7 @@ sub add_sentence {
 sub add_picture {
     my( $self, $acct, $picture ) = @_;
 
-    print STDERR Data::Dumper->Dump([$self->{DATA},refaddr( $self )," add picture ($self) ".$self->get__reserved_by. " , ".$acct->get_avatar." DAAA", $self->get__reserved_by == $acct->get_avatar]);
+#    print STDERR Data::Dumper->Dump([$self->{DATA},refaddr( $self )," add picture ($self) ".$self->get__reserved_by. " , ".$acct->get_avatar." DAAA", $self->get__reserved_by == $acct->get_avatar]);
     die { err => "Error obtaining strip" }
         unless $self->get__reserved_by == $acct->get_avatar;
 
