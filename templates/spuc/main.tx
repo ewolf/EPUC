@@ -136,9 +136,17 @@
       }
       .msg { padding: 3px; margin: 1px; border: solid grey 3px; background-color: lightgrey  }
       .err { padding: 3px; margin: 1px; border: solid red 3px; background-color: pink  }
+      .has-js .err.has-text,
+      .has-js .msg.has-text,
       .err.has-text,
       .msg.has-text {
           display:inline;
+      }
+      .needs-update {
+          background-color:#CC9;
+      }
+      .has-js .no-js {
+          display: none;
       }
       .has-js .msg,
       .has-js .err {

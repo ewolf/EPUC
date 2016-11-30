@@ -2,26 +2,49 @@
 
 <script>
   yote.onReady( function(root,app,acct,session) {
-      var $iconup = $('#iconup');
-      var $upload = $('#upload');
-      $iconup.on( 'change', function(ev) {
-          $upload.show();
-      } );
-      $upload.hide().on( 'click', function(ev) {
-          ev.preventDefault();
-          ev.stopPropagation();
-          var files = $iconup[0].files;
-          if( files.length == 1 ) {
-              acct.uploadIcon( [yote.prepUpload( files ) ],
-                               function(icon) {
-                                   icon.url( ['80x80' ], function( url ) {
-                                       $( '.icon' ).attr( 'src', url );
-                                   } );
-                                   msg( 'uploaded icon' );
-                               }, function( err ) { err ( err ); } );
-          }
-      } );
-  } );
+      if( acct ) {
+          var $iconup = $('#iconup');
+          $iconup.on( 'change', function(ev) {
+              ev.preventDefault();
+              ev.stopPropagation();
+              var files = $iconup[0].files;
+              if( files.length == 1 ) {
+                  acct.uploadIcon( [yote.prepUpload( files ) ],
+                                   function(icon) {
+                                       icon.url( ['80x80' ], function( url ) {
+                                           $( '.icon' ).attr( 'src', url );
+                                       } );
+                                       msg( 'uploaded icon' );
+                                   }, function( err ) { err ( err ); } );
+              }
+          } ); //upload
+
+          var $infoUp = $( '#info-update' );
+          var $name = $( '#name' );
+          var nameVal = $name.val();
+          var $about = $( '#about' );
+          var aboutVal = $about.val();
+          $name.on( 'keyup', function() {
+              $name.toggleClass( 'needs-update', $name.val() != nameVal );
+              $infoUp.toggleClass( 'needs-update', $name.val() != nameVal || $about.val() != aboutVal );
+          } );
+          $about.on( 'keyup', function() {
+              $about.toggleClass( 'needs-update', $about.val() != aboutVal );
+              $infoUp.toggleClass( 'needs-update', $name.val() != nameVal || $about.val() != aboutVal );
+          } );
+          $infoUp.on( 'click', function(ev) {
+              ev.preventDefault();
+              ev.stopPropagation();
+              nameVal = $name.val();
+              aboutVal = $about.val();
+              acct.setInfo( 'name', nameVal );
+              acct.setInfo( 'about', aboutVal );
+              $infoUp.removeClass( 'needs-update' );
+              $name.removeClass( 'needs-update' );
+              $about.removeClass( 'needs-update' );
+          } );
+      } //if there was an account          
+  } ); //onready
 </script>
 
 
@@ -37,7 +60,7 @@
   <input type="hidden" name="action" value="iconup">
   <h4>Upload Picture
     <input type="file" name="iconup" id="iconup"><br>
-    <button type="submit" id="upload">upload</button>
+    <button class="no-js" type="submit" id="upload">upload</button>
   </h4>
 </form>
 
@@ -46,10 +69,10 @@
 <form method="POST" action="/spuc/p/userprefs">
   <input type="hidden" name="action" value="updateinfo">
   <table>
-    <tr> <th>My Name</th> <td><input type="text" class="info" name="name" value="<: $login.get_avatar.get_name() :>"></td></tr>
-    <tr> <th>Details about me</th> <td><textarea class="info" name="about"><: $login.get_avatar.get_about() :></textarea> </td></tr>
+    <tr> <th>My Name</th> <td><input type="text" class="info" name="name" id="name" value="<: $login.get_avatar.get_name() :>"></td></tr>
+    <tr> <th>Details about me</th> <td><textarea class="info" name="about" id="about"><: $login.get_avatar.get_about() :></textarea> </td></tr>
   </table> <br>
-  <input type="submit" value="update">
+  <input type="submit" value="update" id="info-update">
 </form>
 
 <h3>Change Password</h3>
@@ -57,7 +80,7 @@
 <form method="POST" action="/spuc/p/userprefs">
   <input type="hidden" name="action" value="resetpw">
   <table>
-    <tr> <th>current password</th> <td> <input type="password" name="pw"></td> </tr>	
+    <tr> <th>current password</th> <td> <input type="password" name="pw"></td> </tr>
     <tr> <th>password </th> <td> <input type="password" name="pw1"></td> </tr>
     <tr> <th>password (again) </th> <td> <input type="password" name="pw2"></td> </tr>
   </table>
