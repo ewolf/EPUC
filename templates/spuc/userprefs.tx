@@ -3,6 +3,8 @@
 <script>
   yote.onReady( function(root,app,acct,session) {
       if( acct ) {
+
+          // ********** UPLOAD ICON *************
           var $iconup = $('#iconup');
           $iconup.on( 'change', function(ev) {
               ev.preventDefault();
@@ -15,10 +17,11 @@
                                            $( '.icon' ).attr( 'src', url );
                                        } );
                                        msg( 'uploaded icon' );
-                                   }, function( err ) { err ( err ); } );
+                                   }, function( err ) { show_err ( err ); } );
               }
           } ); //upload
 
+          // ********** EDIT INFO *************
           var $infoUp = $( '#info-update' );
           var $name = $( '#name' );
           var nameVal = $name.val();
@@ -43,6 +46,33 @@
               $name.removeClass( 'needs-update' );
               $about.removeClass( 'needs-update' );
           } );
+
+          // ********** RESET PASSWORD *************
+          var $curpw = $('#pw');
+          var $pw1 = $('#pw1');
+          var $pw2 = $('#pw2');
+
+          function check() {
+              $uppw.toggleClass('disabled', !( $curpw.val().length > 0 && $pw1.val() == $pw2.val() && $pw1.val().length > 0 ) );
+          }
+          $pw1.on( 'keyup', check );
+          $pw2.on( 'keyup', check );
+          var $uppw = $('#uppw').addClass('disabled').on('click',function(ev) {
+              ev.preventDefault();
+              ev.stopPropagation();
+
+              if( ! $uppw.hasClass('disabled') ) {
+                  acct.reset_password( [ $pw1.val(), $curpw.val() ],
+                                       function() {
+                                           msg( 'reset password' );
+                                       },
+                                       function( err ) {
+                                           show_err( err );
+                                       } );
+              }
+          } );
+          
+          
       } //if there was an account          
   } ); //onready
 </script>
@@ -80,11 +110,11 @@
 <form method="POST" action="/spuc/p/userprefs">
   <input type="hidden" name="action" value="resetpw">
   <table>
-    <tr> <th>current password</th> <td> <input type="password" name="pw"></td> </tr>
-    <tr> <th>password </th> <td> <input type="password" name="pw1"></td> </tr>
-    <tr> <th>password (again) </th> <td> <input type="password" name="pw2"></td> </tr>
+    <tr> <th>current password</th> <td> <input type="password" name="pw" id="pw"></td> </tr>
+    <tr> <th>password </th> <td> <input type="password" name="pw1" id="pw1"></td> </tr>
+    <tr> <th>password (again) </th> <td> <input type="password" name="pw2" id="pw2"></td> </tr>
   </table>
-  <input type="submit" value="update password">
+  <input type="submit" value="update password" id="uppw">
 </form>
 
 : }

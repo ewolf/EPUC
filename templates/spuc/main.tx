@@ -152,7 +152,11 @@
       .has-js .err {
           display: none;
       }
+      .has-js .disabled {
+      color: grey;
+      background-color: darkgrey;
       
+      }
    </style>
    <script>
    function msg( text, selector ) {
@@ -160,7 +164,7 @@
        text = text || '';
        $( selector ).text( text ).toggleClass( 'has-text', text.length > 0 );
    }
-   function err( text, selector ) {
+   function show_err( text, selector ) {
        selector = selector || '.err';
        text = text || '';
        $( selector ).text( text ).toggleClass( 'has-text', text.length > 0 );
