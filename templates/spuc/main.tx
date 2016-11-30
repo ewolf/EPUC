@@ -140,7 +140,9 @@
       .has-js .msg.has-text,
       .err.has-text,
       .msg.has-text {
-          display:inline;
+         display:inline-block;
+         margin-bottom:.5em;
+      
       }
       .needs-update {
           background-color:#CC9;
@@ -170,7 +172,7 @@
        $( selector ).text( text ).toggleClass( 'has-text', text.length > 0 );
    }
    $().ready( function() {
-       $('body').addClass('has-js');
+   $('body').addClass('has-js');
         yote.init( {
             //            yoteServerURL: '/cgi-bin/yote_cgi.pl',
             yoteServerURL: '/spuc-json',

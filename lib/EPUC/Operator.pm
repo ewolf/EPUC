@@ -250,12 +250,7 @@ sub _check_actions {
             my $msg = $req->param('message');
             my $strip = $sess->fetch( $req->param('strip') );
             if( $strip && $msg =~ /\S/ ) {
-                my $disc = $strip->get_discussion([]);
-                unshift @$disc, $sess->{STORE}->newobj( {
-                    message => $msg,
-                    player  => $login,
-                    time    => time(),
-                                                        } );
+                $strip->add_message( $msg, $login );
                 $self->{msg} = 'message added';
             } else {
                 $@ = { err => 'Error adding message' };

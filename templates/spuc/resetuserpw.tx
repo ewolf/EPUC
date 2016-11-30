@@ -1,11 +1,7 @@
 : if $login && $login.get_is_admin {
 <h3>reset user password</h3>
-  : if $err {
-     <span class="err has-text"><: $err :></span>
-  : }
-  : if $msg {
-     <span class="msg has-text"><: $msg :></span>
-  : }
+<span class="err <: $err ? "has-text" : "" :>"><: $err :></span>
+<span class="msg <: $msg ? "has-text" : "" :>"><: $msg :></span>
 <form method="POST" action="/spuc/p/resetuserpw">
   <input type="hidden" name="action" value="resetuserpw">
   <table>

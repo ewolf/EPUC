@@ -1,16 +1,42 @@
 : if $login {
+<script>
+  yote.onReady( function(root,app,acct,session) {
+      if( acct ) {
+          var $start = $('#start-sentence');
+          var $do = $('#dostart');
+          $start.on( 'keyup', function() {
+              $do.toggleClass('disabled',$start.val().length == 0 );
+          } );
+          $do.on('click',function(ev) {
+              ev.preventDefault();
+              ev.stopPropagation();
+              if( $do.hasClass('disabled') ) return;
+              var start = $start.val();
+              if( start.length > 0 ) {
+                  acct.start_strip( [start],
+                                    function() {
+                                        show_err(); //clear the error
+                                        $start.text('');
+                                        msg( 'started new strip' );
+                                    },
+                                    function(err) {
+                                        show_err(err);
+                                    });
+              } else {
+                  show_err( "must supply sentence" );
+              }
+          } ); //when clicked
+      } //if acct
+  } ); //onReady
+</script>
 	<h3>start a new strip</h3>
-        : if $err {
-             <span class="err has-text"><: $err :></span>
-        : }
-        : if $msg {
-             <span class="msg has-text"><: $msg :></span>
-        : }
+        <span class="err <: $err ? "has-text" : "" :>"><: $err :></span>
+        <span class="msg <: $msg ? "has-text" : "" :>"><: $msg :></span>
 	<form method="POST" action="/spuc/p/startstrip">
           <input type="hidden" name="action" value="startstrip">
-          <textarea cols="80" rows="5" name="start-sentence"></textarea>
+          <textarea cols="80" rows="5" name="start-sentence" id="start-sentence"></textarea>
           <br>
-	  <input type="submit" value="start strip">
+	  <button class="disabled" type="submit" id="dostart">start strip</button>
 	</form>
 : } else {
       : include $op.tmpl( $app_path, 'login' )

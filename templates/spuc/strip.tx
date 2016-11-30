@@ -12,6 +12,41 @@
                 } );
             } );
         } );
+        var $say = $('#say-something');
+        var $something = $('#something');
+        $something.on('keyup', function(ev) {
+            $say.toggleClass('disabled', $something.val().length == 0 );
+        } );
+        $say.on('click', function(ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            if( ! $say.hasClass('disabled') ) {
+                var s_id = $say.data('strip-id');
+                sess.fetch([s_id], function(strip) {
+                    strip.add_message( [ $something.val(),acct ], function() {
+                        var disc = strip.get('discussion');
+                        
+                        var buf = '';
+                        for( var i=0,len=disc.length(); i<len; i++ ) {
+                            var entry = disc.get(i);
+                            var player = entry.get('player');
+                            buf += '<div style="margin-bottom:.4em;border:solid 1px black;background-color:#DEDEEF; font-size: x-large;">' +
+                                '<img style="vertical-align:middle" data-idx="' + i + '" src="">' +
+                                '&ldquo;' + entry.get('message') + ' &rdquo;' + 
+                                ' - ' + player.get('user') + 
+                                '</div>';
+                            $something.val('');
+                            (function(idx) {
+                                player.get('avatar').get('icon').url( [ '80x80' ], function(url) {
+                                    $( 'img[data-idx="' + idx + '"]' ).attr( 'src', url );
+                                } );
+                            })(i);
+                        }
+                        $('.discussion').empty().append( buf );
+                    } );
+                } );
+            }
+        } );
     } );
 
 </script>
@@ -75,7 +110,7 @@
     : my $discussion = $strip.get_discussion;
 
     : if $discussion && $discussion.size() > 0 {
-
+       <div class="discussion">
     :   for $discussion -> $line {
     <div style="margin-bottom:.4em;border:solid 1px black;background-color:#DEDEEF; font-size: x-large;">
       <img style="vertical-align:middle" src="<:$line.get_player.get_avatar.get_icon.url('80x80'):>">
@@ -85,7 +120,7 @@
       - <: $line.get_player.get_user :>
         </div>
     :   }
-
+       </div>
     : } else {
        Nobody has said anything yet
     : }
@@ -94,8 +129,8 @@
     <form method="POST" action="/<:$pag_path:>/s/<:$strip_start:>/d/<:$detail_strip:>">
       <input type="hidden" name="action" value="message">
       <input type="hidden" name="strip" value="<: $session.getid($strip) :>">
-      <textarea cols="80" rows="5" name="message"></textarea><br>
-      <button type="submit">Say something</button>
+      <textarea cols="80" rows="5" name="message" id="something"></textarea><br>
+      <button class="disabled" type="submit" data-strip-id="<:$session.getid($strip):>" id="say-something">Say something</button>
     </form>
      :}
 : }

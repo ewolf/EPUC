@@ -1,9 +1,5 @@
-: if $err {  
-  <span class="err"><: $err :></span>
-: }
-: if $msg {
-  <span class="msg"><: $msg :></span>
-: }
+<span class="err <: $err ? "has-text" : "" :>"><: $err :></span>
+<span class="msg <: $msg ? "has-text" : "" :>"><: $msg :></span>
 <p>
   <img class="starticon" src="/epuc_data/images/coyo.jpg"> Coyo here. I really miss the the <i><b>eat poop u cat</b></i> site, so I've made this clone of a site. The original site and this one is a way to create collaborative comic strips.
 </p>

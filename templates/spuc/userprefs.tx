@@ -13,6 +13,7 @@
               if( files.length == 1 ) {
                   acct.uploadIcon( [yote.prepUpload( files ) ],
                                    function(icon) {
+                                       show_err();
                                        icon.url( ['80x80' ], function( url ) {
                                            $( '.icon' ).attr( 'src', url );
                                        } );
@@ -38,6 +39,7 @@
           $infoUp.on( 'click', function(ev) {
               ev.preventDefault();
               ev.stopPropagation();
+              show_err();
               nameVal = $name.val();
               aboutVal = $about.val();
               acct.setInfo( 'name', nameVal );
@@ -64,6 +66,7 @@
               if( ! $uppw.hasClass('disabled') ) {
                   acct.reset_password( [ $pw1.val(), $curpw.val() ],
                                        function() {
+                                           show_err();
                                            msg( 'reset password' );
                                        },
                                        function( err ) {
@@ -80,8 +83,8 @@
 
 <h2>User Preferences</h2>
 
-<span class="err"><: $err :></span>
-<span class="msg"><: $msg :></span>
+<span class="err <: $err ? "has-text" : "" :>"><: $err :></span>
+<span class="msg <: $msg ? "has-text" : "" :>"><: $msg :></span>
 
 <h3>Change Icon</h3>
 
@@ -114,7 +117,7 @@
     <tr> <th>password </th> <td> <input type="password" name="pw1" id="pw1"></td> </tr>
     <tr> <th>password (again) </th> <td> <input type="password" name="pw2" id="pw2"></td> </tr>
   </table>
-  <input type="submit" value="update password" id="uppw">
+  <input class="disabled" type="submit" value="update password" id="uppw">
 </form>
 
 : }

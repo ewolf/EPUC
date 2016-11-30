@@ -1,13 +1,8 @@
 :if $login {
 
   <h2>Find a Strip to Play</h2>
-  : if $err {
-     <span class="err has-text"><: $err :></span>
-  : }
-  : if $msg {
-     <span class="msg has-text"><: $msg :></span>
-  : }
-
+  <span class="err <: $err ? "has-text" : "" :>"><: $err :></span>
+  <span class="msg <: $msg ? "has-text" : "" :>"><: $msg :></span>
 :   if $strip {
   <h4><a href="/spuc/p/findstrip/not/<:$strip.id:>">Find a different strip</a></h4>
  <div class="right-pane">

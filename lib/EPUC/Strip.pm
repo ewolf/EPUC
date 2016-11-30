@@ -26,10 +26,11 @@ sub _init {
 sub _load {
     my $self = shift;
 
-    my $panels = $self->get__panels;
-    for( my $i=0; $i<@$panels; $i++ ) {
-        $panels->[$i]->set__panel_number( $i );
-    }
+#    $self->set_discussion([]);
+    # my $panels = $self->get__panels;
+    # for( my $i=0; $i<@$panels; $i++ ) {
+    #     $panels->[$i]->set__panel_number( $i );
+    # }
 #    print STDERR Data::Dumper->Dump([$self->{DATA},$self->_last_panel->{DATA},"WOOSTRIPLO"]);
 
 }
@@ -39,6 +40,19 @@ sub _log {
     $sev //= 1;
     open my $out, ">>/opt/yote/log/yote.log";
     print $out "$msg\n";
+}
+
+sub add_message {
+    my( $self, $msg, $acct ) = @_;
+    die "Cant add message" unless $acct&& $acct->isa( "EPUC::Acct" );
+    if( $msg =~ /\S/ ) {
+        my $disc = $self->get_discussion([]);
+        unshift @$disc, $self->{STORE}->newobj( {
+            message => $msg,
+            player  => $acct,
+            time    => time(),
+                                                } );
+    }
 }
 
 sub can_delete {
