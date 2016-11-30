@@ -1,3 +1,21 @@
+<script>
+    yote.onReady( function(root,app,acct,sess) {
+        $('.kudo-button').on( 'click', function(ev) {
+            var $this = $(this);
+            ev.preventDefault();
+            ev.stopPropagation();
+            var p_id = $this.data('panel-id' );
+            sess.fetch([p_id],function(pan) {
+                pan.add_kudo( [acct],function() {
+                    $( '.kudo-count[data-panel-id="' + p_id + '"]' ).text( pan.get( 'kudo_count' ) );
+                    $( '.kudo-heart[data-panel-id="' + p_id + '"]' ).toggle();
+                } );
+            } );
+        } );
+    } );
+
+</script>
+
 : my $panels = $strip.get__panels
 
 : if $showkudos && $strip.get__state == 'complete' {
@@ -35,13 +53,15 @@
 :         $panel.get__artist().get__account().get_user()
         </a>
       </span>
-       <: $panel.kudocount :> kudos
-:     if $panel.can_kudo( $login ) {
+        <span class="kudo-count" data-panel-id="<:$session.getid($panel):>"><: $panel.kudocount :></span> kudos
+
+    :     if $panel.can_kudo( $login ) {
          <form class="" method="POST" action="/<:$pag_path:>/s/<:$strip_start:>/d/<: $detail_strip :>">
            <input type="hidden" name="action" value="kudo">
-           <input type="hidden" name="panel" value="<: $session.id($panel) :>">
-          <button type="submit" class="link-like heart">&hearts;</button>
+           <input type="hidden" name="panel" value="<: $session.getid($panel) :>">
+           <button type="submit" class="link-like heart kudo-button kudo-heart" data-panel-id="<:$session.getid($panel):>">&hearts;</button>
         </form>
+       <span class="redheart heart kudo-heart" style="display:none" data-panel-id="<:$session.getid($panel):>">&hearts;</span>
          :     } else {
        <span class="redheart heart">&hearts;</span>
 :     }
@@ -73,7 +93,7 @@
     <hr>
     <form method="POST" action="/<:$pag_path:>/s/<:$strip_start:>/d/<:$detail_strip:>">
       <input type="hidden" name="action" value="message">
-      <input type="hidden" name="strip" value="<: $session.id($strip) :>">
+      <input type="hidden" name="strip" value="<: $session.getid($strip) :>">
       <textarea cols="80" rows="5" name="message"></textarea><br>
       <button type="submit">Say something</button>
     </form>

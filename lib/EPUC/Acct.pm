@@ -91,6 +91,7 @@ sub start_strip {
         _artist  => $self->get_avatar,
         _players => [ $self->get_avatar ],
         panels_to_go => 8,   # 9 panels total
+        panel_size => 9,
         _next    => 'picture',
         _panels  => [ $panel ],
                                         }, 'EPUC::Strip' );
@@ -99,6 +100,7 @@ sub start_strip {
     
     my $app = $self->get_app;
     $app->add_to__in_progress_strips( $strip );
+    $app->add_to__all_strips( $strip );
     $self->add_to_in_progress_strips( $strip );
 
     $strip;

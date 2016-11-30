@@ -26,72 +26,26 @@ sub _init {
     $self->set__in_progress_strips([]);
 }
 
+sub hi {
+    "HELLO";
+}
+
 sub _load {
     my $self = shift;
-#    print STDERR $self->_DUMP_ALL;
-#    print STDERR ")_))))))\n";
 
-    unless( $self->get__has_all_strips ) {
-        $self->get__all_strips([]);
-        # update to make sure all strip and panel states are accurate
-        for my $strip (@{$self->get_recently_completed_strips},@{$self->get__in_progress_strips}) {
+    $self->get__all_strips([]);
+    # update to make sure all strip and panel states are accurate
+    for my $strip (@{$self->get_recently_completed_strips},@{$self->get__in_progress_strips}) {
+        $self->add_once_to__all_strips( $strip );
+        $strip->set_panel_size( 9 );
+    }
+    for my $acct (values %{$self->get__accts}) {
+        for my $strip (@{$acct->get_reserved_strips},
+                       @{$acct->get_in_progress_strips},
+                       @{$acct->get_avatar->get_completed_strips},
+            ) {
             $self->add_once_to__all_strips( $strip );
         }
-        for my $acct (values %{$self->get__accts}) {
-            for my $strip (@{$acct->get_reserved_strips},
-                           @{$acct->get_in_progress_strips},
-                           @{$acct->get_avatar->get_completed_strips},
-                ) {
-                $self->add_once_to__all_strips( $strip );
-            }
-        }
-        $self->set__has_all_strips(1);
-    } #_has_all_strips
-
-    unless( $self->get__panels_have_numbers ) {
-        for my $strip (@{$self->get__all_strips}) {
-            my $panels = $strip->get__panels;
-            if( @$panels == 9 ) {
-                $strip->set__state( 'complete' );
-                for my $acct (values %{$self->get__accts}) {
-                    $acct->remove_from_reserved_strips( $strip );
-                    $acct->remove_from_in_progress_strips( $strip );
-                }
-            } else { 
-                $strip->set__state( 'pending' );
-                for my $acct (values %{$self->get__accts}) {
-                    $acct->get_avatar->remove_from_completed_strips( $strip );
-                }
-            }
-
-            for( my $i=0; $i<@$panels; $i++ ) {
-                my $panel = $panels->[$i];
-                $panel->set__strip( $strip );
-                $panel->set__panel_number( $i );
-                if( $i < $#$panels ) {
-                    $panel->set__reserved_by( undef );
-                } else {
-                    my $revd = $panel->get__reserved_by;
-                    if( $revd ) {
-                        if( $revd->isa( 'EPUC::Acct' ) ) {
-                            $revd = $revd->get_avatar;
-                            $panel->set__reserved_by( $revd );
-                        }
-                        $strip->set__reserved_by( $revd );
-                        $revd->get__account->add_once_to_reserved_strips( $strip );
-                    }
-                }
-            }
-        } #all strips
-        
-        $self->set__panels_have_numbers( 1 );
-    } # _panels_have_numbers
-
-    unless( $self->get__avatars_have_names ) {
-        for my $acct ( values %{$self->get__accts({})} ) {
-            $acct->get_avatar->set_user( $acct->get_user );
-        }
-        $self->set__avatars_have_names( 1 );
     }
 
 } #_load

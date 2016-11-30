@@ -1,7 +1,7 @@
 : if $login {
   Welcome <b><: $login.get_user :></b> <br>
   <a href="/spuc/p/userprefs">
-  <img src="<: $login.get_avatar.get_icon.url('80x80') :>"></a><br>
+  <img class="icon" src="<: $login.get_avatar.get_icon.url('80x80') :>"></a><br>
   : if $login.get_is_super {
     <span class="important">You are a super admin</span>
   : } elsif $login.get_is_admin {

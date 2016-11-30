@@ -2,6 +2,8 @@
 <html>
   <head>
     <title>SPUC</title>
+    <script src="/js/jquery-1.12.0.min.js"></script>
+    <script src="/js/yote.js"></script>
     <style>
       .subtemplate {
          margin: .5em 3px 3px 13.3em;
@@ -32,6 +34,7 @@
       }
       body {
           background-color: #FFE;
+          font-size: x-large;
       }
       .spuc-stamp {
           float: left;
@@ -133,8 +136,40 @@
       }
       .msg { padding: 3px; margin: 1px; border: solid grey 3px; background-color: lightgrey  }
       .err { padding: 3px; margin: 1px; border: solid red 3px; background-color: pink  }
+      .err.has-text,
+      .msg.has-text {
+          display:inline;
+      }
+      .has-js .msg,
+      .has-js .err {
+          display: none;
+      }
+      
    </style>
-  </head>
+   <script>
+   function msg( text, selector ) {
+       selector = selector || '.msg';
+       text = text || '';
+       alert( text.length() );
+       $( selector ).text( text ).toggleClass( 'has-text', text.length() > 0 );
+   }
+   function err( text, selector ) {
+       selector = selector || '.err';
+       text = text || '';
+       $( selector ).text( text ).toggleClass( 'has-text', text.length() > 0 );
+   }
+   $().ready( function() {
+       $('body').addClass('has-js');
+        yote.init( {
+            //            yoteServerURL: '/cgi-bin/yote_cgi.pl',
+            yoteServerURL: '/spuc-json',
+            appName: 'EPUC::App',
+            token: '<: $session.get__token :>'
+        });       
+   } );
+   </script>
+
+ </head>
   <body>
     <header>
         <a class="spuc-stamp" href="/spuc">SPUC</a>

@@ -1,22 +1,43 @@
 : if $login {
 
+<script>
+  yote.onReady( function(root,app,acct,session) {
+      var $iconup = $('#iconup');
+      var $upload = $('#upload');
+      $iconup.on( 'change', function(ev) {
+          $upload.show();
+      } );
+      $upload.hide().on( 'click', function(ev) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          var files = $iconup[0].files;
+          if( files.length == 1 ) {
+              acct.uploadIcon( [yote.prepUpload( files ) ],
+                               function(icon) {
+                                   icon.url( ['80x80' ], function( url ) {
+                                       $( '.icon' ).attr( 'src', url );
+                                   } );
+                                   msg( 'uploaded icon' );
+                               }, function( err ) { err ( err ); } );
+          }
+      } );
+  } );
+</script>
+
+
 <h2>User Preferences</h2>
 
-: if $err {
-   <span class="err"><: $err :></span>
-: }
-: if $msg {
-   <span class="msg"><: $msg :></span>
-: }
+<span class="err"><: $err :></span>
+<span class="msg"><: $msg :></span>
 
 <h3>Change Icon</h3>
 
-<img src="<: $login.get_avatar.get_icon.url('80x80') :>">
+<img class="icon" src="<: $login.get_avatar.get_icon.url('80x80') :>">
 <form method="POST" enctype="multipart/form-data"  action="/spuc/p/userprefs">
   <input type="hidden" name="action" value="iconup">
   <h4>Upload Picture
-    <input type="file" name="iconup">
-    <input type="submit" value="upload">
+    <input type="file" name="iconup" id="iconup"><br>
+    <button type="submit" id="upload">upload</button>
   </h4>
 </form>
 

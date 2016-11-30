@@ -11,8 +11,10 @@
 :   if $strip {
   <h4><a href="/spuc/p/findstrip/not/<:$strip.id:>">Find a different strip</a></h4>
  <div class="right-pane">
+: my $togo = $strip.get_panels_to_go;
+
 :    if $panel.get_type == 'sentence' {
- <h3>Add a picture for this caption</h3>
+ <h3>Add a picture for this caption (<:$togo:> panels to go)</h3>
         <span class="caption groovy"> &ldquo;
 :      html_encode( $panel.get_sentence )
         &rdquo;
@@ -26,9 +28,7 @@
        <input type="submit" value="upload">
        </h4>
      </form>
-
-: my $allowed = 3 - $login.get_reserved_strips.size()
-
+     
 :    if $allowed > 0 {
 <form method="POST" action="/spuc/p/findstrip">
       <input type="hidden" name="action" value="reserve">
@@ -44,7 +44,7 @@
        <input type="hidden" name="action" value="caption">
        <input type="hidden" name="panel" value="<: $panel.id :>">
        <input type="hidden" name="strip" value="<: $strip.id :>">
-       <h3><a href="#add">Caption this strip</a></h3>
+       <h3><a href="#add">Caption this strip (<:$togo:> panels to go)</a></h3>
        <img src="<: $panel.get_picture.url('700x700') :>">
        <textarea cols="80" rows="5" name="caption"><:$req.param("caption"):></textarea>
        <br>

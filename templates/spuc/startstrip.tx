@@ -8,7 +8,8 @@
         : }
 	<form method="POST" action="/spuc/p/startstrip">
           <input type="hidden" name="action" value="startstrip">
-	  <input type="text" name="start-sentence">
+          <textarea cols="80" rows="5" name="start-sentence"></textarea>
+          <br>
 	  <input type="submit" value="start strip">
 	</form>
 : } else {

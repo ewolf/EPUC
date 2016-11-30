@@ -37,6 +37,10 @@ sub msg {
     $self->{msg} = $msg;
 }
 
+#
+# These are mainly here rather than in the templates because
+# the templates can't really handle thrown exceptions at all.
+#
 sub _check_actions {
     my( $self ) = @_;
 
@@ -259,12 +263,6 @@ sub _check_actions {
         }
 
     } #if login
-
-    if( $subtemplate eq 'showplayer' ) {
-        my $player = $app->lookup_player( $path_args->{'a'} );
-        $self->{strip_list} = $player->get_completed_strips;
-        $self->{pag_path} = "$self->{app_path}/p/show_player/a/$path_args->{'a'}";
-    }
 
     $self->err;
     $self->{state}{subtemplate} = $subtemplate;

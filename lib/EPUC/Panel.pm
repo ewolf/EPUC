@@ -20,6 +20,7 @@ sub _init {
 
 sub _load {
     my $self = shift;
+    $self->set_kudo_count( $self->kudocount );
 }
 
 sub kudocount {
@@ -29,9 +30,15 @@ sub kudocount {
 
 sub add_kudo {
     my( $self, $acct ) = @_;
+
+    my $startk = $self->kudocount;
     $self->get_kudos({})->{$acct} = 1;
     my $artist = $self->get__artist->get__account;
-    $artist->set_kudo_count( 1 + $artist->get_kudo_count );
+    my $newk = $self->kudocount;
+    $self->set_kudo_count( $newk );
+    if( $newk > $startk ) {
+        $artist->set_kudo_count( 1 + $artist->get_kudo_count );
+    }
 }
 
 sub can_kudo {
