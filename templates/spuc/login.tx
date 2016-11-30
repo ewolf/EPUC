@@ -3,6 +3,8 @@
         var $un = $('#un');
         var $pw = $('#pw');
         function login() {
+            show_err();
+            msg();
             app.login( [$un.val(), $pw.val()],
                        function( acct ) {
                            window.location.href = '/spuc';

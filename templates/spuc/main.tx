@@ -159,6 +159,9 @@
       background-color: darkgrey;
       
       }
+      .wait {
+          cursor: wait;
+      }
    </style>
    <script>
    function msg( text, selector ) {
@@ -172,7 +175,8 @@
        $( selector ).text( text ).toggleClass( 'has-text', text.length > 0 );
    }
    $().ready( function() {
-   $('body').addClass('has-js');
+       var $body = $('body')
+       $body.addClass('has-js');
         yote.init( {
             //            yoteServerURL: '/cgi-bin/yote_cgi.pl',
             yoteServerURL: '/spuc-json',
@@ -195,8 +199,7 @@
       </section>
       <div class="subtemplate">
 
-
-      : my $subtemplate = $path_args.p || 'welcome';
+      : my $subtemplate = $state.subtemplate|| $path_args.p || 'welcome';
 
       : include $op.tmpl( $app_path, $subtemplate )
       </div>
