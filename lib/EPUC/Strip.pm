@@ -178,7 +178,7 @@ sub free {
         $self->_last_panel->set__reserved_by(undef);
     }
     $acct->remove_from_reserved_strips( $self );
-    $self;
+    $acct->get_reserved_strips;
 } #free
 
 sub _last_panel {

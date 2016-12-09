@@ -17,8 +17,12 @@
                                        icon.url( ['80x80' ], function( url ) {
                                            $( '.icon' ).attr( 'src', url );
                                        } );
+                                       $iconup.val('');
                                        msg( 'uploaded icon' );
-                                   }, function( err ) { show_err ( err ); } );
+                                   }, function( err ) {
+                                       $iconup.val('');
+                                       show_err ( err );
+                                   } );
               }
           } ); //upload
 

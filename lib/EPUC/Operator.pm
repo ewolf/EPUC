@@ -183,9 +183,13 @@ sub _check_actions {
                 }
             }
             my $strip = $login->play_random_strip;
-            $self->{strip} = $strip;
-            $self->{panel} = $strip->_last_panel;
-            $self->{allowed} = $login->allowed_reserve_count;
+            if( $strip ) {
+                $self->{strip} = $strip;
+                $self->{panel} = $strip->_last_panel;
+                $self->{allowed} = $login->allowed_reserve_count;
+            } else {
+                # no error, the page checks
+            }
         } #findstrip
         elsif( $subtemplate eq 'showreserved' ) {
             if( $action eq 'upload' ) {

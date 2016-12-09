@@ -1,5 +1,65 @@
 :if $login {
-
+<script>
+  yote.onReady( function(root,app,acct,session) {       
+      if( acct ) {
+          var strip = acct.get( 'last_random_strip' );
+          if( strip ) {
+              var $picup = $( '#pictureup');
+              $picup.on( 'change', function( ev ) {
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                  var files = $picup[0].files;
+                  if( files.length == 1 ) {
+                      strip.reserve( [ acct ],
+                                     function() {
+                                         strip.add_picture(
+                                             [ acct, yote.prepUpload( files ) ],
+                                             function( icon ) {
+                                                 $picup.val('');
+                                                 msg( 'uploaded picture' );
+                                                 // taking the easy route and justblanking the right-pane
+                                                 // that shows the chosen strip
+                                                 $( '.right-pane' ).hide();
+                                             },
+                                             function( err ) {
+                                                 $picup.val('');
+                                                 show_err( err );
+                                             } );
+                                     },
+                                     function(err) {
+                                         $picup.val('');
+                                         show_err(err);
+                                     });
+                  } // if there were files uploaded
+              } );
+              var $cap = $( '#caption' );
+              $( '#docap' ).on( 'click', function(ev) {
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                  var val = $cap.val();
+                  if( val.length > 0 ) {
+                      strip.reserve( [ acct ],
+                                     function() {
+                                         strip.add_sentence( [ acct, val ],
+                                                             function() {
+                                                                 msg( 'captioned picture' );
+                                                                 // taking the easy route and justblanking the right-pane
+                                                                 // that shows the chosen strip
+                                                                 $( '.right-pane' ).hide();
+                                                             },
+                                                             function( err) {
+                                                                 show_err(err);          
+                                                             } );
+                                     },
+                                     function(err) {
+                                         show_err(err);
+                                     } );
+                  }
+              } );
+          } //if there was a strip
+      } //if logged in
+  } );
+</script>
   <h2>Find a Strip to Play</h2>
   <span class="err <: $err ? "has-text" : "" :>"><: $err :></span>
   <span class="msg <: $msg ? "has-text" : "" :>"><: $msg :></span>
@@ -19,8 +79,8 @@
        <input type="hidden" name="panel" value="<: $panel.id :>">
        <input type="hidden" name="strip" value="<: $strip.id :>">
        <h4>Upload Picture
-       <input type="file" name="pictureup">
-       <input type="submit" value="upload">
+       <input type="file" name="pictureup" id="pictureup">
+       <input class="no-js" type="submit" value="upload">
        </h4>
      </form>
      
@@ -41,10 +101,10 @@
        <input type="hidden" name="strip" value="<: $strip.id :>">
        <h3><a href="#add">Caption this strip (<:$togo:> panels to go)</a></h3>
        <img src="<: $panel.get_picture.url('700x700') :>">
-       <textarea cols="80" rows="5" name="caption"><:$req.param("caption"):></textarea>
+       <textarea cols="80" rows="5" name="caption" id="caption"><:$req.param("caption"):></textarea>
        <br>
        <a name="add">
-       <input type="submit" value="Add Caption">
+       <input type="submit" value="Add Caption" id="docap">
      </form>
      <br>
 :   } #panel was a picture needing caption

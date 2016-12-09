@@ -34,7 +34,7 @@
         <span class="msg <: $msg ? "has-text" : "" :>"><: $msg :></span>
 	<form method="POST" action="/spuc/p/startstrip">
           <input type="hidden" name="action" value="startstrip">
-          <textarea cols="80" rows="5" name="start-sentence" id="start-sentence"></textarea>
+          <textarea cols="80" rows="5" name="start-sentence" id="start-sentence" style="display:block"></textarea>
           <br>
 	  <button class="disabled" type="submit" id="dostart">start strip</button>
 	</form>

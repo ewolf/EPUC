@@ -17,7 +17,7 @@
     <li><a href="/spuc/p/myinprogress">in progress strips</a></li>
     <li><a href="/spuc/p/findstrip">find a strip to play</a></li>
     : if $login.reserved_count > 0 {
-      <li><a href="/spuc/p/showreserved">Show <:$login.reserved_count:> reserved strips</a></li>
+      <li><a href="/spuc/p/showreserved">Show <span class="reserved-count"><:$login.reserved_count:></span> reserved strips</a></li>
     : }
     <li></li>
   </ul>
