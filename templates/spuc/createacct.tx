@@ -1,17 +1,43 @@
 : if $login && $login.get_is_admin {
+<script>
+ yote.onReady( function(root,app,acct,sess) {
+     if( acct && acct.create_user_account ) {
+         $( '#create' ).on( 'click', function(ev) {
+             msg();
+             show_err();
+             ev.preventDefault();
+             ev.stopPropagation();
+             var $un = $('#un');
+             var $pw = $('#pw');
+             var $ia = $('#is_admin');
+             acct.create_user_account( [ $un.val(), $pw.val(), $ia.is(':checked') ],
+                                       function( acct ) {
+                                           msg('created account');
+                                           $un.val('');
+                                           $pw.val('');
+                                       },
+                                       function( err ) {
+                                           show_err( err );
+                                       }
+                                     );
+         } );
+     }
+ } );
+
+</script>
 <h3>Create Account</h3>
 <span class="msg <: $msg ? "has-text" : "" :>"><:$msg:></span>
 <span class="err <: $err ? "has-text" : "" :>"><:$err:></span>
 <form method="POST" action="/spuc/p/createacct">
   <input type="hidden" name="action" value="createacct">
   <table>
-    <tr> <th>handle </th> <td> <input type="text" name="un" value="<: $req.param("un") :>"></td> </tr>
-    <tr> <th>password </th> <td> <input type="password" name="pw" value="<: $req.param("pw") :>"></td> </tr>
+    <tr> <th>handle </th> <td> <input type="text" name="un" id="un"></td> </tr>
+    <tr> <th>password </th> <td> <input type="password" name="pw" id="pw"></td> </tr>
   : if $login.get_is_super {
-     <tr> <th>is admin</th> <td> <input type="checkbox" name="is_admin"> </td> </tr>
+     <tr> <th>is admin</th> <td> <input type="checkbox" name="is_admin" id="is_admin"> </td> </tr>
   : }
   </table>
-  <input type="submit" value="create">
+  <input type="submit" value="create" id="create">
 </form>
 
 : } elsif $login {
