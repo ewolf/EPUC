@@ -50,11 +50,21 @@ sub _check_actions {
     my $req = $self->{req};
     my $app = $self->{app};
     my $sess = $self->{session};
-
-    my $subtemplate = $path_args->{'p'} || 'welcome';
+    my $login = $self->{login};
     my $action = $req->param( 'action' );
 
-    my $login = $self->{login};
+    my $subtemplate = $path_args->{'p'};
+    if( $subtemplate ) {
+        if( ! $login && ( $subtemplate !~ /^(recent|top_rated|search|login)$/ ) ) {
+            $subtemplate = 'login';
+            if( $action ne 'login' ) {
+                $self->msg( "Your session has expired. Please Log In.");
+            }
+        }
+    } else {
+        $subtemplate = 'welcome';
+    }
+
     my $avatar = $login ? $login->get_avatar : undef;
 
     if( $subtemplate eq 'login' ) {
@@ -261,7 +271,6 @@ sub _check_actions {
 
     $self->err;
     $self->{state}{subtemplate} = $subtemplate;
-
     return ! $self->{has_err};
     
 } #_check_actions
