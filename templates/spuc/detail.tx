@@ -1,0 +1,6 @@
+: # just draw a single strip
+: my $strip = $session.fetch( $path_args['d'] )
+<h3>Showing Strip Detail</h3>
+<div style="width:440px;">
+: include $op.tmpl( $app_path, 'strip' ) { 'panelsize' => '400x400', 'strip' => $strip, 'showkudos' => 1 }
+</div>

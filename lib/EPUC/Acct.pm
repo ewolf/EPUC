@@ -8,9 +8,10 @@ use Yote;
 use Yote::Server;
 use base 'Yote::Server::Acct';
 
+use EPUC::NewsItem;
 use EPUC::Panel;
-use EPUC::Strip;
 use EPUC::Picture;
+use EPUC::Strip;
 
 sub _log {
     my( $msg, $sev ) = @_;
@@ -47,6 +48,20 @@ sub _onLogin {
     my $self = shift;
     $self->set_has_initial_login(1);
     $self->set_last_logged_in( time );
+}
+
+sub add_news {
+    my( $self, $msg, $strip, $showtimes ) = @_;
+    my $news = $self->get_news([]);
+    push @$news, $self->{STORE}->newobj( {
+        acct => $self,
+        showtimes => $showtimes || 2,
+        seen => 0,
+        msg  => $msg,
+        strip => $strip,
+        time => time,
+                                         }, 'EPUC::NewsItem' );
+    $news;
 }
 
 sub last_logged_in {

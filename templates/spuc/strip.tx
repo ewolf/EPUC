@@ -55,7 +55,7 @@
 
 : my $panels = $strip.get__panels
 
-: if $showkudos && $strip.get__state == 'complete' {
+: if 0 && $showkudos && $strip.get__state == 'complete' {
 <div class="rating">
  rate this strip RATINGBAR &star; <span style="color:red">&#9733;</span>
 </div>

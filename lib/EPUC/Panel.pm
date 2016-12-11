@@ -38,6 +38,7 @@ sub add_kudo {
     $self->set_kudo_count( $newk );
     if( $newk > $startk ) {
         $artist->set_kudo_count( 1 + $artist->get_kudo_count );
+        $artist->add_news( "You got a kudo", $self->get__strip );
     }
 }
 

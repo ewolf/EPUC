@@ -7,8 +7,6 @@ use base 'Yote::ServerObj';
 
 use EPUC::Picture;
 
-use Scalar::Util qw( refaddr );
-
 sub _init {
     my $self = shift;
     #
@@ -52,6 +50,11 @@ sub add_message {
             player  => $acct,
             time    => time(),
                                                 } );
+        my( @players ) = map { $_->get__account } @{$self->get__players([])};
+        for my $player (@players) {
+            $player->add_news( "new comment", $self );
+        }
+        return 1;
     }
 }
 
@@ -220,6 +223,8 @@ sub _add_panel {
 
     my $togo = $self->get_panels_to_go - 1;
     $self->set_panels_to_go( $togo );
+    my( @players ) = map { $_->get__account } @{$self->get__players([])};
+
     if( $togo == 0 ) {
         $self->set__state( 'complete' );
         my $app = $acct->get_app;
@@ -235,8 +240,16 @@ sub _add_panel {
             $artist->get__account->remove_from_in_progress_strips( $self );
             $artist->add_to_completed_strips( $self );
         }
+
+        for my $player (@players) {
+            $player->add_news( "strip just finished", $self );
+        }
         
         # TODO - notify all the artists that this strip is completed?
+    } else {
+        for my $player (@players) {
+            $player->add_news( "got a new " . ( $is_picture ? "caption" : "picture" ), $self );
+        }
     }
     push @$panels, $panel;
     $panel;
@@ -259,7 +272,6 @@ sub add_sentence {
 sub add_picture {
     my( $self, $acct, $picture ) = @_;
 
-#    print STDERR Data::Dumper->Dump([$self->{DATA},refaddr( $self )," add picture ($self) ".$self->get__reserved_by. " , ".$acct->get_avatar." DAAA", $self->get__reserved_by == $acct->get_avatar]);
     die { err => "Error obtaining strip" }
         unless $self->get__reserved_by == $acct->get_avatar;
 
@@ -270,11 +282,6 @@ sub add_picture {
 sub reserve {
     my( $self, $acct ) = @_;
     
-    print STDERR Data::Dumper->Dump([$self->{DATA},refaddr($self),
-                                     exists( $self->{STORE}{_WEAK_REFS}{$self->{ID}} ),
-                                     $self->{STORE}{_WEAK_REFS}{$self->{ID}},
-                                     refaddr($self->_last_panel->get__strip),"RESERVE STRIP ($self) ".exists $self->{STORE}{_WEAKREFS}{$self->_last_panel->{DATA}{_strip}}]);
-
     $self->_last_panel->reserve( $acct, $self );
 } #reserve
 

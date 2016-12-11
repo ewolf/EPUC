@@ -7,6 +7,20 @@
   : } elsif $login.get_is_admin {
     <span class="important">You are an admin</span>
   : }
+
+: #check the news
+: if $login.get_news.size() > 0 {
+  <h3>Activity</h3>
+  <ul>
+:   for $login.get_news -> $news {
+      : my $newstrip = $news.get_strip;
+      <li class="<:$news.get_seen()>0?"seen-news":"":>"><: $news.get_msg :><a href="/spuc/p/detail/d/<:$session.getid($newstrip):>"><: $newstrip.get__title :></a></li>
+      : $news.show()
+:   }
+  </ul>
+: }
+
+
   <ul class="menu">
     <li><a href="/spuc/p/logout">log out</a></li>
     <li><a href="/spuc/p/userprefs">user preferences</a></li>
