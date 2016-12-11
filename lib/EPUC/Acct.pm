@@ -2,6 +2,7 @@ package EPUC::Acct;
 
 use strict;
 use namespace::clean;
+use POSIX;
 
 use Yote;
 use Yote::Server;
@@ -45,6 +46,15 @@ sub _load {
 sub _onLogin {
     my $self = shift;
     $self->set_has_initial_login(1);
+    $self->set_last_logged_in( time );
+}
+
+sub last_logged_in {
+    my $self = shift;
+    my $epoch_seconds = $self->get_last_logged_in;
+    $epoch_seconds ?
+        POSIX::strftime( "%m/%d/%Y %H:%M", localtime($epoch_seconds) )
+        : 'never logged in';
 }
 
 our %fields = map { $_ => 1 } ('name','about');

@@ -4,15 +4,19 @@
 <p>
 	maybe be able to put accountson hold or remove accounts
 </p>
-
+  <table>
+        <tr> <th>Handle</th> <th>Name</th> <th>Last Logged In</th> <th>Is Admin</th> </tr>
   : for $app.get__accts.values() -> $acct {
-     : $acct.get_user
+    <tr>
+        <td><img src="<: $acct.get_avatar.get_icon.url('80x80'):>"></td>
+        <td><: $acct.get_user :></td>
 
-     : if $acct.get_is_admin {
-         * admin
-     : }
-     <br>
+        <td><: $acct.last_logged_in :></td>
+
+        <td><: $acct.get_is_admin ? "*" : "" :></td>
+    </tr>
   : }
+  </table>
 : } elsif $login {
 :   include $op.tmpl( $app_path, 'welcomeplayer' )
 : } else {
