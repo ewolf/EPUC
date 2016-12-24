@@ -1,0 +1,17 @@
+
+* rate this strip
+* last login for accounts
+* kudo message
+* more options for admin for accounts?
+
+actions/news
+ * a strip of yours was advanced
+ * you got a kudo
+ * a strip was rated
+ * a strip of yours got a new message
+
+form --> js
+  createacct.tx
+  paginate_strips.tx
+  resetuserpw.tx
+
