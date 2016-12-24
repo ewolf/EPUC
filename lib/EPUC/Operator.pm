@@ -73,14 +73,15 @@ sub _check_actions {
     
     my $subtemplate = $path_args->{'p'};
     if( $subtemplate ) {
-        if( ! $login && ( $subtemplate !~ /^(recent|top_rated|search|login)$/ ) ) {
+        if( ! $login && ( $subtemplate !~ /^(view|search|login|news|about)$/ ) ) {
+            print STDERR Data::Dumper->Dump(["SSESS EXPIRED ON ($subtemplate)"]);
             $subtemplate = 'login';
             if( $action ne 'login' ) {
                 $self->msg( "Your session has expired. Please Log In.");
             }
         }
     } else {
-        $subtemplate = 'viewstrips';
+        $subtemplate = 'view';
     }
 
     my $avatar = $login ? $login->get_avatar : undef;

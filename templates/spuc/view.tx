@@ -1,0 +1,18 @@
+: my $mode = $path_args['m'] || $session.get_view_mode || 'completed'
+
+: my $link_path = $path ~ '/view'
+
+: if $login {
+:  include $op.tmpl( $app_path, 'menu' ) { opts => [ ['completed',0], ['my-completed',1],['my-in-progress',1] ], selected => $mode, path => $link_path ~ '/m' }
+: }
+: my $null = $session.set_view_mode( $mode );
+
+: if $mode == 'completed' {
+:  include $op.tmpl( $app_path, 'paginate_strips' ) { strip_list => $app.get__completed_strips, path => $link_path ~ '/m/completed' }
+: } elsif $login {
+:   if $mode == 'my-completed' {
+:  include $op.tmpl( $app_path, 'paginate_strips' ) { strip_list => $login.get_avatar.get_completed_strips, path => $link_path ~ '/m/my-completed' }
+:   } elsif $mode == 'my-in-progress' {
+:  include $op.tmpl( $app_path, 'paginate_strips' ) { strip_list => $login.get_in_progress_strips, path => $link_path ~ '/m/my-in-progress' }
+:   }
+: }

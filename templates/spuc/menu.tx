@@ -1,0 +1,11 @@
+<div class="horizontal-menu">
+  : for $opts -> $opt {
+  :  if !($opt[1] == -1 && $login ) && ($opt[1]==-1 || $opt[1] == 0 || $login && $login.get_is_admin || $opt[1] == 1 && $login) {
+  :    if $opt[0] == $selected {
+  <span class="selected"><: $opt[0] :></span>
+  :    } else {
+  <span><a href="<:$path:>/<: $opt[0] :>"><: $opt[0] :></a></span>
+  :    }
+  :  }
+  : }
+</div>

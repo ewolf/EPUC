@@ -7,6 +7,8 @@
     }
 </style>
 
+: my $link_path = $path
+
 : my $start_idx = $strip_start || $path_args['s']
 
 : my $detail_idx = $detail_index;
@@ -20,13 +22,13 @@
       <div class="detail">
         <div class="paginate-bar">
 :     if $detail_idx > 0 {
-           <a href="<: $pag_path :>/s/<:$start_idx || '0':>/d/<:($detail_idx-1):>">&lt;prev</a>
+           <a href="<: $link_path :>/s/<:$start_idx || '0':>/d/<:($detail_idx-1):>">&lt;prev</a>
 :     } else {
            prev
 :     }
-<!--           <a href="<: $pag_path :>/s/<:$start_idx||'0':>" style="margin:0 3em 0 3em">^back^</a> -->
+<!--           <a href="<: $link_path :>/s/<:$start_idx||'0':>" style="margin:0 3em 0 3em">^back^</a> -->
 :     if $detail_idx < ($strip_list.size()-1) {
-           <a href="<: $pag_path :>/s/<:$start_idx||'0':>/d/<:($detail_idx+1):>">next&gt;</a>
+           <a href="<: $link_path :>/s/<:$start_idx||'0':>/d/<:($detail_idx+1):>">next&gt;</a>
 :     } else {
            next
 :     }
@@ -35,7 +37,7 @@
 :    include $op.tmpl( $app_path, 'strip' ) { panelsize => '700x700', strip => $str, detail_strip => $detail_idx, start_idx => $start_idx }
 
 :   if $show_delete && $str.can_delete($login) {
-      <form method="POST" action="<: $pag_path :>/s/<:$start_idx||'0':>/d/<:$detail_idx:>">
+      <form method="POST" action="<: $link_path :>/s/<:$start_idx||'0':>/d/<:$detail_idx:>">
         <input type="hidden" name="action" value="delete">
         <input type="hidden" name="strip-number" value="<:$detail_idx:>">
         You may <button class="link-like" type="submit">delete this strip</button>
@@ -51,9 +53,9 @@
     <div class="prevnext">
   : if $start_idx > 0 {
       : if $start_idx - 3 >= 0 {
-          <a href="<: $pag_path :>/s/<:($start_idx-3):>">
+          <a href="<: $link_path :>/s/<:($start_idx-3):>">
       : } else {
-          <a href="<: $pag_path :>/s/0">
+          <a href="<: $link_path :>/s/0">
       : }
       &lt;prev</a>
   : } else {
@@ -61,7 +63,7 @@
   : }
       <span style="margin:0 3em 0 3em"> </span>
   : if (3+$start_idx) < $strip_list.size() {
-      <a href="<: $pag_path :>/s/<:(3+$start_idx):>">next&gt;</a>
+      <a href="<: $link_path :>/s/<:(3+$start_idx):>">next&gt;</a>
   : } else {
       next&gt;
   : }
@@ -74,7 +76,7 @@
      : my $strip = $strip_list[$idx]
      
      : if $strip {
-        <a class="strip" href="<: $pag_path :>/s/<:$path_args['s']||'0':>/d/<:$idx:>">
+        <a class="strip" href="<: $link_path :>/s/<:$path_args['s']||'0':>/d/<:$idx:>">
         <div style="display:inline-block;vertical-align:top;max-width:420px;margin:1em;">
 :       include $op.tmpl( $app_path, 'strip' ) { panelsize => '400x400', 'strip' => $strip, 'strip_idx' => $strip_idx, 'include-top-link' => 1 }
         </div>
