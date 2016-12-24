@@ -61,10 +61,12 @@
   } );
 </script>
   <h2>Find a Strip to Play</h2>
-  <span class="err <: $err ? "has-text" : "" :>"><: $err :></span>
-  <span class="msg <: $msg ? "has-text" : "" :>"><: $msg :></span>
+: #  cases : find random strip,
+
+: my $strip = $login.play_random_strip
+
 :   if $strip {
-  <h4><a href="/spuc/p/findstrip/not/<:$strip.id:>">Find a different strip</a></h4>
+  <h4><a href="/spuc/p/findstrip/">Find a different strip</a></h4>
  <div class="right-pane">
 : my $togo = $strip.get_panels_to_go;
 
@@ -76,8 +78,6 @@
         </span>
      <form method="POST" enctype="multipart/form-data"  action="/spuc/p/findstrip">
        <input type="hidden" name="action" value="upload">
-       <input type="hidden" name="panel" value="<: $panel.id :>">
-       <input type="hidden" name="strip" value="<: $strip.id :>">
        <h4>Upload Picture
        <input type="file" name="pictureup" id="pictureup">
        <input class="no-js" type="submit" value="upload">
@@ -95,13 +95,11 @@
 :   } # panel was sentence needing picture
 :   else {
 :    #submit a caption
-     <form method="POST" action="/spuc/p/findstrip">
+     <form class="full-when-narrow" method="POST" action="/spuc/p/findstrip">
        <input type="hidden" name="action" value="caption">
-       <input type="hidden" name="panel" value="<: $panel.id :>">
-       <input type="hidden" name="strip" value="<: $strip.id :>">
        <h3><a href="#add">Caption this strip (<:$togo:> panels to go)</a></h3>
        <img src="<: $panel.get_picture.url('700x700') :>">
-       <textarea cols="80" rows="5" name="caption" id="caption"><:$req.param("caption"):></textarea>
+       <textarea name="caption" id="caption"><:$req.param("caption"):></textarea>
        <br>
        <a name="add">
        <input type="submit" value="Add Caption" id="docap">
@@ -114,5 +112,6 @@
 : }
 :} else {
 :  # no login
+:  $app.msg( 'login expired. log in' );
 :  include $op.tmpl( $app_path, 'welcome' )
 :}

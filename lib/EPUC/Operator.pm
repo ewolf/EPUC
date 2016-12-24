@@ -162,14 +162,18 @@ sub _check_actions {
                 }
             }
         }
-        elsif( $subtemplate eq 'findstrip' ) {
+        elsif( $subtemplate eq 'play' ) {
             my $last_strip = $login->get_last_random_strip;
+
             if( $action eq 'reserve' ) {
+                $login->set_lock_strip( $last_strip );
                 if( $last_strip ) {
                     if( $login->reserves_available > 0 ) {
                         eval {
                             $last_strip->reserve( $login );
                             $self->msg( 'Reserved Strip' );
+                            $login->set_last_random_strip;
+                            $login->set_lock_strip;
                         };
                     } else {
                         $@ = { err => "out of strips to reserve" };
@@ -180,10 +184,13 @@ sub _check_actions {
             }
             elsif( $last_strip ) {
                 if( $action eq 'upload' ) {
+                    $login->set_lock_strip( $last_strip );
                     eval {
                         my $upload = $self->upload( 'pictureup' );
                         if( $upload  && $last_strip->reserve($login) && $last_strip->add_picture( $login, $upload ) ) {
                             $self->msg( 'uploaded picure' );
+                            $login->set_last_random_strip;
+                            $login->set_lock_strip;
                         } else {
                             $last_strip->free($login);
                             $@ = { err => "error uploading" };
@@ -191,9 +198,12 @@ sub _check_actions {
                     };
                 }
                 elsif( $action eq 'caption' ) {
+                    $login->set_lock_strip( $last_strip );
                     eval {
                         if( $last_strip->reserve($login) && $last_strip->add_sentence( $login, $req->param('caption') ) ) {
                             $self->msg( 'added caption' );
+                            $login->set_last_random_strip;
+                            $login->set_lock_strip;
                         }
                     };
                     if( $@ ) {
@@ -205,11 +215,11 @@ sub _check_actions {
             if( $strip ) {
                 $self->{strip} = $strip;
                 $self->{panel} = $strip->_last_panel;
-                $self->{allowed} = $login->allowed_reserve_count;
+                $self->{allowed} = $login->reserves_available;
             } else {
                 # no error, the page checks
             }
-        } #findstrip
+        } #play
         elsif( $subtemplate eq 'showreserved' ) {
             if( $action eq 'upload' ) {
                 my $strip_idx = $req->param('strip_idx');

@@ -1,5 +1,8 @@
 : my $strip_mode = $path_args['vm'] || 'completed'
-: my $strip_sort = $path_args['vs'] || 'recent'
+
+: # pending and reserved sort is only for artist-strips (my strips )
+: my $strip_sort = ($path_args['vs'] && ($strip_mode == 'artist-strips' || ($path_args['vs'] != 'pending' && $path_args['vs'] != 'reserved') ) ) ? $path_args['vs'] : 'recent'
+
 : my $pag_path = '/' ~ $app_path ~ '/p/viewstrips'
 
 : # login gets a menu, everyone else just the
@@ -12,8 +15,7 @@
     }
   </style>
   <div class="horizontal-menu">
-   :# for [ ['recent','recent','recent strips'], ['my strips','mystrips','my strips'], ['best strips','best','best strips'], ['most discussed','discussed','most discussed'] ] -> $modesel {
-   : for [ ['completed','completed','completed strips'], ['my strips','mystrips','my strips'] ] -> $modesel {
+   : for [ ['completed','completed','completed strips'], ['my strips','artist-strips','my strips'] ] -> $modesel {
    :   if $modesel[1] == $strip_mode {
        <span class="selected"><:$modesel[2]:></span>
    :   } else {
@@ -23,15 +25,23 @@
   </div>
 
   <div class="horizontal-menu">
-   : for [ ['recent','recent','recent strips'], ['most discussed','mystrips','most discussed'], ['top rated','mystrips','top rated'] ] -> $modesel {
-   :   if $modesel[1] == $strip_sort {
-       <span class="selected"><:$modesel[2]:></span>
-   :   } else {
-      <span><a class="select" href="<: $pag_path :>/vm/<:$strip_mode:>/vs/<:$modesel[1]:>"><:$modesel[0]:></a></span>
-   :   }
+   : for [ ['recent','recent','recent strips'], ['most discussed','discussed','most discussed'], ['top rated','top','top rated'], ['pending','pending','pending' ], ['reserved','reserved','reserved' ] ] -> $sortsel {
+   :  if ($sortsel[1] != 'pending' && $sortsel[1] != 'reserved' ) || $strip_mode == 'artist-strips' {
+   :    if $sortsel[1] == $strip_sort {
+        <span class="selected"><:$sortsel[2]:></span>
+   :    } else {
+       <span><a class="select" href="<: $pag_path :>/vm/<:$strip_mode:>/vs/<:$sortsel[1]:>"><:$sortsel[0]:></a></span>
+   :    }
+   :  }
    : }
   </div>
 
 : }
 
-: include $op.tmpl( $app_path, $strip_mode ) { pag_path =>  $pag_path ~ '/vm/' ~ $strip_mode ~ '/vs/' ~ $strip_sort }
+: my $strip_list = $app.strip_list( $strip_mode, $strip_sort, $login )
+
+: if $strip_list.size() > 0 {
+:   include $op.tmpl( $app_path, 'paginate_strips' ) { strip_list => $strip_list, pag_path => $pag_path ~ '/vs/' ~ $strip_sort ~ '/vm/' ~ $strip_mode, detail_index => $path_args['d'] || '0', strip_start => $path_args['s'] || '0' }
+: } else {
+    <h4>No Strips</h4>
+: }

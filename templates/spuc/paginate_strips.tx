@@ -1,33 +1,43 @@
-: my $strip_start = $path_args['s']
+<style>
+    .paginate-bar {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+//        padding: .2em 3em;
+    }
+</style>
 
-: my $is_detail = $path_args['d'] == '0' || $path_args['d'] > 0
+: my $start_idx = $strip_start || $path_args['s']
+
+: my $detail_idx = $detail_index;
+
+: my $is_detail = $detail_idx == '0' || $detail_idx > 0
 
 : if $is_detail {
-:   my $detail_strip = $path_args['d']
-:   my $str = $strip_list[$detail_strip];
+:   my $str = $strip_list[$detail_idx];
 
 :   if $str {
       <div class="detail">
         <div class="paginate-bar">
-:     if $detail_strip > 0 {
-           <a href="/<: $pag_path :>/s/<:$strip_start || '0':>/d/<:($detail_strip-1):>">&lt;prev</a>
+:     if $detail_idx > 0 {
+           <a href="<: $pag_path :>/s/<:$start_idx || '0':>/d/<:($detail_idx-1):>">&lt;prev</a>
 :     } else {
            prev
 :     }
-           <a href="/<: $pag_path :>/s/<:$strip_start||'0':>" style="margin:0 3em 0 3em">^back^</a>
-:     if $detail_strip < ($strip_list.size()-1) {
-           <a href="/<: $pag_path :>/s/<:$strip_start||'0':>/d/<:($detail_strip+1):>">next&gt;</a> ($pag_path)
+<!--           <a href="<: $pag_path :>/s/<:$start_idx||'0':>" style="margin:0 3em 0 3em">^back^</a> -->
+:     if $detail_idx < ($strip_list.size()-1) {
+           <a href="<: $pag_path :>/s/<:$start_idx||'0':>/d/<:($detail_idx+1):>">next&gt;</a>
 :     } else {
            next
 :     }
         </div>
 
-:    include $op.tmpl( $app_path, 'strip' ) { showkudos => 1, panelsize => '700x700', strip => $str, detail_strip => $detail_strip, strip_start => $strip_start }
+:    include $op.tmpl( $app_path, 'strip' ) { showkudos => 1, panelsize => '700x700', strip => $str, detail_strip => $detail_idx, start_idx => $start_idx }
 
 :   if $show_delete && $str.can_delete($login) {
-      <form method="POST" action="/<: $pag_path :>/s/<:$strip_start||'0':>/d/<:$detail_strip:>">
+      <form method="POST" action="<: $pag_path :>/s/<:$start_idx||'0':>/d/<:$detail_idx:>">
         <input type="hidden" name="action" value="delete">
-        <input type="hidden" name="strip-number" value="<:$detail_strip:>">
+        <input type="hidden" name="strip-number" value="<:$detail_idx:>">
         You may <button class="link-like" type="submit">delete this strip</button>
       </form>
 :    } #may delete
@@ -39,19 +49,19 @@
 : } else { # multiple strips
 
     <div class="prevnext">
-  : if $strip_start > 0 {
-      : if $strip_start - 3 >= 0 {
-          <a href="/<: $pag_path :>/s/<:($strip_start-3):>">
+  : if $start_idx > 0 {
+      : if $start_idx - 3 >= 0 {
+          <a href="<: $pag_path :>/s/<:($start_idx-3):>">
       : } else {
-          <a href="/<: $pag_path :>/s/0">
+          <a href="<: $pag_path :>/s/0">
       : }
       &lt;prev</a>
   : } else {
       &lt;prev
   : }
       <span style="margin:0 3em 0 3em"> </span>
-  : if (3+$strip_start) < $strip_list.size() {
-      <a href="<: $pag_path :>/s/<:(3+$strip_start):>">next&gt;</a> (<:$pag_path:>)
+  : if (3+$start_idx) < $strip_list.size() {
+      <a href="<: $pag_path :>/s/<:(3+$start_idx):>">next&gt;</a>
   : } else {
       next&gt;
   : }
@@ -59,12 +69,12 @@
   <br>
      
   <div class="paginated-strips">
-  : for [$strip_start..(2+$strip_start)] -> $idx {
+  : for [$start_idx..(2+$start_idx)] -> $idx {
 
      : my $strip = $strip_list[$idx]
      
      : if $strip {
-        <a class="strip" href="/<: $pag_path :>/s/<:$path_args['s']||'0':>/d/<:$idx:>">
+        <a class="strip" href="<: $pag_path :>/s/<:$path_args['s']||'0':>/d/<:$idx:>">
         <div style="display:inline-block;vertical-align:top;max-width:420px;margin:1em;">
 :       include $op.tmpl( $app_path, 'strip' ) { panelsize => '400x400', 'strip' => $strip, 'strip_idx' => $strip_idx, 'include-top-link' => 1 }
         </div>

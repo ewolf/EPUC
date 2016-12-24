@@ -34,7 +34,7 @@ sub _load {
     my $self = shift;
 
     $self->get__all_strips([]);
-    # update to make sure all strip and panel states are accurate
+    
     for my $strip (@{$self->get_recently_completed_strips},@{$self->get__in_progress_strips}) {
         $self->add_once_to__all_strips( $strip );
         $strip->set_panel_size( 9 );
@@ -56,7 +56,36 @@ sub lookup_player {
     $accts->{lc($name)};
 }
 
-sub completed_strips {
+sub strip_list {
+    my( $self, $mode, $sort, $artist ) = @_;
+    
+    my $login = $self->{SESSION}->get_acct;
+
+    my $strips;
+    if( $mode eq 'completed' ) {
+        $strips = $self->get__completed_strips;
+    }
+    elsif( $mode eq 'artist-strips' ) {
+        if( $sort eq 'pending' && $login && $artist == $login ) {
+            $strips = $artist->get_in_progress_strips;
+        } elsif( $sort eq 'reserved' && $login && $artist == $login ) {
+            $strips = $artist->get_reserved_strips;
+        } else {
+            $strips = $artist->get_completed_strips;
+        }
+    }
+
+    #sorting?
+    if( $sort eq 'top' ) {
+
+    } elsif( $sort eq 'discussed' ) {
+        
+    }
+    
+    $strips;
+} #strip_list
+
+sub completed_strips_old {
     my( $self, $sort ) = @_;
     # search thru all. if there become too
     # many, keep a running list that is updated

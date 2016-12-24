@@ -124,6 +124,7 @@ sub start_strip {
     $panel->set__strip( $strip);
     
     my $app = $self->get_app;
+    
     $app->add_to__in_progress_strips( $strip );
     $app->add_to__all_strips( $strip );
     $self->add_to_in_progress_strips( $strip );
@@ -131,19 +132,19 @@ sub start_strip {
     $strip;
 } #start_strip
 
-sub allowed_reserve_count {
-    3 - @{shift->get_reserved_strips};
-}
-
 # returns strip and panel objects
 sub play_random_strip {
     my( $self ) = @_;
-
+    
     my $app = $self->get_app;
 
     # sort by strips you've not played yet
     my $strips = $app->get__in_progress_strips([]);
 
+    # if there was a locked strip here, put it the first to check
+    if( $self->get_lock_strip ) {
+        unshift @$strips, $self->get_lock_strip;
+    }
     
     my( @new_strips, @playing_strips );
     my $ava = $self->get_avatar;

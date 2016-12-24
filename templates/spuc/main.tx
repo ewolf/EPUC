@@ -80,6 +80,10 @@ li {
         border-bottom: solid 1px #AAA;
         padding: 3px 0;
     }
+    .full-when-narrow,
+    textarea {
+        width: 100%;
+    }
 }
 form {
     display: inline-block;
