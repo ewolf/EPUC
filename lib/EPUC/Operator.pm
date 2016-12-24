@@ -13,7 +13,7 @@ sub new {
     $options{apps}{spuc} = {
         app_name      => 'EPUC::App',
         cookie_path   => 'spuc',
-        main_template => 'main',
+        main_template => 'frame',
         template_path => "spuc",
         state_manager_class   => 'EPUC::StateManager',
     };
@@ -304,6 +304,14 @@ sub _check_actions {
 
     $self->err;
     $self->{state}{subtemplate} = $subtemplate;
+
+    $self->{state}{menus} = [
+        [ map { { chosen => $_, choose => $_ } } qw( view play ) ],
+        [ map { { chosen => $_, choose => $_ } } ('all strips','my strips') ],
+#        [ map { { chosen => $_, choose => $_ } } ('random strip','start strip') ],
+        ];
+    $self->{state}{selecteds} = [ 'view', 'my strips' ];
+    
     return ! $self->{has_err};
     
 } #_check_actions

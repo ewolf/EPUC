@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SPUC</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/js/jquery-1.12.0.min.js"></script>
+    <script src="/js/yote.js"></script>
+    <style>
+    body {
+        padding:0;
+        margin:0;
+    }
+    header {
+        text-align: center;
+        vertical-align: middle;
+        background-color: #DDE;
+        padding: 1em 0 1.6em 0;
+    }
+    main {
+        font-size: large;
+        padding: 15px;
+    }
+    .plain {
+        text-decoration: none;
+        color: black;
+    }
+    .err {
+        display: none;
+        padding: .3em;
+        margin: 4px 0;
+        background-color: #EFE;
+        border: solid 2px #DED;
+        font-family: monospace;
+    }
+    .msg {
+        display: none;
+        padding: .3em;
+        margin: 4px 0;
+        background-color: #EEF;
+        border: solid 2px #DDE;
+        font-family: monospace;
+    }
+    .show.err,
+    .show.msg {
+        display: block;
+    }
+
+    .login {
+        background-color:wheat;
+        padding: .5em .5em;
+        margin: .3em 0 0 0;
+    }
+    .login > span {
+        vertical-align: top;
+    }
+    .logout {
+        float: right;
+    }
+    .horizontal-menu li
+    {
+        display: block;
+    }
+    ul,
+    li {
+        margin: 0;
+        padding: 0;
+    }
+    @media (max-width: 500px) { 
+        body .picture {
+            width: 100%;
+        }
+        body .picture img {
+            width: 100%;
+        }
+        h1 {
+            border: solid 3px green;
+        }
+        body {
+            background-color:lightblue;
+        }
+        .panel {
+        }
+        .full-when-narrow,
+        textarea {
+            width: 100%;
+        }
+        .small-icon {
+            width:30px;
+            height:30px;
+        }
+        .up {
+            vertical-align: top;
+        }
+    }
+    form {
+        display: inline-block;
+    }
+    .icon.tiny {
+        width: 40px;
+        height: 40px;
+    }
+    .login a {
+        vertical-align:top;
+    }
+    
+    </style>
+    <script>
+   function msg( text, selector ) {
+       selector = selector || '.msg';
+       text = text || '';
+       $( selector ).text( text ).toggleClass( 'show', text.length > 0 );
+   }
+   function show_err( text, selector ) {
+       selector = selector || '.err';
+       text = text || '';
+       $( selector ).text( text ).toggleClass( 'show', text.length > 0 );
+   }
+   $().ready( function() {
+       var $body = $('body')
+       $body.addClass('has-js');
+       yote.init( {
+            yoteServerURL: '/spuc-json',
+            appName: 'EPUC::App',
+            token: '<: $session.get__token :>'
+        });       
+   } );
+   </script>
+
+  </head>
+  <body>
+    
+    <a class="plain" href="/spuc">
+      <header>
+        <h1>-----&gt; <span style="text-decoration:underline; color:blue">SPUC</span> &lt;-----</h1>
+      </header>
+    </a>
+    : if $login {
+    <div class="login">
+      <span><a href="/spuc/p/userprefs"><img class="icon tiny" src="<: $login.get_avatar.get_icon.url('80x80'):>"> <: $login.get_user :></a></span>
+      <span class="logout"><a href="/spuc/p/logout">log out</a></span>
+    </div>
+    :}
+        
+    : my $err = $session.get_err
+    : my $msg = $session.get_msg
+
+    <span class="err<: $err ? " show" : "":>"><:$err:></span>
+    <span class="msg<: $msg ? " show" : "":>"><:$msg:></span>
+       
+    <main>
+
+      : #so, get from the server end the subtemplate and the menu options
+      : my $menus = $state.menus
+      : my $selecteds = $state.selecteds
+      ( <: $menus :> )
+      : for [0..$menus.size()] -> $i {
+      <div class="horizontal-menu">
+      :   for $menus[$i] -> $item {
+      :      if $item.chosen == $selecteds[$i] {
+        <span class="selected"><: $item.chosen :></span>
+      :      } else {
+        <span><a href="/spuc/p/<:$item.path:>"><: $item.choose :></a></span>
+      :      }
+      :   }  
+      : }
+      </div>
+      
+      ( <: $state.subtemplate :> )
+      
+      time to work on the reserved, because it should jsut show the last panel
+: #      : include $op.tmpl( $app_path, 'welcome' )
+    </main>
+  </body>
+</html>
