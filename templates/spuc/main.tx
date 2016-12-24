@@ -66,29 +66,31 @@ li {
     margin: 0;
     padding: 0;
 }
-@media (min-width: 401px) {
-    body {
-        max-width: 750px;
-        margin: auto;
-    }
-}
-@media (max-width: 400px) { 
+@media (max-width: 500px) { 
     body .picture {
         width: 100%;
     }
     body .picture img {
         width: 100%;
     }
+    h1 {
+     border: solid 3px green;
+    }
     body {
-//        background-color:blue;
+        background-color:lightblue;
     }
     .panel {
-        border-bottom: solid 1px #AAA;
-        padding: 3px 0;
     }
     .full-when-narrow,
     textarea {
         width: 100%;
+    }
+    .small-icon {
+        width:30px;
+        height:30px;
+    }
+    .up {
+       vertical-align: top;
     }
 }
 form {
@@ -103,7 +105,7 @@ form {
 }
     
 </style>
-   <script>
+    <script>
    function msg( text, selector ) {
        selector = selector || '.msg';
        text = text || '';
@@ -147,6 +149,7 @@ form {
     <span class="msg<: $msg ? " show" : "":>"><:$msg:></span>
        
     <main>
+      time to work on the reserved, because it should jsut show the last panel
       : include $op.tmpl( $app_path, 'welcome' )
     </main>
   </body>

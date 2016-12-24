@@ -1,8 +1,15 @@
 <style>
-@media (max-width: 400px) {
+@media (max-width: 500px) {
   .panel {
          text-align: center;
          font-size: x-large;
+         border: solid 5px #CCE;
+         background-color: #CDF;
+         padding: 3px 0;
+         
+  }
+  .strip {
+         margin-top: .4em;
   }
   .kudos {
          font-size: small;
@@ -87,7 +94,7 @@ yote.onReady( function(root,app,acct,sess) {
 
 : my $panels = $strip.get__panels
 
-: if 0 && $showkudos && $strip.get__state == 'complete' {
+: if 0 && $show_kudos && $strip.get__state == 'complete' {
      <div class="rating">
       rate this strip RATINGBAR &star; <span style="color:red">&#9733;</span>
      </div>
@@ -101,7 +108,7 @@ yote.onReady( function(root,app,acct,sess) {
 
   <div class="panel">
 
-:   if $showkudos {
+:   if $show_kudos {
     <div class="kudos">
       <span class="kudo">
         <a href="/<:$app_path:>/p/showplayer/a/<:$panel.get__artist().get__account().get_user():>">
@@ -145,7 +152,7 @@ yote.onReady( function(root,app,acct,sess) {
 
 : } #each panel
 
-: if $showkudos {
+: if $show_discussion && $login {
     <h4>Discussion</h4>
     
   : my $discussion = $strip.get_discussion;
