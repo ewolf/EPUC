@@ -1,3 +1,62 @@
+#------------#
+
+you can
+
+ VIEW, then sort
+  view all completed
+  view own incomplete strips
+  strips for an artist
+  bookmarked strips
+
+ PLAY
+  play/see reserved strips
+  random strip to play
+  start strip
+
+ NEWS (if there is any
+
+ ABOUT
+
+ ADMIN
+
+#---------------------
+
+id leaf nodes,
+
+[ {
+       choose => 'view',
+       chosen => 'viewing',
+       mode   => 'viewstrips',
+       actions => [
+            { choose_title => 'all completed strips', selected_title => 'all strips' },
+            { choose_title => 'my completed strips', selected_title => 'my completed strips' },
+            { choose_title => 'my in progress strips', selected_title => 'my in progress strips' },
+       ]
+  },
+  {
+       choose => 'play',
+       chosen => 'playing',
+       login_level => 1,
+       actions => [
+            { choose_title => 'find strip', selected_title => 'playing strip', mode => 'play' },
+            { choose_title => 'bookmarked strip', selected_title => 'bookmarked strip', mode => 'bookmarks' },
+            { choose_title => 'start string', selected_title => 'starting strip', mode => 'startstrip' },
+       ]
+  },
+]
+
+'admin' => {
+        login_level => 2,
+        actions => [
+             { mode => 'create_account', choose_title => 'create account', 'selected_title' => 'creating account' },
+        ]
+           }
+
+
+
+sorting you can do with strips
+  
+
 
 * rate this strip
 * last login for accounts

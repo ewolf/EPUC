@@ -66,6 +66,12 @@ li {
     margin: 0;
     padding: 0;
 }
+@media (min-width: 401px) {
+    body {
+        max-width: 750px;
+        margin: auto;
+    }
+}
 @media (max-width: 400px) { 
     body .picture {
         width: 100%;
@@ -88,25 +94,30 @@ li {
 form {
     display: inline-block;
 }
+.icon.tiny {
+    width: 40px;
+    height: 40px;
+}
+.login a {
+    vertical-align:top;
+}
     
 </style>
    <script>
    function msg( text, selector ) {
        selector = selector || '.msg';
        text = text || '';
-       $( selector ).text( text ).toggleClass( 'has-text', text.length > 0 );
+       $( selector ).text( text ).toggleClass( 'show', text.length > 0 );
    }
    function show_err( text, selector ) {
        selector = selector || '.err';
        text = text || '';
-       $( selector ).text( text ).toggleClass( 'has-text', text.length > 0 );
+       $( selector ).text( text ).toggleClass( 'show', text.length > 0 );
    }
    $().ready( function() {
-                    return;
        var $body = $('body')
        $body.addClass('has-js');
        yote.init( {
-            //            yoteServerURL: '/cgi-bin/yote_cgi.pl',
             yoteServerURL: '/spuc-json',
             appName: 'EPUC::App',
             token: '<: $session.get__token :>'
@@ -124,8 +135,7 @@ form {
     </a>
     : if $login {
     <div class="login">
-<!--      <a href="/spuc/p/userprefs"><img class="icon" src="<: $login.get_avatar.get_icon.url('80x80') :>"></a> -->
-      <span>Logged in as <a href="/spuc/p/userprefs"><: $login.get_user :></a></span>
+      <span><a href="/spuc/p/userprefs"><img class="icon tiny" src="<: $login.get_avatar.get_icon.url('80x80'):>"> <: $login.get_user :></a></span>
       <span class="logout"><a href="/spuc/p/logout">log out</a></span>
     </div>
     :}

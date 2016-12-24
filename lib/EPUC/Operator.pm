@@ -246,7 +246,7 @@ sub _check_actions {
                     my $reserved = $login->get_reserved_strips;
                     my $strip = $reserved->[ $req->param('strip-idx') ];
                     if( $strip && $strip->free( $login ) ) {
-                        $self->{msg} = "freed strip reserveation";
+                        $self->msg( "freed strip reserveation" );
                     } else {
                         $@ = { err => 'Error trying to Unreserve Caption' };
                     }
@@ -284,7 +284,7 @@ sub _check_actions {
             my $panel = $sess->fetch( $req->param('panel') );
             if( $panel && $panel->can_kudo( $login ) ) {
                 $panel->add_kudo( $login );
-                $self->{msg} = 'added kudo';
+                $self->msg( 'added kudo' );
             } else {
                 $@ = { err => 'Error trying to kudo caption' };
             }
@@ -294,7 +294,7 @@ sub _check_actions {
             my $strip = $sess->fetch( $req->param('strip') );
             if( $strip && $msg =~ /\S/ ) {
                 $strip->add_message( $msg, $login );
-                $self->{msg} = 'message added';
+                $self->msg( 'message added' );
             } else {
                 $@ = { err => 'Error adding message' };
             }

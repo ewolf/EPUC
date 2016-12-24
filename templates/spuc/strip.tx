@@ -31,7 +31,6 @@ yote.onReady( function(root,app,acct,sess) {
 : if $login {
 <script>
     yote.onReady( function(root,app,acct,sess) {
-        return; // NOT READY YET
         $('.kudo-button').on( 'click', function(ev) {
             var $this = $(this);
             ev.preventDefault();
@@ -41,6 +40,8 @@ yote.onReady( function(root,app,acct,sess) {
                 pan.add_kudo( [acct],function() {
                     $( '.kudo-count[data-panel-id="' + p_id + '"]' ).text( pan.get( 'kudo_count' ) );
                     $( '.kudo-heart[data-panel-id="' + p_id + '"]' ).toggle();
+                    show_err();
+                    msg( 'added kudo' );
                 } );
             } );
         } );
@@ -118,7 +119,7 @@ yote.onReady( function(root,app,acct,sess) {
         : if $panel.can_kudo( $login ) {
           <form method="POST" action="<:$pag_path:>/s/<:$strip_start:>/d/<: $detail_strip :>">
                <input type="hidden" name="action" value="kudo">
-               <input type="hidden" name="panel" value="<: $session.getid($detail_strip) :>">
+               <input type="hidden" name="panel" value="<: $session.getid($panel) :>">
                <button type="submit" class="link-like heart kudo-button kudo-heart" data-panel-id="<:$session.getid($panel):>">&hearts;</button>
             </form>
            <span class="redheart heart kudo-heart" style="display:none" data-panel-id="<:$session.getid($panel):>">&hearts;</span>

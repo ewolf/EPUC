@@ -32,6 +32,16 @@
   <a href="/spuc/p/login">Log In</a>
 : } else {
   <div class="horizontal-menu">
+
+    : my $option_sets = [ ['view', 0, [ 'completed', 'my incomplete', 'bookmarked' ]],
+    : ['play', 1, [ 'random strip', 'reserved strip', 'start new strip' ] ],['news',0,[]], ['about',0,[]], ['admin',2,[ 'create account', 'reset user password', 'list accounts' ]] ];
+
+    : for $option_sets -> $set {
+         ( <:$set[0]:>)
+   :   for $set[1] -> $pair {
+   :   }
+   : }
+<br>
    : for [ ['view strips','viewstrips','viewing strips'], ['play','play','playing spuc'],['start strip','startstrip','starting strip'], ['admin','admin','in admin'] ] -> $modesel {
    :   if $modesel[1] != 'admin' || $login.get_is_admin {
    :     if $modesel[1] == $subtemplate {
