@@ -52,6 +52,30 @@ sub redirect {
 }
 
 
+sub _allowed {
+  my( $mode, $login ) = @_;
+  $mode && ($mode->{login_level} == 0 || ( $mode->{login_level} == 1 && $login ) || ( $login && $login->get_is_admin ) );
+}
+
+sub _adjust_menus {
+      my( $node, @path ) = @_;
+
+      my $subnodes = @path == 0 ? $node : $node->{options} || {};
+      my @subnodenames = keys %$subnodes;
+      
+      if( @path > 0 ) {
+        my $lastpath = $path[$#path];
+        $node->{chosen} //= $lastpath;
+        $node->{choose} //= $lastpath;
+        $node->{mode}   //= $lastpath;
+        $node->{path} //= join('', map { "m$_/$path[$_]/" } (0..$#path));
+      }
+
+      for my $subnode (@subnodenames) {
+        _adjust_menus( $subnodes->{$subnode}, @path, $subnode );
+      }
+} #_adjust_menus
+
 #
 # These are mainly here rather than in the templates because
 # the templates can't really handle thrown exceptions at all.
@@ -60,17 +84,17 @@ sub _check_actions {
     my( $self ) = @_;
 
     $self->{has_err} = 0;
-    
+
     my $path_args = $self->{path_args};
-    my $req = $self->{req};
-    my $app = $self->{app};
-    my $sess = $self->{session};
-    my $login = $self->{login};
-    my $action = $req->param( 'action' );
+    my $req       = $self->{req};
+    my $app       = $self->{app};
+    my $sess      = $self->{session};
+    my $login     = $self->{login};
+    my $action    = $req->param( 'action' );
 
     $self->msg;
     $self->err;
-    
+
     my $subtemplate = $path_args->{'p'};
     if( $subtemplate ) {
         if( ! $login && ( $subtemplate !~ /^(recent|top_rated|search|login)$/ ) ) {
@@ -103,10 +127,10 @@ sub _check_actions {
 	}
     }
     elsif( $subtemplate eq 'logout' ) {
-	$self->logout;
-        $self->msg( 'logged out' );
-	$self->redirect( '/spuc' );
-	return;
+      $self->logout;
+      $self->msg( 'logged out' );
+      $self->redirect( '/spuc' );
+      return;
     }
     if( $login ) {
         if( $login->get_is_admin ) {
@@ -302,18 +326,65 @@ sub _check_actions {
 
     } #if login
 
-    $self->err;
-    $self->{state}{subtemplate} = $subtemplate;
+    $self->err; #clear error
 
-    $self->{state}{menus} = [
-        [ map { { chosen => $_, choose => $_ } } qw( view play ) ],
-        [ map { { chosen => $_, choose => $_ } } ('all strips','my strips') ],
-#        [ map { { chosen => $_, choose => $_ } } ('random strip','start strip') ],
-        ];
-    $self->{state}{selecteds} = [ 'view', 'my strips' ];
+    my $heirarch = {
+                   about => { template => 'about', },
+                   news  => { template => 'news', },
+                   view => {
+                            chosen => 'viewing',
+                            default => 'all',
+                            options => {   #if options, then there are sub options. If not this is a leaf
+                                        all => { choose => 'all strips', chosen => 'all strips', template => 'allstrips' },
+                                        my  => { choose => 'my strips', chosen => 'my strips', template => 'mystrips' },
+                                       },
+                           },
+                   play => {
+                            default => 'findstrip',
+                            login_level => 1,
+                            options => {
+                                        findstrip => { choose => 'find strip', chosen => 'playing strip', template => 'play' },
+                                        startstrip => { choose => 'start strip', chosen => 'starting strip', template => 'startstrip' },
+                                        reserved => { choose => 'reserved strips', chosen => 'reserved strip', template => 'reserved' },
+                                       },
+                           },
+                   prefs => {
+                             chosen => 'user prefs',
+                             login_level => 1,
+                             template => 'userprefs',
+                            },
+                   admin => {
+                             login_level => 2,
+                             template => 'admin',
+                            },
+                  };
+    _adjust_menus( $heirarch );
+
+    print STDERR Data::Dumper->Dump([$heirarch,"H"]);
+    # show requested mode if allowed and one is requested, otherwise default to view
+    my $currmode = $heirarch->{ $path_args->{m} && _allowed( $heirarch->{$path_args->{m}}, $login ) ? $path_args->{m} : 'view' };
+
+    #
+    # Menusand chosenmodes are sent to the template to build the needed menus
+    #
+    my $menus = [ [  map { $heirarch->{$_} } sort grep { _allowed($heirarch->{$_}, $login) } keys %$heirarch] ];
+    my $chosenmodes = [ $currmode ];
+
+    my $menulevel = 0;
+    while( $currmode->{options} ) {
+      $menulevel++;
+      my $trymode = $currmode->{options}{$path_args->{"m$menulevel"}};
+      my $submode = _allowed( $trymode,$login ) ? $trymode : $currmode->{options}{ $currmode->{default} };
+      push @$chosenmodes, $submode;
+      push @$menus, [ map { $currmode->{options}{$_} } sort grep { _allowed($currmode->{options}{$_},$login) } keys %{$currmode->{options}}],
+      $currmode = $submode;
+    }
+
+    $self->{state}{menus} = $menus;
+    $self->{state}{chosenmodes} = $chosenmodes;
     
     return ! $self->{has_err};
-    
+
 } #_check_actions
 
 1;

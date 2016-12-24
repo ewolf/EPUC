@@ -151,12 +151,10 @@
 
       : #so, get from the server end the subtemplate and the menu options
       : my $menus = $state.menus
-      : my $selecteds = $state.selecteds
-      ( <: $menus :> )
       : for [0..$menus.size()] -> $i {
       <div class="horizontal-menu">
       :   for $menus[$i] -> $item {
-      :      if $item.chosen == $selecteds[$i] {
+      :      if $item.chosen == $chosenmodes[$i] {
         <span class="selected"><: $item.chosen :></span>
       :      } else {
         <span><a href="/spuc/p/<:$item.path:>"><: $item.choose :></a></span>
