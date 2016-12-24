@@ -1,6 +1,7 @@
+XX
 :if $login {
 <script>
-  yote.onReady( function(root,app,acct,session) {       
+  yote.onReady( function(root,app,acct,session) {
       if( acct ) {
           var strip = acct.get( 'last_random_strip' );
           if( strip ) {
@@ -60,44 +61,48 @@
       } //if logged in
   } );
 </script>
-  <h2>Find a Strip to Play</h2>
-: #  cases : find random strip,
+<h2>Find a Strip to Play</h2>
 
-: my $strip = $login.play_random_strip
+:  my $strip =  $login.play_random_strip
 
-:   if $strip {
-  <h4><a href="/spuc/p/findstrip/">Find a different strip</a></h4>
- <div class="right-pane">
-: my $togo = $strip.get_panels_to_go;
+:    if $strip {
+  <h4><a href="/spuc/p/play">Find a different strip</a></h4>
 
-:    if $panel.get_type == 'sentence' {
+:  my $togo = $strip.get_panels_to_go;
+:  my $panel = $strip._last_panel
+  
+:     if $panel.get_type == 'sentence' {
  <h3>Add a picture for this caption (<:$togo:> panels to go)</h3>
         <span class="caption groovy"> &ldquo;
-:      html_encode( $panel.get_sentence )
+:       html_encode( $panel.get_sentence )
         &rdquo;
         </span>
-     <form method="POST" enctype="multipart/form-data"  action="/spuc/p/findstrip">
+     <form method="POST" enctype="multipart/form-data"  action="/spuc/p/play">
        <input type="hidden" name="action" value="upload">
+       <input type="hidden" name="panel" value="<: $panel.id :>">
+       <input type="hidden" name="strip" value="<: $strip.id :>">
        <h4>Upload Picture
        <input type="file" name="pictureup" id="pictureup">
        <input class="no-js" type="submit" value="upload">
        </h4>
      </form>
      
-:    if $allowed > 0 {
-<form method="POST" action="/spuc/p/findstrip">
+:     if $allowed > 0 {
+<form method="POST" action="/spuc/p/play">
       <input type="hidden" name="action" value="reserve">
-       <h4><button class="link-like" type="submit" href="/do/reserve">Reserve this sentence for later ( may reserve <: $allowed :> more)</button></h4>
+       <h4><button class="link-like" type="submit" href="/do/reserve">Reserve this sentence for later</button> ( may reserve <: $allowed :> more)</h4>
 </form>
-:    } else {
+:     } else {
        <h4>out of strip reservations</h4>
-:    }
-:   } # panel was sentence needing picture
-:   else {
-:    #submit a caption
-     <form class="full-when-narrow" method="POST" action="/spuc/p/findstrip">
+:     }
+:    } # panel was sentence needing picture
+:    else {
+:     #submit a caption
+     <form class="picture" method="POST" action="/spuc/p/play">
        <input type="hidden" name="action" value="caption">
-       <h3><a href="#add">Caption this strip (<:$togo:> panels to go)</a></h3>
+       <input type="hidden" name="panel" value="<: $panel.id :>">
+       <input type="hidden" name="strip" value="<: $strip.id :>">
+       <h3><a href="#add">Caption</a> this strip (<:$togo:> panels to go)</h3>
        <img src="<: $panel.get_picture.url('700x700') :>">
        <textarea name="caption" id="caption"><:$req.param("caption"):></textarea>
        <br>
@@ -105,13 +110,14 @@
        <input type="submit" value="Add Caption" id="docap">
      </form>
      <br>
-:   } #panel was a picture needing caption
-  </div>
-: } else {
-   No strip found
-: }
+:    } #panel was a picture needing caption
+:   } # if strip
+:   else { 
+      No strip found
+:   }
 :} else {
 :  # no login
 :  $app.msg( 'login expired. log in' );
 :  include $op.tmpl( $app_path, 'welcome' )
 :}
+XX

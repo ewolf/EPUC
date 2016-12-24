@@ -71,7 +71,7 @@ sub _check_actions {
     $self->msg;
     $self->err;
     
-    my $subtemplate = $path_args->{'p'};
+    my $subtemplate = $path_args->{'p'} || 'view';
     if( $subtemplate ) {
         if( ! $login && ( $subtemplate !~ /^(view|search|login|news|about)$/ ) ) {
             print STDERR Data::Dumper->Dump(["SSESS EXPIRED ON ($subtemplate)"]);
