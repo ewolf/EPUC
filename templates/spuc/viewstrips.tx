@@ -15,7 +15,7 @@
     }
   </style>
   <div class="horizontal-menu">
-   : for [ ['completed','completed','completed strips'], ['my strips','artist-strips','my strips'] ] -> $modesel {
+   : for [ ['all completed','completed','all completed'], ['my strips','artist-strips','my'] ] -> $modesel {
    :   if $modesel[1] == $strip_mode {
        <span class="selected"><:$modesel[2]:></span>
    :   } else {
@@ -25,7 +25,7 @@
   </div>
 
   <div class="horizontal-menu">
-   : for [ ['recent','recent','recent strips'], ['most discussed','discussed','most discussed'], ['top rated','top','top rated'], ['pending','pending','pending' ], ['reserved','reserved','reserved' ] ] -> $sortsel {
+   : for [ ['recent','recent','recent strips'], ['most discussed','discussed','most discussed strips'], ['top rated','top','top rated strips'], ['pending','pending','pending strips' ], ['reserved','reserved','reserved strips' ] ] -> $sortsel {
    :  if ($sortsel[1] != 'pending' && $sortsel[1] != 'reserved' ) || $strip_mode == 'artist-strips' {
    :    if $sortsel[1] == $strip_sort {
         <span class="selected"><:$sortsel[2]:></span>
@@ -41,7 +41,7 @@
 : my $strip_list = $app.strip_list( $strip_mode, $strip_sort, $login )
 
 : if $strip_list.size() > 0 {
-:   include $op.tmpl( $app_path, 'paginate_strips' ) { strip_list => $strip_list, pag_path => $pag_path ~ '/vs/' ~ $strip_sort ~ '/vm/' ~ $strip_mode, detail_index => $path_args['d'] || '0', strip_start => $path_args['s'] || '0' }
+:   include $op.tmpl( $app_path, 'paginate_strips' ) { strip_list => $strip_list, pag_path => $pag_path ~ '/vs/' ~ $strip_sort ~ '/vm/' ~ $strip_mode, detail_index => $path_args['d'] || '0', strip_start => $path_args['s'] || '0', show_kudos => $strip_sort != 'reserved', show_discussion => 1, last_only => $strip_sort == 'reserved' }
 : } else {
     <h4>No Strips</h4>
 : }

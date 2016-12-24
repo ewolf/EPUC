@@ -12,13 +12,17 @@
     margin-right: 1em;
   }
   div.horizontal-menu {
+      display:flex;
+      flex-wrap: wrap;
     padding-bottom: 3px;
     border-bottom: groove 3px #BBB;
   }
   .selected {
     font-weight: bold;
     white-space: nowrap;
-    float: left;
+    border: solid 3px black;
+    padding: .3em;
+    order: -1;
   }
   .select {
     white-space: nowrap;
@@ -32,7 +36,7 @@
   <a href="/spuc/p/login">Log In</a>
 : } else {
   <div class="horizontal-menu">
-   : for [ ['view strips','viewstrips','viewing strips'], ['play','play','playing spuc'],['start strip','startstrip','starting strip'], ['admin','admin','in admin'] ] -> $modesel {
+   : for [ ['view strips','viewstrips','viewing'], ['play','play','playing spuc'],['start strip','startstrip','starting strip'], ['prefs','userprefs','editing prefs'], ['admin','admin','in admin'] ] -> $modesel {
    :   if $modesel[1] != 'admin' || $login.get_is_admin {
    :     if $modesel[1] == $subtemplate {
       <span class="selected"><:$modesel[2]:></span>

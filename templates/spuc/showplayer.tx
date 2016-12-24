@@ -1,5 +1,12 @@
+<style>
+ .top {
+   margin-top: 4px;
+ } 
+</style>
+
 : my $player = $app.lookup_player($path_args['a'])
-<div>
+
+<div class="top">
   <img src="<: $player.get_avatar.get_icon.url('80x80'):>">
   <br>
   <span>
@@ -22,7 +29,7 @@
 : my $strip_list = $player.get_avatar.get_completed_strips
 
 : if $strip_list.size() > 0 {
-:   include $op.tmpl( $app_path, 'paginate_strips' ) { strip_list => $strip_list, pag_path => $app_path ~ '/p/showplayer/a/' ~ $path_args['a'] }
+:   include $op.tmpl( $app_path, 'paginate_strips' ) { strip_list => $strip_list, pag_path => $app_path ~ '/p/showplayer/a/' ~ $path_args['a'], show_kudos => 1, show_discussion => 1 }
 : } else {
     <h4>No Strips Yet</h4>
 : }

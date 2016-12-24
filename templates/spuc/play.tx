@@ -1,7 +1,6 @@
 :if $login {
 <script>
   yote.onReady( function(root,app,acct,session) {
-  return; //NOT READY YET FOR THIS
       if( acct ) {
           var strip = acct.get( 'last_random_strip' );
           if( strip ) {

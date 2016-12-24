@@ -66,23 +66,31 @@ li {
     margin: 0;
     padding: 0;
 }
-@media (max-width: 400px) { 
+@media (max-width: 500px) { 
     body .picture {
         width: 100%;
     }
     body .picture img {
         width: 100%;
     }
+    h1 {
+     border: solid 3px green;
+    }
     body {
-//        background-color:blue;
+        background-color:lightblue;
     }
     .panel {
-        border-bottom: solid 1px #AAA;
-        padding: 3px 0;
     }
     .full-when-narrow,
     textarea {
         width: 100%;
+    }
+    .small-icon {
+        width:30px;
+        height:30px;
+    }
+    .up {
+       vertical-align: top;
     }
 }
 form {
@@ -90,7 +98,7 @@ form {
 }
     
 </style>
-   <script>
+    <script>
    function msg( text, selector ) {
        selector = selector || '.msg';
        text = text || '';
@@ -102,11 +110,9 @@ form {
        $( selector ).text( text ).toggleClass( 'has-text', text.length > 0 );
    }
    $().ready( function() {
-                    return;
        var $body = $('body')
        $body.addClass('has-js');
        yote.init( {
-            //            yoteServerURL: '/cgi-bin/yote_cgi.pl',
             yoteServerURL: '/spuc-json',
             appName: 'EPUC::App',
             token: '<: $session.get__token :>'
@@ -125,7 +131,7 @@ form {
     : if $login {
     <div class="login">
 <!--      <a href="/spuc/p/userprefs"><img class="icon" src="<: $login.get_avatar.get_icon.url('80x80') :>"></a> -->
-      <span>Logged in as <a href="/spuc/p/userprefs"><: $login.get_user :></a></span>
+      <span> <a class="up" href="/spuc/p/userprefs"><img class="small-icon" src="<: $login.get_avatar.get_icon.url('80x80') :>"> <: $login.get_user :></a></span>
       <span class="logout"><a href="/spuc/p/logout">log out</a></span>
     </div>
     :}
@@ -137,6 +143,7 @@ form {
     <span class="msg<: $msg ? " show" : "":>"><:$msg:></span>
        
     <main>
+      time to work on the reserved, because it should jsut show the last panel
       : include $op.tmpl( $app_path, 'welcome' )
     </main>
   </body>
