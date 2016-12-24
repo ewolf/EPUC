@@ -110,7 +110,8 @@ yote.onReady( function(root,app,acct,sess) {
 
       <div class="kudospot">
           <span class="kudo-count" data-panel-id="<:$session.getid($panel):>">
-          : $panel.kudocount 
+          : $panel.kudocount
+    
           : $panel.kudocount == 1 ? "kudo" : "kudos"
           </span>
 

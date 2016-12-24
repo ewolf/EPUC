@@ -17,9 +17,9 @@ header {
     background-color: #DDE;
     padding: 1em 0 1.6em 0;
 }
-.subtemplate {
+main {
     font-size: large;
-    padding: 10px;
+    padding: 15px;
 }
 .plain {
     text-decoration: none;
@@ -49,20 +49,13 @@ header {
 .login {
     background-color:wheat;
     padding: .5em .5em;
-    margin: .3em 0;
+    margin: .3em 0 0 0;
 }
 .login > span {
     vertical-align: top;
 }
 .logout {
     float: right;
-}
-ul.horizontal-menu
-{
-    list-style-type: none;
-    justify-content: space-around;
-    align-items: stretch;
-    display: flex;
 }
 .horizontal-menu li
 {
@@ -91,6 +84,7 @@ li {
 form {
     display: inline-block;
 }
+    
 </style>
    <script>
    function msg( text, selector ) {
@@ -139,13 +133,7 @@ form {
     <span class="msg<: $msg ? " show" : "":>"><:$msg:></span>
        
     <main>
-      <div class="subtemplate">
-
-        : my $subtemplate = $state.subtemplate|| $path_args.p || 'welcome';
-
-        : include $op.tmpl( $app_path, $subtemplate )
-      </div>
-      
+      : include $op.tmpl( $app_path, 'welcome' )
     </main>
   </body>
 </html>

@@ -1,29 +1,48 @@
+<style>
+  ul.horizontal-menu
+  {
+    list-style-type: none;
+    justify-content: space-around;
+    align-items: stretch;
+    display: flex;
+    padding-bottom: 3px;
+    border-bottom: groove 3px #BBB;
+  }
+  div.horizontal-menu > span {
+    margin-right: 1em;
+  }
+  div.horizontal-menu {
+    padding-bottom: 3px;
+    border-bottom: groove 3px #BBB;
+  }
+  .selected {
+    font-weight: bold;
+    white-space: nowrap;
+    float: left;
+  }
+  .select {
+    white-space: nowrap;
+  }
+
+</style>
+: my $subtemplate = $path_args['p'] || $state.subtemplate || 'viewstrips';
+
 : if ! $login {
   <h3>Welcome to scarf poutine you clone</h3>
   <a href="/spuc/p/login">Log In</a>
 : } else {
-  <ul class="horizontal-menu">
-    <li><a href="/spuc/p/play">play</a></li>
-    <li><a href="/spuc/p/view">view strips</a></li>
-    : if $login.get_is_admin {
-        <li><a href="/spuc/p/admin">admin</a></li>
-    : }
-  </ul>
-  <!--
-  <menu>
-    hi there
-    </menu>
--->
+  <div class="horizontal-menu">
+   : for [ ['play','play','playing spuc'], ['view strips','viewstrips','viewing strips'], ['admin','admin','in admin'] ] -> $modesel {
+   :   if $modesel[1] != 'admin' || $login.get_is_admin {
+   :     if $modesel[1] == $subtemplate {
+      <span class="selected"><:$modesel[2]:></span>
+   :     } else {
+      <span><a href="/spuc/p/<:$modesel[1]:>"><:$modesel[0]:></a></span>
+   :     }
+   :   }
+   : }
+  </div>
 : }
 
-<h3>Recent Strips</h3>
   
-:  my $strip_list = $app.completed_strips
-:  my $show_kudos = $login ? 1 : 0;
-
-: if $strip_list.size() > 0 {
-:    include $op.tmpl( $app_path, 'strip' ) { showkudos => $show_kudos, panelsize => '400x400', strip => $strip_list[0], detail_strip => 0, strip_start => 0 }
-:#   include $op.tmpl( $app_path, 'paginate_strips' ) { strip_list => $strip_list, pag_path => $app_path ~ '/p/welcome' }
-: } else {
-    <h4>No Completed Strips Yet</h4>
-: }
+: include $op.tmpl( $app_path, $subtemplate )

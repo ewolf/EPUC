@@ -1,0 +1,9 @@
+:  my $strip_list = $app.completed_strips
+:  my $show_kudos = $login ? 1 : 0;
+
+: if $strip_list.size() > 0 {
+:    include $op.tmpl( $app_path, 'strip' ) { showkudos => $show_kudos, panelsize => '400x400', strip => $strip_list[0], detail_strip => 0, strip_start => 0 }
+:#   include $op.tmpl( $app_path, 'paginate_strips' ) { strip_list => $strip_list, pag_path => $app_path ~ '/p/welcome' }
+: } else {
+    <h4>No Completed Strips Yet</h4>
+: }

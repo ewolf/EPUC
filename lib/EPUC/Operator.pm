@@ -80,7 +80,7 @@ sub _check_actions {
             }
         }
     } else {
-        $subtemplate = 'welcome';
+        $subtemplate = 'viewstrips';
     }
 
     my $avatar = $login ? $login->get_avatar : undef;
