@@ -10,7 +10,7 @@
              var $un = $('#un');
              var $pw = $('#pw');
              var $ia = $('#is_admin');
-             acct.create_user_account( [ $un.val(), $pw.val(), $ia.is(':checked') ],
+             acct.create_user_account( [ $un.val(), $pw.val(), $ia.is(':checked')? 1: 0 ],
                                        function( acct ) {
                                            msg('created account');
                                            $un.val('');
