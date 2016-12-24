@@ -1,6 +1,37 @@
+<style>
+@media (max-width: 400px) {
+  .panel {
+         text-align: center;
+         font-size: x-large;
+  }
+  .kudos {
+         font-size: small;
+         text-align: left;
+  }
+  .kudospot {
+         display: inline-block;
+         float: right;
+  }
+}
+</style>
+
+
+<script>
+yote.onReady( function(root,app,acct,sess) {
+    $( '.strip' ).on("swipeleft",function(ev) {
+        alert('left');
+    } );
+    $( '.strip' ).on("swipe",function(ev) {
+        alert('rigth');
+    } );
+} );
+</script>
+
+: #-------------------------- IF LOGIN --------------------------
 : if $login {
 <script>
     yote.onReady( function(root,app,acct,sess) {
+        
         $('.kudo-button').on( 'click', function(ev) {
             var $this = $(this);
             ev.preventDefault();
@@ -51,70 +82,75 @@
     } );
 
 </script>
-: } #if login
+: } #-------------------if login--------------------------------------
 
 : my $panels = $strip.get__panels
 
 : if 0 && $showkudos && $strip.get__state == 'complete' {
-<div class="rating">
- rate this strip RATINGBAR &star; <span style="color:red">&#9733;</span>
-</div>
+     <div class="rating">
+      rate this strip RATINGBAR &star; <span style="color:red">&#9733;</span>
+     </div>
 : }
+     
 <div class="strip">
-: for [0..($panels.size()-1)] -> $p_idx {
-:  my $panel = $panels[$p_idx]
 
- <div class="panel">
-:   if $panel.get_type == 'sentence' {
-    <span class="caption">
-:        html_encode( $panel.get_sentence )
-    </span>
-:   } else {
-    <span class="picture">
-    : if $showkudos {
-      <img src="<: $panel.get_picture.url($panelsize) :>">
-    : } else {
-      <img width="300" src="<: $panel.get_picture.url($panelsize) :>">
-    : }
-    </span>
-:   }
+: # --------------- EACH STRIP PANEL
+: for [0..($panels.size()-1)] -> $p_idx {
+:    my $panel = $panels[$p_idx]
+
+  <div class="panel">
+
 :   if $showkudos {
     <div class="kudos">
       <span class="kudo">
-      
-      :# $panel.get__artist().get__account().add_once_to_in_progress_strips( $strip )
-      
-      :# $app.get__accts['coyo'].get_in_progress_strips.size()
-
         <a href="/<:$app_path:>/p/showplayer/a/<:$panel.get__artist().get__account().get_user():>">
-:         $panel.get__artist().get__account().get_user()
+      : $panel.get__artist().get__account().get_user()
         </a>
       </span>
-        <span class="kudo-count" data-panel-id="<:$session.getid($panel):>"><: $panel.kudocount :></span> kudos
 
-    :     if $panel.can_kudo( $login ) {
-         <form class="" method="POST" action="/<:$pag_path:>/s/<:$strip_start:>/d/<: $detail_strip :>">
-           <input type="hidden" name="action" value="kudo">
-           <input type="hidden" name="panel" value="<: $session.getid($panel) :>">
-           <button type="submit" class="link-like heart kudo-button kudo-heart" data-panel-id="<:$session.getid($panel):>">&hearts;</button>
-        </form>
-       <span class="redheart heart kudo-heart" style="display:none" data-panel-id="<:$session.getid($panel):>">&hearts;</span>
+      <div class="kudospot">
+          <span class="kudo-count" data-panel-id="<:$session.getid($panel):>">
+          : $panel.kudocount 
+          : $panel.kudocount == 1 ? "kudo" : "kudos"
+          </span>
+
+        : if $panel.can_kudo( $login ) {
+          <form method="POST" action="/<:$pag_path:>/s/<:$strip_start:>/d/<: $detail_strip :>">
+               <input type="hidden" name="action" value="kudo">
+               <input type="hidden" name="panel" value="<: $session.getid($panel) :>">
+               <button type="submit" class="link-like heart kudo-button kudo-heart" data-panel-id="<:$session.getid($panel):>">&hearts;</button>
+            </form>
+           <span class="redheart heart kudo-heart" style="display:none" data-panel-id="<:$session.getid($panel):>">&hearts;</span>
          :     } else {
-       <span class="redheart heart">&hearts;</span>
-:     }
-    </div>
-:   }
-</div>
-<br>
+           <span class="redheart heart">&hearts;</span>
+         :     } # ------- can kudo
+      </div>
+    </div> <: # ---- kudo panel :>
+:   } #---if show kudos
+
+:   if $panel.get_type == 'sentence' {
+    <span class="caption">
+       : html_encode( $panel.get_sentence )
+    </span>
+: }
+: else { #------- else an image panel
+    <span class="picture">
+      <img src="<: $panel.get_picture.url($panelsize) :>">
+    </span>
+:  } #---- image panel
+
+  </div>  <: # ==== PANEL ==== :>
+
 : } #each panel
+
 : if $showkudos {
     <h4>Discussion</h4>
-    : my $discussion = $strip.get_discussion;
-
-    : if $discussion && $discussion.size() > 0 {
-       <div class="discussion">
-    :   for $discussion -> $line {
-    <div style="margin-bottom:.4em;border:solid 1px black;background-color:#DEDEEF; font-size: x-large;">
+    
+  : my $discussion = $strip.get_discussion;
+  : if $discussion && $discussion.size() > 0 {
+    <div class="discussion">
+  :   for $discussion -> $line {
+       <div style="margin-bottom:.4em;border:solid 1px black;background-color:#DEDEEF; font-size: x-large;">
       <img style="vertical-align:middle" src="<:$line.get_player.get_avatar.get_icon.url('80x80'):>">
       &ldquo;
         <: $line.get_message :>
@@ -131,7 +167,7 @@
     <form method="POST" action="/<:$pag_path:>/s/<:$strip_start:>/d/<:$detail_strip:>">
       <input type="hidden" name="action" value="message">
       <input type="hidden" name="strip" value="<: $session.getid($strip) :>">
-      <textarea cols="80" rows="5" name="message" id="something"></textarea><br>
+      <textarea cols="30" rows="5" name="message" id="something"></textarea><br>
       <button class="disabled" type="submit" data-strip-id="<:$session.getid($strip):>" id="say-something">Say something</button>
     </form>
      :}

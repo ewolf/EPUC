@@ -6,167 +6,92 @@
     <script src="/js/jquery-1.12.0.min.js"></script>
     <script src="/js/yote.js"></script>
     <style>
-      .subtemplate {
-         margin: .5em 3px 3px 13.3em;
-         padding: 1em 0 2em 13px;
-         border: 4px solid #ABB;
-         background-color: #EDD;
-      }
-      .rightpane {
-         width: 10em;
-         margin: 0 0 0 .5em;
-         padding: 1em;
-         float:left;
-         border: 4px solid #ABB;
-         background-color: #EDD;
-      }
-      .prevnext {
-         text-align: center;
-         font-size: large;
-      }
-      header {
-          text-align: center;
-          vertical-align: middle;
-          background-color: #DDE;
-          padding: 1em 0 1.6em 0;
-      }
-      .subtemplate > h2 {
-          margin-left: 4em;
-      }
-      body {
-          background-color: #FFE;
-          font-size: x-large;
-      }
-      .spuc-stamp {
-          float: left;
-          margin: .3em;
-          padding: .5em;
-      }
-      .footer {
-          margin:2em;
-          bottom:0px;
-          position:absolute;
-          text-align: center;
-      }
-      .spuc-stamp {
-         float:left;
-      }
-      form {
-          display: inline;
-      }
-      .caption {
-         font-size:xx-large;
-         background-color: wheat;
- 	 text-align:center;
-	 display:block;
-      }
-      .picture > img {
-         border: solid 1px black;
-      }
-      .picture {
- 	 text-align:center;
-	 display:block;
-      }
-      .strip {
-         text-decoration: none;
-         color: black;
-      }
-      .menu {
-	  list-style-type: none;
-	  -webkit-padding-start: 0;
-      }
-      .detail {
-	  display:inline-block;
-      }
-      .paginated-strips {
-	  padding:3px 0 3px 3em;
-          vertical-align:top;
-          width: 1500px;
-      }
-      .heart {
-          margin-left: 1.4em;
-          font-size: x-large;
-      }
-      .redheart {
-         color: #E00;
-      }
-      .kudos {
-          background-color: #EEE;
-          font-size: large;
-          padding: 6px;
-          text-align: right;
-      }
-      .kudo {
-          font-size: large;
-          float :left;
-      }
-      .reserved-strip {
-          margin: 0 6em 3em 6em;
-          padding: 1em;
-          border: solid 1px black;
-      }
-      .paginate-bar {
-          text-align: center;
-          font-size: large;
-          margin-bottom: 2em;
-      }
-      .rating {
-          text-align: right;
-          font-size: large;
-          padding-bottom: .3em;
-      }
-      .panel {
-          background-color: #EEE;
-          border: solid 3px #661;
-          padding: .3em;
-      }
-      .groovy {
-          border: groove 7px #AAB;
-      }
-      .link-like {
-          text-decoration: underline;
-          cursor: pointer;
-          border: none;
-          background: none;
-          color: blue;
-          font: inherit;
-          display: inline;
-          outline-offset: 0;
-          outline: none;
-          padding: 0;
-      }
-      .msg { padding: 3px; margin: 1px; border: solid grey 3px; background-color: lightgrey  }
-      .err { padding: 3px; margin: 1px; border: solid red 3px; background-color: pink  }
-      .has-js .err.has-text,
-      .has-js .msg.has-text,
-      .err.has-text,
-      .msg.has-text {
-         display:inline-block;
-         margin-bottom:.5em;
-      
-      }
-      .needs-update {
-          background-color:#CC9;
-      }
-      .has-js .no-js {
-          display: none;
-      }
-      .msg,
-      .err {
-          display: none;
-      }
-      .has-js .disabled {
-          color: grey;
-          background-color: darkgrey;
-      
-      }
-      .wait {
-          cursor: wait;
-      }
-      .seen-news {
-          background-color: #EEE;
-      }
-   </style>
+    
+    body {
+    padding:0;
+    margin:0;
+}
+header {
+    text-align: center;
+    vertical-align: middle;
+    background-color: #DDE;
+    padding: 1em 0 1.6em 0;
+}
+.subtemplate {
+    font-size: large;
+    padding: 10px;
+}
+.plain {
+    text-decoration: none;
+    color: black;
+}
+.err {
+    display: none;
+    padding: .3em;
+    margin: 4px 0;
+    background-color: #EFE;
+    border: solid 2px #DED;
+    font-family: monospace;
+}
+.msg {
+    display: none;
+    padding: .3em;
+    margin: 4px 0;
+    background-color: #EEF;
+    border: solid 2px #DDE;
+    font-family: monospace;
+}
+.show.err,
+.show.msg {
+    display: block;
+}
+
+.login {
+    background-color:wheat;
+    padding: .5em .5em;
+    margin: .3em 0;
+}
+.login > span {
+    vertical-align: top;
+}
+.logout {
+    float: right;
+}
+ul.horizontal-menu
+{
+    list-style-type: none;
+    justify-content: space-around;
+    align-items: stretch;
+    display: flex;
+}
+.horizontal-menu li
+{
+    display: block;
+}
+ul,
+li {
+    margin: 0;
+    padding: 0;
+}
+@media (max-width: 400px) { 
+    body .picture {
+        width: 100%;
+    }
+    body .picture img {
+        width: 100%;
+    }
+    body {
+//        background-color:blue;
+    }
+    .panel {
+        border-bottom: solid 1px #AAA;
+        padding: 3px 0;
+    }
+}
+form {
+    display: inline-block;
+}
+</style>
    <script>
    function msg( text, selector ) {
        selector = selector || '.msg';
@@ -179,9 +104,10 @@
        $( selector ).text( text ).toggleClass( 'has-text', text.length > 0 );
    }
    $().ready( function() {
+                    return;
        var $body = $('body')
        $body.addClass('has-js');
-        yote.init( {
+       yote.init( {
             //            yoteServerURL: '/cgi-bin/yote_cgi.pl',
             yoteServerURL: '/spuc-json',
             appName: 'EPUC::App',
@@ -190,27 +116,36 @@
    } );
    </script>
 
- </head>
+  </head>
   <body>
-    <header>
-        <a class="spuc-stamp" href="/spuc">SPUC</a>
-        <h1>Scarf Poutine You Clone</h1>
-    </header>
+    
+    <a class="plain" href="/spuc">
+      <header>
+        <h1>-----&gt; <span style="text-decoration:underline; color:blue">SPUC</span> &lt;-----</h1>
+      </header>
+    </a>
+    : if $login {
+    <div class="login">
+<!--      <a href="/spuc/p/userprefs"><img class="icon" src="<: $login.get_avatar.get_icon.url('80x80') :>"></a> -->
+      <span>Logged in as <a href="/spuc/p/userprefs"><: $login.get_user :></a></span>
+      <span class="logout"><a href="/spuc/p/logout">log out</a></span>
+    </div>
+    :}
+        
+    : my $err = $session.get_err
+    : my $msg = $session.get_msg
+
+    <span class="err<: $err ? " show" : "":>"><:$err:></span>
+    <span class="msg<: $msg ? " show" : "":>"><:$msg:></span>
+       
     <main>
-      
-      <section class="rightpane">
-        : include $op.tmpl( 'spuc/playermenu' )
-      </section>
       <div class="subtemplate">
 
-      : my $subtemplate = $state.subtemplate|| $path_args.p || 'welcome';
+        : my $subtemplate = $state.subtemplate|| $path_args.p || 'welcome';
 
-      : include $op.tmpl( $app_path, $subtemplate )
+        : include $op.tmpl( $app_path, $subtemplate )
       </div>
-                
+      
     </main>
-    <footer>
-      <div class="footer"></div>
-    </footer>
   </body>
 </html>

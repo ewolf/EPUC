@@ -1,35 +1,29 @@
-<span class="err <: $err ? "has-text" : "" :>"><: $err :></span>
-<span class="msg <: $msg ? "has-text" : "" :>"><: $msg :></span>
+: if ! $login {
+  <h3>Welcome to scarf poutine you clone</h3>
+  <a href="/spuc/p/login">Log In</a>
+: } else {
+  <ul class="horizontal-menu">
+    <li><a href="/spuc/p/play">play</a></li>
+    <li><a href="/spuc/p/view">view strips</a></li>
+    : if $login.get_is_admin {
+        <li><a href="/spuc/p/admin">admin</a></li>
+    : }
+  </ul>
+  <!--
+  <menu>
+    hi there
+    </menu>
+-->
+: }
+
 <h3>Recent Strips</h3>
+  
 :  my $strip_list = $app.completed_strips
+:  my $show_kudos = $login ? 1 : 0;
 
 : if $strip_list.size() > 0 {
-:   include $op.tmpl( $app_path, 'paginate_strips' ) { strip_list => $strip_list, pag_path => $app_path ~ '/p/welcome' }
+:    include $op.tmpl( $app_path, 'strip' ) { showkudos => $show_kudos, panelsize => '400x400', strip => $strip_list[0], detail_strip => 0, strip_start => 0 }
+:#   include $op.tmpl( $app_path, 'paginate_strips' ) { strip_list => $strip_list, pag_path => $app_path ~ '/p/welcome' }
 : } else {
     <h4>No Completed Strips Yet</h4>
 : }
-<h3>News</h3>
-
-: include $op.tmpl( $app_path, 'news' )
-
-<h3>SPUC</h3>
-<p>
-  <img class="starticon" src="/epuc_data/images/coyo.jpg"> Coyo here. I really miss the the <i><b>eat poop u cat</b></i> site, so I've made this clone of a site. The original site and this one is a way to create collaborative comic strips.
-</p>
-<p>
-  To get an account, <a href="mailto:coyocanid\@gmail.com">contact me</a>  or any of the admins of the site. Include
-  the user handle you would like.
-</p>
-<h3>How to Play</h3>
-<p>
-Log in and click the
-: if $login {
-    <a href="/spuc/p/findstrip">find a strip to play</a>
-: } else {
-    <b>find a strip to play</b>
-: }
-link. This will show you either a picture or a caption. If you have a picture, you can play by
-writing a caption for that picture. If you have a caption, you can upload a picture for it, or reserve it so that you can work on the picture in your lesiure without worrying that someone else will draw the picture. You can reserve up to three captions this way. Also, you can click on a strip to show who drew which panels and also give kudos.
-</p>
-
-

@@ -25,17 +25,32 @@ package EPUC::StateManager;
 
 use base 'Yote::Server::ModperlOperatorStateManager';
 
+sub make_err {
+    $@ = { err => shift };
+}
+
 sub err {
     my( $self, $err ) = @_;
     $err //= $@;
-    $self->{err} = ref $err ? $err->{err} : $err;
+    $self->{session}->set_err( ref $err ? $err->{err} : $err  );
     $self->{has_err} = 1 if $err;
 }
 
 sub msg {
     my( $self, $msg ) = @_;
-    $self->{msg} = $msg;
+    if( $self->{session}->get_redirect ) {
+        $self->{session}->set_redirect;
+    } else {
+        $self->{session}->set_msg( $msg );
+    }
 }
+
+sub redirect {
+    my( $self, $loc ) = @_;
+    $self->{redirect} = $loc;
+    $self->{session}->set_redirect(1);
+}
+
 
 #
 # These are mainly here rather than in the templates because
@@ -53,6 +68,9 @@ sub _check_actions {
     my $login = $self->{login};
     my $action = $req->param( 'action' );
 
+    $self->msg;
+    $self->err;
+    
     my $subtemplate = $path_args->{'p'};
     if( $subtemplate ) {
         if( ! $login && ( $subtemplate !~ /^(recent|top_rated|search|login)$/ ) ) {
@@ -77,8 +95,8 @@ sub _check_actions {
 		    $self->{login} = $login;
 		};
 		if( $login ) {
-		    $self->msg( "Logged in as " . $login->get_user );
-		    $self->{redirect} = '/spuc';
+		    $self->msg( "Login successfull" );
+		    $self->redirect( '/spuc' );
 		    return;
 		}
 	    }
@@ -86,7 +104,8 @@ sub _check_actions {
     }
     elsif( $subtemplate eq 'logout' ) {
 	$self->logout;
-	$self->{redirect} = '/spuc';
+        $self->msg( 'logged out' );
+	$self->redirect( '/spuc' );
 	return;
     }
     if( $login ) {
@@ -243,9 +262,9 @@ sub _check_actions {
                         my $idx = $path_args->{'d'} - 1;
                         if( @$strips > 0 ) {
                             $idx = 0 if $idx < 0;
-                            $self->{redirect} = "/spuc/p/myinprogress/s/$path_args->{s}/d/$idx";
+                            $self->redirect( "/spuc/p/myinprogress/s/$path_args->{s}/d/$idx" );
                         } else {
-                            $self->{redirect} = "/spuc/p/myinprogress";
+                            $self->redirect( "/spuc/p/myinprogress" );
                         }
                     }
                 };
