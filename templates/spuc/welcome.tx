@@ -30,7 +30,85 @@
 : if ! $login {
   <h3>Welcome to scarf poutine you clone</h3>
   <a href="/spuc/p/login">Log In</a>
-: } else {
+: } 
+
+: my $options = [
+: { choose => 'view', chosen => 'viewing', chosen_mode => $session.get_lastview || 'viewstrips', actions => [
+:            { choose_title => 'all completed strips',  selected_title => 'all strips',            mode => 'viewstrips' },
+:            { choose_title => 'my completed strips',   selected_title => 'my completed strips',   mode => 'mycompleted', login_level => 1 },
+:            { choose_title => 'my in progress strips', selected_title => 'my in progress strips', mode => 'myinprogress', login_level => 1 },
+:            { choose_title => 'artist',                selected_title => 'artist',                mode => 'viewartist' },
+:            { choose_title => 'bookmarked strip', selected_title => 'bookmarked strip', mode => 'bookmarks' },
+:       ]
+:  },
+:  {
+:       choose => 'play',
+:       chosen => 'playing',
+:       login_level => 1,
+:       chosen_mode     => $session.get_lastview || 'play',
+:       actions => [
+:            { choose_title => 'find strip', selected_title => 'playing strip', mode => 'play' },
+:            { choose_title => 'reserved strips', selected_title => 'reserved strips', mode => 'showreserved' },
+:            { choose_title => 'start string', selected_title => 'starting strip', mode => 'startstrip' }
+:       ]
+:  },
+:  {     choose => 'admin',
+:        chosen => 'admin',
+:        chosen_mode => 'admin',
+:        login_level => 2,
+:        actions => [
+:             { mode => 'createacct', choose_title => 'create account', 'selected_title' => 'creating account' },
+:             { mode => 'resetuserpw', choose_title => 'reset password', 'selected_title' => 'resetting password' },
+:             { mode => 'listaccounts', choose_title => 'list accounts', 'selected_title' => 'listing accounts' },
+:             { mode => 'allinprogress', choose_title => 'show all in progress strips', 'selected_title' => 'showing all in progress strips', login_level => 3 }
+:        ]
+:  },
+:  {
+:        choose  => 'news',
+:        chosen  => 'news',
+:        chosen_mode => 'news',
+:        mode    => 'news'
+:  },
+:  {
+:        choose  => 'about',
+:        chosen  => 'about',
+:        mode    => 'about',
+:        chosen_mode => 'about'
+:  }
+:  ]
+
+<div class="horizontal-menu">
+: for $options -> $opt {
+:   if $opt.login_level == 0 || ( $opt.login_level == 1 && $login ) || ( $opt.login_level == 2 && $login && $login.get_is_admin ) || ( ! $opt.login_level ) {
+:     if $subtemplate == $opt.chosen_mode {
+        <span class="selected"><: $opt.chosen :></span>
+:     } else {
+        <span><a href="/spuc/p/<: $opt.chosen_mode:>"><: $opt.choose :></a></span>
+:     }
+:   }
+: }
+</div>
+
+: for $options -> $opt {
+:   if $opt.login_level == 0 || ( $opt.login_level == 1 && $login ) || ( $opt.login_level == 2 && $login && $login.get_is_admin ) || ( ! $opt.login_level ) {
+:     if $opt.actions && $subtemplate == $opt.chosen_mode {
+        <div class="horizontal-menu">
+:       for $opt.actions -> $action {
+:        if $action.mode == $opt.chosen_mode {
+           <span class="selected"><: $action.selected_title :></span>
+:        } else {
+           <span><a href="/spuc/p/<:$action.mode:>"><: $action.choose_title :></a></span>
+:        }
+:       }
+      </div>
+:     } #if actions
+:   } #if allowed
+: } #each option
+
+
+<hr>
+beep
+<hr>
   <div class="horizontal-menu">
 
     : my $option_sets = [ ['view', 0, [ 'completed', 'my incomplete', 'bookmarked' ]],
@@ -52,7 +130,6 @@
    :   }
    : }
   </div>
-: }
 
   
 : include $op.tmpl( $app_path, $subtemplate )
