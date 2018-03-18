@@ -3,6 +3,7 @@
 
   <head>
     <style>
+      /*  BRUSH */
        .brushsize {
            border: solid 1px black;
            margin: 7px auto;
@@ -13,15 +14,47 @@
        .brushcontrol {
            border: solid 1px black;
            margin: 7px;
+           cursor:pointer;
        }
-      .colorpick {
+
+       /*  COLOR CREATOR */
+       #composite {
+           display: none;
+       }
+       
+       .colorslide {
+           width:256px;
+           margin:7px 0;
+           border: solid 1px black;
+       }
+       .slider.atend {
+           margin-left:255px;
+       }
+       .slider {
+          width: 3em;
+          background-color: black;
+          border:solid 3px black;
+          cursor:pointer;
+       }
+       /*  COLOR SELECT */
+       span.colorpick {
+           display:inline-block;
+           margin: 3px;
+       }
+       .colorpick {
           border: solid 1px black;
           width: 40px;
           height: 40px;
           cursor: pointer;
           margin: 7px auto;
-      }
-      .colorpick.picked {
+       }
+       .colorpick.eyedrop.picked {
+          border: solid 1px black;
+          width: 40px;
+          height: 40px;
+          background-color: silver;
+       }
+       .colorpick.picked {
           border: double 6px white;
           width: 35px;
           height: 35px;
@@ -31,9 +64,12 @@
           width: 35px;
           height: 35px;
       }
+
+      /* LAYOUT */
       .drawtool {
           display:flex;
       }
+
       .canv {
           margin: 10px;
       }
@@ -44,11 +80,15 @@
       .longcontrols {
           display:flex;
           flex-direction: row;
-      }
+       }
       #canv {
           border:solid 1px black;
+          //background-color: rgba(255,255,255,255);
+          background-color: lightblue;
       }
-     .colorpicker,.brushpicker {
+
+      /* GENERIC CONTROLS */
+      .colorpicker,.brushpicker {
           align: middle;
           border:solid 1px black;
       }
@@ -88,9 +128,44 @@
     Drawing Tool Test
     <div class="drawtool">
       <div class="canv">
-        <canvas id="canv" width="400" height="250">
+        <canvas id="canv">
         </canvas>
+        
+        <div>
+          Palette
+          <div id="palette">
+            <span id="composite" class="colorpick circle"></span>
+          </div>
+          <div class="slide-controls">
+            <div data-color-idx="0" class="colorslide">
+              <span class="slider">&nbsp;</span>
+            </div>
+            <div data-color-idx="1" class="colorslide">
+              <span class="slider">&nbsp;</span>
+            </div>
+            <div data-color-idx="2" class="colorslide">
+              <span class="slider">&nbsp;</span>
+            </div>
+            <div data-color-idx="3" class="colorslide">
+              <span class="slider atend">&nbsp;</span>
+            </div>
+          </div>
+        </div>
+
+      
+        <div>
+	      To Do and stuff
+          <ul>
+            <li>color creator</li>
+            <li>color picker w/ creator</li>
+            <li>picking white bug</li>
+            <li>save image</li>
+            <li>transmit and store image</li>
+            <li>brush shape</li>
+          </ul>
+        </div>
       </div>
+    
       <div class="rightpane">
         <div>
           <div class="barbutton" id="undo">undo</div>
@@ -99,14 +174,16 @@
         </div>
         <div class="longcontrols">
           <div class="colorpicker">
-            <div data-color="black" class="colorpick circle"></div>
-            <div data-color="white" class="colorpick circle"></div>
-            <div data-color="red"   class="colorpick circle"></div>
-            <div data-color="orange"   class="colorpick circle"></div>
-            <div data-color="yellow"   class="colorpick circle"></div>
-            <div data-color="green" class="colorpick circle"></div>
-            <div data-color="blue"  class="colorpick circle"></div>
-            <div data-color="purple"  class="colorpick circle"></div>
+            <div data-color="eyedrop" id="eyedrop" class="eyedrop colorpick">grab a color</div>
+            <div data-color="erase" id="erase" class="colorpick">erase</div>
+            <div data-color="rgba(0,0,0,255)" class="colorpick circle"></div>
+            <div data-color="rgba(255,255,255,255)" class="colorpick circle white"></div>
+            <div data-color="rgba(255,0,0,255)"   class="colorpick circle"></div>
+            <div data-color="rgba(255,164,0,255)"   class="colorpick circle"></div>
+            <div data-color="rgba(255,255,0,255)"   class="colorpick circle"></div>
+            <div data-color="rgba(0,128,0,255)" class="colorpick circle"></div>
+            <div data-color="rgba(0,0,255,255)"  class="colorpick circle"></div>
+            <div data-color="rgba(128,0,128,255)"  class="colorpick circle"></div>
           </div>
           <div class="brushpicker">
             <div>brush size</div>
@@ -121,36 +198,185 @@
         </div>
       </div>
     </div>
-    
-      <div>
-	    To Do and stuff
-        <ul>
-          <li>arbitrary color picker</li>
-          <li>save image</li>
-          <li>transmit and store image</li>
-          <li>brush shape</li>
-        </ul>
-      </div>
-
+    To save your drawing, right click on the image below.
+    <div>
+    <div class="imghome">
+      <img id="imgy">
+    </div>
+    </div>
   </body>
     <script><!--
-
+var eye = document.getElementById("eyedrop");
 var c = document.getElementById("canv");
+var pal = document.getElementById("palette");
 var ctx = c.getContext("2d");
 var size = 8;
+var maxUndos = 50;
 var lastX, lastY;
-var color = 'black';
+var color = 'rgba(0,0,0,255)';
+
+var usingCompo = false;
+var compocolor, inicolor;
+
+
 var isDrawing = false;
 var pickedBrush;
+var isEyedrop = false;
+var isErase = false;
+
+function max() {
+    var m = 0;
+    for( var i=0; i<arguments.length; i++ ) {
+        if( arguments[i] > m ) {
+            m = arguments[i];
+        }
+    }
+    return m;
+}
+function min() {
+    var m = 9999;
+    for( var i=0; i<arguments.length; i++ ) {
+        if( arguments[i] < m ) {
+            m = arguments[i];
+        }
+    }
+    return m;
+}
+
+var slider_boxes = document.getElementsByClassName('colorslide');
+function setup_sliders() {
+    var lastslide;
+    var x;
+    var colors = [0,0,0,255];
+    
+    var sat   = ['#FF0000','#00FF00','#0000FF','#FFFFFF' ];
+    var unsat = ['#FFFFFF','#FFFFFF','#FFFFFF','#000000' ];
+    
+    var compo = document.getElementById("composite");
+    
+    function setup_slider(sliderbox) {
+        var sliding = false;
+        var arry = [255,255,255];
+        var slide = sliderbox.firstElementChild;
+
+        var cidx = sliderbox.getAttribute('data-color-idx');
+        
+        sliderbox.style['background'] = 'linear-gradient(to right,'+unsat[cidx]+','+sat[cidx]+')';
+        
+        function updateslide(newx) {
+            if( newx >=0 && newx <= 255 ) {
+                x = newx;
+                slide.style['margin-left'] = x+'px';
+                colors[cidx] = x;
+                
+                var bright = parseInt(colors[3]);
+                var r = parseInt(colors[0]);
+                var g = parseInt(colors[1]);
+                var b = parseInt(colors[2]);
+                inicolor = [ r, g, b, bright ];
+                var mx = max( r, g, b );
+                var mi = min( r, g, b );
+
+                var delta = bright - mx;
+                r += delta;
+                g += delta;
+                b += delta;
+                
+                // interpolate the bright. if the bright is 255, then set the max color to 255
+                // and interpolate the others accordingly.
+                compocolor = 'rgba(' + r + ',' + g + ',' + b + ',255)';
+                compo.style.display = 'block';
+                compo.setAttribute( 'data-color', compocolor );
+                compo.style['background-color'] = compocolor;
+                usingCompo = true;
+                compo.changecolor();
+            }
+        }
+        sliderbox.updateslide = updateslide;
+        sliderbox.addEventListener('click', function(ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            sliding = false;
+            lastslide = this;
+            updateslide( ev.offsetX );
+        } );
+
+        sliderbox.addEventListener('mousedown', function(ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            sliding = true;
+            lastslide = this;
+        } );
+        slide.addEventListener('mouseup', function() { sliding = false; } );
+        sliderbox.addEventListener('mouseup', function() { sliding = false; } );
+        slide.addEventListener('mousemove', function(ev) {
+            if( sliding ) {
+                updateslide( ev.offsetX );
+            }
+        } );
+        sliderbox.addEventListener('mousemove', function(ev) {
+            if( sliding ) {
+                updateslide( ev.offsetX );
+            }
+        } );
+        
+    } //setup_slider
+
+    var slider_boxes = document.getElementsByClassName('colorslide');
+    for( var i=0; i<slider_boxes.length; i++ ) {
+        setup_slider( slider_boxes[i] );
+    }
+
+    window.addEventListener( 'keydown', function(ev) {
+        var press = ev.key;
+        if( press === 'ArrowLeft' ) {
+            if( lastslide ) {
+                lastslide.updateslide( x - 1 );
+            }
+        } else if( press === 'ArrowRight' ) {
+            if( lastslide ) {
+                lastslide.updateslide( x + 1 );
+            }
+        }
+    } );
+    window.addEventListener( 'keyup', function(ev) {
+        var press = ev.key;
+        if( press === 'ArrowLeft' ) {
+            if( lastslide ) {
+                lastslide.updateslide( x - 1 );
+            }
+        } else if( press === 'ArrowRight' ) {
+            if( lastslide ) {
+                lastslide.updateslide( x + 1 );
+            }
+        } else if( press === 'PageUp' ) {
+            if( lastslide ) {
+                lastslide.updateslide( 255 );
+            }
+        } else if( press === 'PageDown' ) {
+            if( lastslide ) {
+                lastslide.updateslide( 0 );
+            }
+        }
+    } );    
+} //setup_sliders
+setup_sliders();
+
 
 function setDrawingControls() {
     var undob = document.getElementById("undo");
     var redob = document.getElementById("redo");
+    var iy = document.getElementById( 'imgy' );
 
     var width = 400;
     var height = 250;
+    c.style['width'] = width;
+    c.style['height'] = height;
 
     var blankscreen = ctx.getImageData( 0, 0, width, height );
+    iy.src = c.toDataURL("image/png" );
+    iy.style['border'] = '1px black solid';
+
     var undos = [ blankscreen ];
     var paintpoint = -1;
     var redos = [];
@@ -177,6 +403,8 @@ function setDrawingControls() {
         } else {
             redob.classList.remove('active');
         }
+        iy.src = c.toDataURL("image/png" );
+
     }
 
     function undo() {
@@ -195,18 +423,56 @@ function setDrawingControls() {
 
     function starttouch(ev) {
         if( ev.touches.length == 1 ) {
-            isDrawing = true;
-            lastX = Math.round(ev.touches[0].pageX - c.offsetLeft );
-            lastY = Math.round(ev.touches[0].pageY - c.offsetLeft );
-            drawPoint( lastX, lastY );
+            startdraw( ev.touches[0].pageX - c.offsetLeft,
+                       ev.touches[0].pageY - c.offsetTop );
         }
     }
-    function startdraw(ev) {
+    function startmousedraw(ev) {
+        startdraw( ev.offsetX, ev.offsetY );
+    }
+    function startdraw(x,y) {
         //save how things are
-        isDrawing = true;
-        lastX = ev.offsetX;
-        lastY = ev.offsetY;
-        drawPoint( lastX, lastY );
+        if( isEyedrop ) {
+            // select a color
+            
+            var pixel = ctx.getImageData( x, y, 1, 1 ).data;
+            var pcolor = 'rgba(' + pixel[0] + ',' + pixel[1] + ',' + pixel[2] + ',' + pixel[3] + ')';
+            if( colorcontrol[pcolor] ) {
+                colorcontrol[pcolor].changecolor();
+            }
+            isEyedrop = false;
+            c.style.cursor = 'default';
+        }
+        else {
+            isDrawing = true;
+            lastX = x;
+            lastY = y;
+            drawPoint( lastX, lastY );
+            if( usingCompo ) {
+                // add to palette
+                if( colorcontrol[ compocolor ] ) {
+                    colorcontrol[ compocolor ].changecolor();
+                } else { 
+                    var newc = document.createElement("span");
+                    newc.classList.add( 'colorpick' );
+                    newc.classList.add( 'circle' );
+                    newc.setAttribute( 'data-color', compocolor );
+                    newc.style['background-color'] = compocolor;
+                    newc.changecolor = changecolor;
+                    newc.setAttribute( 'data-inicolor', inicolor.join(',') );
+                    newc.addEventListener('click', function() {
+                        var icl = this.getAttribute( 'data-inicolor' ).split(',');
+                        for( var i=0; i<4; i++ ) {
+                            slider_boxes[i].updateslide( icl[i] );
+                        }
+                        this.changecolor();
+                    } );
+                    colorcontrol[ compocolor ] = newc;
+                    pal.appendChild( newc );
+                }
+                usingCompo = false;
+            }
+        }
     }
     function movem(ev) {
         if( isDrawing ) {
@@ -218,8 +484,8 @@ function setDrawingControls() {
         }
     }
     function movet(ev) {
-//        ev.preventDefault();
-//        ev.stopPropagation();
+        ev.preventDefault();
+        ev.stopPropagation();
         if( ev.touches.length == 1 ) {
             if( isDrawing ) {
                 move( Math.round(ev.touches[0].pageX - c.offsetLeft ),
@@ -229,21 +495,22 @@ function setDrawingControls() {
                            Math.round( ev.touches[0].pageY - c.offsetTop ) );
             }
         }
-    }
+    } //movet
     
     function enddraw() {
         if( isDrawing ) {
             isDrawing = false;
             ++paintpoint;
-            undos[paintpoint+1] = ctx.getImageData( 0, 0, width, height );
+            var idata = ctx.getImageData( 0, 0, width, height );
+            undos[paintpoint+1] = idata;
             undos.length = paintpoint+2;
-            if( undos.length > 50 ) {
+            if( undos.length > maxUndos ) {
                 undos.shift();
                 --paintpoint;
             }
             checkundoredo();
         }
-    }
+    } //enddraw
 
     function mouseout() {
         if( isDrawing ) {
@@ -293,13 +560,17 @@ function setDrawingControls() {
                 }
             }
         }
-    }
+    } //move
 
     function drawPoint(x,y) {
-        ctx.beginPath();
-        ctx.arc( x, y, size, 0, P2, true );
-        ctx.fill();
-    }
+        if( isErase ) {
+            ctx.clearRect( x - size/2, y - size/2, size, size );
+        } else {
+            ctx.beginPath();
+            ctx.arc( x, y, size, 0, P2, true );
+            ctx.fill();
+        }
+    } //drawPoint
 
     var undoel = document.getElementById('undo');
     undoel.addEventListener('click', undo );
@@ -308,7 +579,7 @@ function setDrawingControls() {
     var clearey = document.getElementById('cleary');
     clearey.addEventListener('click', blank );
     
-    c.addEventListener('mousedown', startdraw );
+    c.addEventListener('mousedown', startmousedraw );
     c.addEventListener('mouseup', enddraw );
     c.addEventListener('mousemove', movem );
     c.addEventListener('mouseout', mouseout );
@@ -326,8 +597,6 @@ function setSizeControls() {
 
     var picks = document.getElementsByClassName('brushcontrol');
     function changesize( ev ) {
-//        ev.preventDefault();
-//        ev.stopPropagation();
         for( var i=0; i<picks.length; i++ ) {
             picks[i].classList.remove( 'picked' );
             picks[i].firstChild.style['background-color'] = 'white';
@@ -368,33 +637,42 @@ function setSizeControls() {
     }
 } //setSizeControls
 setSizeControls();
-
-function setColorControls() {
-
-    var picks = document.getElementsByClassName('colorpick');
-
-    function changecolor( ev ) {
-//        ev.preventDefault();
-//        ev.stopPropagation();
-        for( var i=0; i<picks.length; i++ ) {
-            picks[i].classList.remove( 'picked' );
-        }
-        this.classList.add( 'picked' );
-        color = this.getAttribute('data-color');
+var colorcontrol = {};
+var picks = document.getElementsByClassName('colorpick');
+var changecolor = function changecolor() {    
+    for( var i=0; i<picks.length; i++ ) {
+        picks[i].classList.remove( 'picked' );
+    }
+    this.classList.add( 'picked' );
+    color = this.getAttribute('data-color');
+    if( color === 'eyedrop' ) {
+        isEyedrop = true;
+        isErase = false;
+        c.style.cursor = 'crosshair';
+    } else {
+        isErase = color === 'erase';
+        isEyedrop = false;
+        c.style.cursor = 'default';
         ctx.fillStyle = color;
         pickedBrush.style.backgroundColor = color;
     }
+}
+function setColorControls() {
 
     for( var i=0; i<picks.length; i++ ) {
         var pick = picks[i];
+        pick.changecolor = changecolor;
         var pickcolor = pick.getAttribute('data-color');
-        pick.style.backgroundColor = pickcolor;
-        if( pickcolor == color ) {
-            pickedBrush.style.backgroundColor = color;
-            pick.classList.add( 'picked' );
-        }
-        if( pickcolor == 'white' ) {
-            pick.classList.add( 'white' );
+        if( pickcolor ) {
+            pick.style.backgroundColor = pickcolor;
+            colorcontrol[pickcolor] = pick;
+            if( pickcolor == color ) {
+                pickedBrush.style.backgroundColor = color;
+                pick.classList.add( 'picked' );
+            }
+            if( pickcolor == 'white' ) {
+                pick.classList.add( 'white' );
+            }
         }
         pick.addEventListener('click', changecolor );
         pick.addEventListener('touchstart', changecolor );
