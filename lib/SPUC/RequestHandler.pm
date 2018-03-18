@@ -53,7 +53,6 @@ sub note {
     my $tdis = sprintf( "[%02d/%02d/%02d %02d:%02d]", $year%100,$mon+1,$mday,$hour,$min );
     my $msg = "$tdis $txt - ".( $user ? $user->_display : '?' );
     # LOCK app _log
-    push @locks, lock( "LOG" );
     my $log = $app->get__log([]);
     print $logfh "$msg\n";
     print STDERR "$msg\n";
@@ -166,7 +165,7 @@ sub handle {
     # use the new id creating feature in Data::Objectsore coupled with
     # the fixed  record store's atomicic id generation to get a file coordinated store
 
-    my( $user, $sess, $err, $msg, @locks );
+    my( $user, $sess, $err, $msg, @locks, @notes );
     my $action = $params->{action} || '';
     # see if the session is attached to a user. If not
     # then create a default unlogged in "session".
@@ -176,11 +175,11 @@ sub handle {
         if( $sess ) {
             $user = $sess->get_user;
             unless( $user ) {
-                note( "invalid sessions (no user) $sess_id", $user );
+                push @notes, [ "invalid sessions (no user) $sess_id", $user ];
                 undef $sess_id;
             }
         } else {
-            note( "session not found for $sess_id", $user );
+            push @notes, [ "session not found for $sess_id", $user ];
             undef $sess_id;
         }
     }
@@ -401,64 +400,75 @@ sub handle {
 
     # play
     elsif( $path =~ m~^/play~ && $user ) {
-        if( $action eq 'upload-panel' ) {
+        if( $action eq 'caption-picture' || $action eq 'upload-panel' ) {
             my $comic = $user->get__playing;
-            if( $comic ) {
-                my $fn = $params->{uppanel};
-                if( $fn =~ /^data:image\/png;base64,(.*)/ ) {
-                    my $png = MIME::Base64::decode( $1 );
-                    my $img = $store->create_container( 'SPUC::Image',
-                                                        {
-                                                            _original_name => 'upload',
-                                                            extension      => 'png',
-                                                        });
-                    my $destdir = "$imagedir/comics/$comic";
-                    make_path( $destdir );
-                    my $dest = "$destdir/$img.png";
-
-                    open my $out, '>', $dest;
-                    print $out $png;
-                    close $out;
-                    $img->set__origin_file( $dest );
-                    ( $msg, $err ) = $comic->add_picture( $img, $user );
-                    $user->set__playing(undef);
-                    $comic->set__player( undef );
-                }
-                elsif( (my $fh = $uploader->fh('uppanel')) ) {
-                    my( $ext ) = ( $fn =~ /\.([^.]+)$/ );
-                    if( $ext =~ /^(png|jpeg|jpg|gif)$/ ) {
+            if( $action eq 'upload-panel' ) {
+                if( $comic ) {
+                    my $fn = $params->{uppanel};
+                    if( $fn =~ /^data:image\/png;base64,(.*)/ ) {
+                        my $png = MIME::Base64::decode( $1 );
                         my $img = $store->create_container( 'SPUC::Image',
                                                             {
-                                                                _original_name => $fn,
-                                                                extension      => $ext,
+                                                                _original_name => 'upload',
+                                                                extension      => 'png',
                                                             });
                         my $destdir = "$imagedir/comics/$comic";
                         make_path( $destdir );
-                        my $dest = "$destdir/$img.$ext";
+                        my $dest = "$destdir/$img.png";
+
+                        open my $out, '>', $dest;
+                        print $out $png;
+                        close $out;
                         $img->set__origin_file( $dest );
-                        copy( $fh, $dest );
                         ( $msg, $err ) = $comic->add_picture( $img, $user );
                         $user->set__playing(undef);
                         $comic->set__player( undef );
-                    } else {
-                        $err = "avatar file format not recognized";
                     }
-                } #file up
-                else {
-                    note("upload called without anything to upload", $user );
-                }
-            } #if comic
-        } #if upload to panel
-        elsif( $action eq 'caption-picture' ) {
-            my $comic = $user->get__playing;
-            my $cap = encode( 'UTF-8', $params->{caption});
-            ( $msg, $err ) = $comic->add_caption( $cap, $user );
-            $user->set__playing(undef);
-            $comic->set__player( undef );
+                    elsif( (my $fh = $uploader->fh('uppanel')) ) {
+                        my( $ext ) = ( $fn =~ /\.([^.]+)$/ );
+                        if( $ext =~ /^(png|jpeg|jpg|gif)$/ ) {
+                            my $img = $store->create_container( 'SPUC::Image',
+                                                                {
+                                                                    _original_name => $fn,
+                                                                    extension      => $ext,
+                                                                });
+                            my $destdir = "$imagedir/comics/$comic";
+                            make_path( $destdir );
+                            my $dest = "$destdir/$img.$ext";
+                            $img->set__origin_file( $dest );
+                            copy( $fh, $dest );
+                            ( $msg, $err ) = $comic->add_picture( $img, $user );
+                            $user->set__playing(undef);
+                            $comic->set__player( undef );
+                        } else {
+                            $err = "avatar file format not recognized";
+                        }
+                    } #file up
+                    else {
+                        push @notes, ["upload called without anything to upload", $user ];
+                    }
+                } #if comic
+            } #if upload to panel
+            elsif( $action eq 'caption-picture' ) {
+                my $cap = encode( 'UTF-8', $params->{caption});
+                ( $msg, $err ) = $comic->add_caption( $cap, $user );
+                $user->set__playing(undef);
+                $comic->set__player( undef );
+            }
             if( $comic->is_complete ) {
+                my $arts = $comic->get_artists;
+                push @locks, lock( "UNFINISHED" );
+                for my $thing ( $app, values %$arts) {
+                    $thing->remove_from__unfinished_comics( $comic );
+                    my $fin = $thing->get_finished_comics([]);
+                    unshift @$fin, $comic;
+                }
                 $msg = "comleted comic";
             }
-        }
+        } #if action played
+
+        # find new comic
+        push @locks, lock( "COMIC" );
         my $comic = $app->find_comic_to_play( $user, $params->{skip} );
         if( $comic ) {
             $user->set__playing( $comic );
@@ -473,6 +483,7 @@ sub handle {
     elsif( $path =~ m~^/start~ && $user && $action eq 'start-comic' ) {
         my $start = encode( 'UTF-8', $params->{start});
         # LOCK app _unfinished_comics
+        push @locks, lock( "UNFINISHED" );
         ( $msg, $err ) = $app->begin_strip( $user, $start );
     }
 
@@ -504,18 +515,19 @@ sub handle {
 
     }
     
-    elsif( $path =~ m~^/play~ && $user ) {
-        
-    }
-    
     if( $err ) {
-        note( $err, $user );
+        push @notes, [ $err, $user ];
     }
     if( $msg ) {
-        note( $msg, $user );
+        push @notes, [ $msg, $user ];
     }
 
+    push @locks, lock ("NOTE");
+    map { note( @$_ ) } @notes;
+    
     $store->save;
+
+    unlock( @locks );
 
     # try the rule you can register if you
     # are already logged in

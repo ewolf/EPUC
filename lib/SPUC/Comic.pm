@@ -89,15 +89,6 @@ sub add_panel {
     $user->add_once_to__unfinished_comics( $self );
     $arts->{$user} = $user;
 
-    if( $self->is_complete ) {
-        for my $thing ( $self->get_app, values %$arts) {
-            $thing->remove_from__unfinished_comics( $self );
-            my $fin = $thing->get_finished_comics([]);
-            unshift @$fin, $self;
-        }
-        return ('comic was finished','');
-    }
-
     return ('added panel','');
 } #add_panel
 
