@@ -38,7 +38,7 @@ sub begin_strip {
         artists     => { $artist => $artist },
         last_artist => $artist,
         panels      => [ $panel ],
-        needs       => 3, # TODO - remove for prod
+        needs       => 4, # TODO - remove for prod
         app         => $self,
                                           } );
     
@@ -54,7 +54,6 @@ sub find_comic_to_play {
     my( $self, $artist, $skip ) = @_;
     
     my $last_comic = $artist->get__playing;
-    print STDERR Data::Dumper->Dump(["$skip,$last_comic buu"]);
     if( $last_comic ) {
         if( $skip ) {
             $last_comic->set__player(undef);
@@ -75,9 +74,76 @@ sub find_comic_to_play {
     grep { (! $skip) || $_ ne $last_comic } # if the comic was skipped dont show it again
     grep { ! $_->get__player }  #comics not being currently played
     @$comics;
-
+    
     $comic;
     
 } #find_comic_to_play
+
+
+sub _send_reset_request {
+    my( $self, $user ) = @_;
+    return;
+    my $resets = $self->get__resets({});
+    
+    my $restok;
+    my $found;
+    until( $found ) {
+        $restok  = int( rand( 10_000_000 ) );
+        $found = ! $resets->{$restok};
+    }
+    $resets->{$restok} = $user;
+    my $gooduntil = time + 3600;
+    
+    $user->set__reset_token( $restok );
+    $user->set__reset_token_good_until( $gooduntil );
+
+    my $link = "https://madyote.com/cgi-bin/yote.cgi\?path=/recover\&tok=$restok";
+    
+    my $body_html = <<"END";
+<body>
+<h1>SPUC Password Reset Request</h1>
+
+<p>
+To reset your password, please visit <a href="$link">$link</a>.
+This link will work for an hour. If you did not request this, please let us know.
+</p>
+
+<p>Thanks</p>
+
+<p style="font-style:italic">Scarf Poutine You Clone</p>
+
+</body>
+END
+
+    my $body_txt = <<"END";
+SPUC Password Reset Request
+
+To reset your password, please visit 
+$link.
+This link will work for an hour. 
+If you did not request this, please let us know.
+
+Thanks
+  Scarf Poutine You Clone
+
+END
+
+    my $msg = MIME::Lite->new(
+        From => 'noreply@madyote.com',
+        To   => $self->get__email,
+        Subject => 'SPUC Password Reset',
+        Type => 'multipart/alternative',
+        );
+    
+    $msg->attach(Type => 'text/plain', Data => $body_txt);
+    $msg->attach(Type => 'text/html', 
+                 Data => $body_html, 
+                 Encoding => 'quoted-printable');
+    
+    $msg->send;
+
+    
+} #_send_reset_request
+
 
 1;

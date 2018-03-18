@@ -1,0 +1,14 @@
+<link rel="stylesheet" type="text/css" href="/css/SPUC/register.css" title="Default">
+<h1>Make an Artist Account</h1>
+<form method="POST" action="?path=/register" class="col">
+  <span id="err"><:$err:></span>
+    <input type="hidden" name="action" value="registering">
+    <input type="email" name="em" placeholder="email" value="<:$params['em']:>">
+    <input type="text" name="un" placeholder="user" value="<:$params.un:>"> 
+    <input type="password" name="pw" placeholder="password" value="<:$params.pw:>">
+    <input type="password" name="pw2" placeholder="repeat password">
+    <span id="err"><:$err:></span>
+    <button type="submit">Register Account</button>
+    <a id="cancel" href="?path=/">cancel</a>
+  <script src="/js/SPUC/register.js"></script>
+</form>

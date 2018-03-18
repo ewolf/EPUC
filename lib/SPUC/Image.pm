@@ -29,7 +29,7 @@ sub size {
     $of =~ s/\.$ext$/_${w}_${h}.$ext/;
 
     unless( -e $of ) {
-        `rm $of`;
+#        `rm $of`;
         `convert $orf -resize ${w}x$h $of`;
     }
     

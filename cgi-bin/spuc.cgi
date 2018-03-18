@@ -10,6 +10,7 @@ use lib '/home/wolf/proj/Yote/FixedRecordStore/lib';
 
 use SPUC::RequestHandler;
 
+use Encode qw/ decode encode /;
 use CGI;
 
 use Data::Dumper;
@@ -75,6 +76,10 @@ print $q->header(
     -type => $content_type,
     -cookie => [$sesscook],
     -status => $status,
+    -charset => 'utf-8',
  );
 #print "<html><body>FOO      🔍</body></html>"
-print $$content_ref;
+#my $out = $$content_ref;
+my $out = $$content_ref;
+print STDERR $out;
+print $out;

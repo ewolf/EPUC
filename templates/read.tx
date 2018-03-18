@@ -1,39 +1,44 @@
 <link rel="stylesheet" type="text/css" href="/css/SPUC/comic.css" title="Default">
 <link rel="stylesheet" type="text/css" href="/css/SPUC/read.css" title="Default">
 
-<h1>Read Comics</h1>
 
 : my $comics = $user && $path == '/mine' ? $user.get( 'finished_comics' ) : $app.get( 'finished_comics' )
 
-: my $startidx = $params.idx || 0;
+: if ! $comics.size() {
+<div class="no-comics">No finished comics found</div>
+: } else {
 
-: if $params.single {
+<h1>Read Comics</h1>
+
+  : my $startidx = $params.idx || 0;
+
+  : if $params.single {
 
 <div class="row pagination">
-  : if $startidx > 0 {
-    : my $del = $startidx - 1;
+    : if $startidx > 0 {
+      : my $del = $startidx - 1;
    <a href="?path=<: $path :>&idx=<: $del :>&single=1&sort=<:$params.sort:>">newer</a>
-  : } else {
+    : } else {
    <span class="disabled">newer</span>
-  : }
+    : }
 
    <a href="?path=<: $path :>&idx=<: $startidx :>&sort=<:$params.sort:>">back to list</a>
    
-  : my $del = $startidx + 1;
-  : if $comics.size() - $del  > 0 {
+    : my $del = $startidx + 1;
+    : if $comics.size() - $del  > 0 {
    <a href="?path=<: $path :>&idx=<: $del :>&single=1&sort=<:$params.sort:>">older</a>
-  : } else {
+    : } else {
    <span class="disabled">older</span>
-  : }
+    : }
 </div>
 
 
 <div id="comics" class="comics row">
 
-  : my $comic = $comics[$startidx];
-  : if $comic {
-    : include "comic.tx" { comic => $comic, small => 0, path => $path }
-  : }
+    : my $comic = $comics[$startidx];
+    : if $comic {
+      : include "comic.tx" { comic => $comic, small => 0, path => $path }
+    : }
      
 </div>
 
@@ -41,48 +46,34 @@
 : } else {
 
 <div class="row pagination">
-  : if $startidx > 0 {
-    : my $del = $startidx - 4 >= 0 ? $startidx - 4 : 0;
+    : if $startidx > 0 {
+      : my $del = $startidx - 4 >= 0 ? $startidx - 4 : 0;
    <a href="?path=<: $path :>&idx=<: $del :>&sort=<:$params.sort:>">newer</a>
-  : } else {
+    : } else {
    <span class="disabled">newer</span>
-  : }
+    : }
 
-  : my $del = $startidx + 4;
-  : if $comics.size() - $del  > 0 {
+    : my $del = $startidx + 4;
+    : if $comics.size() - $del  > 0 {
    <a href="?path=<: $path :>&idx=<: $del :>&sort=<:$params.sort:>">older</a>
-  : } else {
+    : } else {
    <span class="disabled">older</span>
-  : }
+    : }
 </div>
 
 
 <div id="comics" class="comics row small">
 
-: for [0..3] -> $i {
-  : my $idx = $i + $startidx;
-  : my $comic = $comics[$idx];
-  : if $comic {
-    : include "comic.tx" { comic => $comic, small => 1, idx => $idx, path => $path }
+  : for [0..3] -> $i {
+    : my $idx = $i + $startidx;
+    : my $comic = $comics[$idx];
+    : if $comic {
+      : include "comic.tx" { comic => $comic, small => 1, idx => $idx, path => $path }
+    : }
   : }
-: }
      
 </div>
 
+  : }
 : }
 
-<script>
-  if(0){
-  var c = byId( 'comics' )
-  var f = byId( 'flip' );
-  var bool = false;
-  f.addEventListener( 'click', ev => {
-      if( bool ) {
-          c.classList.remove( 'small' );
-      } else {
-          c.classList.add( 'small' );          
-      }
-      bool = ! bool;
-  } );
-  }
-</script>

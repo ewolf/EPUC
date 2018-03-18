@@ -4,3 +4,11 @@
 .sort {
     justify-content: space-around;    
 }
+.no-comics {
+    text-align: center;
+    font-size: x-large;
+    background-color: #FFE;
+    padding: 3em;
+    margin: 5px;
+    border: solid 1px purple;
+}

@@ -5,29 +5,33 @@
 
 <div class="profile" >
   <h1>Editing Profile</h1>
-  
+  : if $err {
+  <span class="err bigerr"><:$err:></span>
+  : }
   <h2>Avatars</h2>
   <section id="avatars" class="col">
-    <div>
+    <div class="col">
       <a href="#" class="toggleedit">
-        <img src="<:$selava.size(600,600):>" class="selava">
+        <div class="frame">
+          <img src="<:$selava.size(150,150):>" class="selava">
+        </div>
+        <img class="invisava" src="<:$selava.size(600,600):>">
       </a>
-      <p>You can have multiple avatars and select the one to show.</p>
       : if $params['ava-open'] {
-      <a id="avatoggle" class="toggleedit" href="?path=/profile#avatars">Close</a>
+      <a id="avatoggle" class="toggleedit" href="?path=/profile#avatars">Close Avatar Picker</a>
       : } else {
-      <a id="avatoggle" class="toggleedit" href="?path=/profile&action=manage-avatars#avatars">Manage Avatars</a>
+      <a id="avatoggle" class="toggleedit" href="?path=/profile&action=manage-avatars#avatars">Choose or Create Avatar</a>
       : } 
     </div>
       
-    <div id="avedit" class="<: $params['ava-open'] || $avas.size < 2 ? 'open' : '' :>">
+    <div id="avedit" class="<: $params['ava-open'] || $avas.size() < 2 ? 'open' : '' :>">
       : if $avas.size() > 0 {
-      <h3>Select Avatar</h3>
-      <a name="avatars">
+      <h3></h3>
+      <a name="avatars"></a>
       <div class="avatars row box">
         : for $avas -> $ava {
           : if  $ava != $selava {
-        <div class="avatar box">        ( <: $ava :>, <: $selava :> )
+        <div class="avatar box">
 
           <a href="?path=/profile&avatar=<:$~ava:>&action=select-avatar&ava-open=1#avatars">
             <img src="<:$ava.size(150,150):>">
@@ -57,21 +61,15 @@
   </section>
 
   <h2>Bio</h2>
-  <form id="bio" method="POST" action="?path=/profile" class="col">
-    <input type="hidden" name="action" value="set-bio">
-    <textarea placeholder="Write a little about yourself" name="bio" cols="80" rows="7"><: $user.get('bio') :></textarea>
-    <div><button type="submit">Update</button></div>
+  <form id="bio" method="POST" action="?path=/profile" class="row">
+    <div class="col">
+      <input type="hidden" name="action" value="set-bio">
+      <textarea placeholder="Write a little about yourself" name="bio" cols="50" rows="7"><: $user.get('bio') :></textarea>
+      <button type="submit">Update</button>
+    </div>
   </form>
 
-  <h2>Update Password</h2>
-  <form method="POST" action="?path=/profile" class="col">
-    <input type="hidden" name="action" value="update-password">
-    <input type="password" name="pwold" placeholder="old password">
-    <input type="password" name="pw" placeholder="password">
-    <input type="password" name="pw2" placeholder="repeat password">
-    <span id="err"><:$err:></span>
-    <button id="uppw" type="submit">update</button>
-  </form>
+  : include "update_password.tx"
   
   <script src="/js/SPUC/profile.js"></script>
 </div>

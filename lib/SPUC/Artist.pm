@@ -7,7 +7,7 @@ use Data::ObjectStore;
 use base 'Data::ObjectStore::Container';
 
 use Digest::MD5;
-
+use MIME::Lite;
 
 #
 # Fields :
@@ -31,7 +31,7 @@ use Digest::MD5;
 #
 #  ** comics **
 #  _unfinished_comics - list of comic objects
-#  finished_comic_head - linked list node of comic objects
+#  finished_comics - linked list node of comic objects
 #
 # ** game state **
 #  _viewing_comic - current comic viewed in pagination
@@ -43,14 +43,14 @@ sub _setpw {
     my $un = $self->get__login_name;
     my $enc_pw = crypt( $pw, length( $pw ) . Digest::MD5::md5_hex($un) );
     $self->set__enc_pw( $enc_pw );
-}
+} #_setpw
 
 sub _checkpw {
     my( $self, $pw ) = @_;
     my $un = $self->get__login_name;
     my $enc_pw = crypt( $pw, length( $pw ) . Digest::MD5::md5_hex($un) );
     $enc_pw eq $self->get__enc_pw;
-}
+} #_checkpw
 
 sub _display {
     my $self = shift;
@@ -61,7 +61,10 @@ sub _display {
     } else {
         return $ln;
     }
-}
+} #_display
 
+sub _send_confirmation_email {
+    my( $self ) = @_;
+}
 
 1;

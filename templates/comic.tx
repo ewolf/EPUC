@@ -4,8 +4,8 @@
 <div class="comic col">
 : }  
   <div class="row comichead">
-    <span>🔍</span>
-    <span class="rating">⭐⭐⭐⭐⭐</span>
+  <span>&#x1F50D;</span>
+  <span class="rating">&#x2B50;&#x2B50;&#x2B50;&#x2B50;&#x2B50;</span>
   </div>
   
   : for $comic.get('panels') -> $panel {
@@ -15,10 +15,10 @@
     : if $panel.get('type') == 'caption' {
 
   <div class="panel caption row">
+    <span class="artist"><: $panel.get('artist').get('display_name') :> </span>
     
-    <span class="artist"><: $panel.get('artist').get('display_name') :> :</span>
-    <span class="caption">&quot;<: $panel.get('caption') :>&quot;</span>
-    <div class="captionsmall"><: $panel.get('caption') :></div>
+     <span class="caption">&quot;<: $panel.get('caption') :>&quot;</span>
+     <span class="captionsmall"><: $panel.get('caption') :></span>
 
     : } else {
 

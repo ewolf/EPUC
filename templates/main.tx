@@ -4,20 +4,20 @@
     <title>SPUC</title>
     <link rel="stylesheet" type="text/css" href="/css/SPUC/main.css" title="Default">
     <script src='/js/SPUC/main.js'></script>
-    <meta charset='utf-8'>
   </head>
   
   <body class="col">
     <header class="row">
-      
-      <div class="splash col">
+
+      <a href="?path=/read&sort=recent" class="splash col">
         <p>Scarf Poutine You Clone</p>
         <p>Collaborative Comics</p>
-      </div>
+      </a>
       
-      <aside class="column">
       : if $user {
+      <aside class="column">
         <p><: $user.get('display_name') :></p>
+        
         : my $ava = $user.get('avatar')
         <a href="?path=/profile">
           : if $ava {
@@ -26,23 +26,28 @@
           my profile
         : }
         </a>
+      </aside>
       
       : } else if $path != '/register' {
+      <aside class="column">
       <form method="POST" action="?path=/login" class="col" id="loginblock">
+        : if $err {
         <span id="err"><:$err:></span>
+        <a href="?path=/recover_request">recover password</a>
+        : } 
         <input type="text" name="un" placeholder="user">
         <input type="password" name="pw" placeholder="password">
         <button type="submit">Log In</button>
-        <a id="reglink" href="?path=/register">register</a>
+        <a id="reglink" href="?path=/register">sign up</a>
       </form>
+      </aside>
       : }
       
-      </aside>
       
     </header>
     <nav class="row">
       : my $comics = $app.get( 'finished_comics' )      
-      : if $comics.size > 0 {
+      : if $comics.size() > 0 {
       <a href="?path=/read&sort=recent">read comics</a>
       : }
       : if $user {
@@ -60,26 +65,25 @@
 
     <main>
       
-    : if $path == '/register' && ! $user {
-      <form method="POST" action="?path=/register">
-        <input type="email" name="em" placeholder="email" value="<:$params['em']:>">
-        <input type="text" name="un" placeholder="user" value="<:$params.un:>"> 
-        <input type="password" name="pw" placeholder="password" value="<:$params.pw:>">
-        <input type="password" name="pw2" placeholder="repeat password">
-        <span id="err"><:$err:></span>
-        <button type="submit">Register Account</button>
-        <a href="?path=/">cancel</a>
-        <script src="/js/SPUC/register.js"></script>
-      </form>
-      : }
-
-      : if $path == '/profile' && $user {
+      : if $path == '/register' && ! $user {
+        : include "register.tx"
+      : } else if $path == '/profile' && $user {
         : include "profile.tx"
       : } else if( $path == '/play' && $user ) {
         : include "play.tx"
-      : } else if $path == '/start' && $user {
+      : } else if $path == '/start' && $user && ( $params.action != 'start-comic' || $err ) {
         : include "start.tx"
-      : } else if $comics.size > 0 {
+      : } else if $path == '/recover_request' {
+        : include "recover_request.tx"
+      : } else if $path == '/recover' {
+        : if $user {
+          : include "update_password.tx" { nooriginal => 1 }
+        : } else {
+          <div class="err bigerr">reset link is stale</div>
+        : }
+      : } else if $path == '/mine' && $user {
+        : include "read.tx" 
+      : } else if $comics.size() > 10 {
         : include "read.tx"
       : } else {
         : include "about.tx"
@@ -88,19 +92,27 @@
       
     </main>
 
+    : if $user && $user.get__is_admin {
     <hr>
     <footer class="message" style="margin-top:100px">
       Min Viable Product
       TODOS
       <ul>
+        <li>link and page for email reset password</li>
+        <li>email reset password</li>
+        <li>correct level of mail check in production</li>
         <li>locking comics and other objects</li>
+        <li>show artist</li>
+        <li>contact info</li>
       </ul>
       Other TODOS
       <ul>
-        <li>admin class user</li>
+        <li>email for account verification</li>
         <li>in progress comics</li>
         <li>bookmarks for comics</li>
 
+        <li>modperl</li>
+        
         <li>make sure only one user is playing a comic</li>
 
         <li>testing comic</li>
@@ -111,11 +123,9 @@
 
         <li>group chat</li>
         
-        <li>images on the filesystem</li>
         <li>permissions/group datastore. Maybe a spuc admin group?</li>
         
         <li>spuc_admin.pl actions</li>
-        <li>show admins</li>
         <li>log view for admin</li>
         <li>logging for all things done</li>
         
@@ -125,6 +135,6 @@
         <li>yote js -> server</li>
       </ul>
     </footer>
-    
+    : }
   </body>
 </html>

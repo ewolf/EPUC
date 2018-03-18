@@ -18,6 +18,15 @@ var user;
 var token;
 var cache = {};
 
+function error( errs ) {
+    var errbox = Object.values(document.getElementsByClassName);
+    var txt = errs.join(',');
+    errbox.forEach( box => {
+        box.textContent = txt;
+    } );
+}
+
+
 // how about just get the user?
 function initApp(appname) {
     return new Promise(function( resolve, reject )  {
@@ -159,3 +168,4 @@ function RPCCall( id, method, args ) {
         req.send(sendData);
     });
 } //RPCCall
+

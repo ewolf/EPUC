@@ -7,6 +7,7 @@ use Data::ObjectStore;
 use Email::Valid;
 use Encode qw/ decode encode /;
 use File::Copy;
+use File::Path qw(make_path);
 use MIME::Base64;
 use Text::Xslate qw(mark_raw);
 use JSON;
@@ -171,7 +172,7 @@ sub handle {
     } #logout
 
 
-    elsif( $path =~ m~^/register~ ) {
+    elsif( $path =~ m~^/register~ && $action eq 'registering' ) {
         # just do squishy for now and organically
         # grow this, dont yet force it. code can move
         # where it wants to
@@ -181,7 +182,7 @@ sub handle {
 
         my $pw = $params->{pw};
         my $pw2 = $params->{pw2};
-        my $un = $params->{un};
+        my $un = encode( 'UTF-8', $params->{un} );
         my $em = $params->{em};
 
         # see if the account or email is already registered
@@ -198,9 +199,9 @@ sub handle {
             $err = 'passwords too short. Must be at least 8 characters.';
         }
         #        elsif( ! Email::Valid->address( -address => $em, -tldcheck => 1, -mxcheck => 1 ) ) {
-        elsif( ! Email::Valid->address( -address => $em, -tldcheck => 1 ) ) {
-            $err = 'unable to verify email.';
-        }
+#        elsif( ! Email::Valid->address( -address => $em, -tldcheck => 1 ) ) {
+#            $err = 'unable to verify email.';
+#        }
 
         if( ! $err ) {
             # no error defined, so create the user
@@ -225,7 +226,7 @@ sub handle {
                 $found = ! $sessions->{$sess_id};
             }
 
-            $msg = "Created artist account '$un'. You are now logged in and ready to play. An email will be delivered to the address given for account confirmation.";
+            $msg = "Created artist account '$un'. You are now logged in and ready to play.";
             my $sess = $sessions->{$sess_id} =
                 $store->create_container( 'SPUC::Session', {
                     last_id => $sess_id,
@@ -257,7 +258,9 @@ sub handle {
                                                         _original_name => 'upload',
                                                         extension      => 'png',
                                                     });
-                my $dest = "/var/www/html/spuc/images/$img.png";
+                my $destdir = "/var/www/html/spuc/images/avatars/$user";
+                make_path( $destdir );
+                my $dest = "$destdir/$img.png";
                 open my $out, '>', $dest;
                 print $out $png;
                 close $out;
@@ -274,7 +277,9 @@ sub handle {
                                                             _original_name => $fn,
                                                             extension      => $ext,
                                                         });
-                    my $dest = "/var/www/html/spuc/images/$img.$ext";
+                    my $destdir = "/var/www/html/spuc/images/avatars/$user";
+                    make_path( $destdir );
+                    my $dest = "$destdir/$img.$ext";
                     $img->set__origin_file( $dest );
                     $user->add_to__avatars( $img );
                     $user->set_avatar( $img );
@@ -324,7 +329,7 @@ sub handle {
 
     # login
     elsif( $path =~ m~^/login~ && ! $user ) {
-        my $un = $params->{un};
+        my $un = encode( 'UTF-8', $params->{un} );
         my $pw = $params->{pw};
 
         my $unames = $root->get__users({});
@@ -361,7 +366,10 @@ sub handle {
                                                             _original_name => 'upload',
                                                             extension      => 'png',
                                                         });
-                    my $dest = "/var/www/html/spuc/images/$img.png";
+                    my $destdir = "/var/www/html/spuc/images/comics/$comic";
+                    make_path( $destdir );
+                    my $dest = "$destdir/$img.png";
+
                     open my $out, '>', $dest;
                     print $out $png;
                     close $out;
@@ -378,7 +386,9 @@ sub handle {
                                                                 _original_name => $fn,
                                                                 extension      => $ext,
                                                             });
-                        my $dest = "/var/www/html/spuc/images/$img.$ext";
+                        my $destdir = "/var/www/html/spuc/images/comics/$comic";
+                        make_path( $destdir );
+                        my $dest = "$destdir/$img.$ext";
                         $img->set__origin_file( $dest );
                         copy( $fh, $dest );
                         ( $msg, $err ) = $comic->add_picture( $img, $user );
@@ -389,7 +399,7 @@ sub handle {
                     }
                 } #file up
                 else {
-                    print STDERR Data::Dumper->Dump(["YIP"]);
+                    note("upload called without anything to upload", $user );
                 }
             } #if comic
         } #if upload to panel
@@ -415,18 +425,41 @@ sub handle {
 
     # start new comic
     elsif( $path =~ m~^/start~ && $user && $action eq 'start-comic' ) {
-        ( $msg, $err ) = $app->begin_strip( $user, $params->{start} );
+        my $start = encode( 'UTF-8', $params->{start});
+        ( $msg, $err ) = $app->begin_strip( $user, $start );
     }
 
-    elsif( $path =~ m~^/comic~ ) {
-
+    elsif( $path =~ m~^/recover_request~ ) {
+        my $unorem = encode( 'UTF-8', $params->{unorem});
+        my $emails = $root->get__emails({});
+        my $unames = $root->get__users({});
+        my $emu = $emails->{lc($unorem)};
+        my $umu = $unames->{lc($unorem)};
+        $user = $umu || $emu;
+        $user && $user->_send_reset_request;
+        $msg = "sent reset request";
     }
 
+    elsif( $path =~ m~^/recover~ ) {
+        my $tok = $params->{tok};
+        my $user = $app->get__resets({})->{$tok};
+        if( $user && 
+            $user->get__reset_token eq $tok &&
+            $user->get__reset_token_good_until > time ) {
+            $msg = 'reset your password';
+        } else {
+            undef $user;
+        }
+    }
+    
 
     elsif( $path =~ m~^/artist~ ) {
 
     }
-
+    
+    elsif( $path =~ m~^/play~ && $user ) {
+        
+    }
     
     if( $err ) {
         note( $err, $user );

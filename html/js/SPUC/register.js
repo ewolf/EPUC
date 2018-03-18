@@ -1,4 +1,3 @@
-var err = byId( 'err' );
 var but = oneTag( 'button' );
 var pw1 = byName( 'pw' );
 var pw2 = byName( 'pw2' );
@@ -6,10 +5,6 @@ var un  = byName( 'un' );
 var em  = byName( 'em' );
 
 but.setAttribute( 'disabled', true );
-
-function error( errs ) {
-    err.textContent = errs.join(',');
-}
 
 function check() {
     var errs = [];

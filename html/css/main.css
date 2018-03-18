@@ -47,13 +47,17 @@ header aside img {
     text-align: center;
     font-weight: bold;
     font-style: italic;
+    text-decoration: none;
+    color: black;
 }
-
-main {
-    justify-content: center;
+.err {
+    background-color: #FEE;
+    border: red solid 1px;
+    padding: 3px 5px;
 }
-main form * {
-    margin: 2px;
+.err.bigerr {
+    font-size: x-large;
+    padding: 10px 15px;
 }
 input.error {
     background-color: pink;

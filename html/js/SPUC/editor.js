@@ -509,7 +509,8 @@ uped.addEventListener('click', function(ev) {
         edform.submit();
     }
 } );
-var selimg = oneByClass( 'selava' );
+
+var selimg = oneByClass( 'invisava' );
 if( selimg ) {
     ctx.drawImage( selimg, 0, 0 );
 }

@@ -57,9 +57,10 @@ sub add_caption {
         artist  => $user,
         caption => $caption,
         type    => 'caption',
-                                          } );
+                                                } );
     $self->add_panel( $panel, $user );
 }
+
 sub add_picture {
     my( $self, $picture, $user ) = @_;
     if( $self->last_panel->get_type eq 'picture' ) {
