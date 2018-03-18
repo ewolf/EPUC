@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <style>
+      .colorpick {
+          border: solid 1px black;
+          width: 40px;
+          height: 40px;
+          cursor:pointer;
+          margin:7px auto;
+      }
+      .colorpick.picked {
+          border: double 6px white;
+          width: 35px;
+          height: 35px;
+      }
+      .colorpick.picked.white {
+          border: double 6px black;
+          width: 35px;
+          height: 35px;
+      }
+      .colorpicker {
+          align: middle;
+          border:solid 1px black;
+      }
+      .circle.picked {
+          -moz-border-radius: 25px;
+          -webkit-border-radius: 25px;
+      }
+      .circle {
+          width: 30px;
+          height: 30px;
+          -moz-border-radius: 15px;
+          -webkit-border-radius: 15px;
+          border-radius: 15px;
+      }
+      
+      .barbutton {
+          cursor:not-allowed;
+          color:gray;
+          background-color:lightgrey;
+          padding: 3px;
+          margin: 4px;
+          border: solid 1px gray;
+      }
+      
+      .active.barbutton {
+          border: solid 1px grey;
+          background-color: white;
+          cursor:pointer;
+          color:black;
+      }
+
+    </style>
+  </head>
+  
+  <body>
+    Drawing Tool Test
+    <div style="display:flex">
+      <div>
+        <canvas id="canv" width="400" height="250" style="border:solid 1px black;">
+        </canvas>
+      </div>
+      <div class="colorpicker">
+        <div class="barbutton" id="undo">undo</div>
+        <div class="barbutton" id="redo">redo</div>
+        <div class="barbutton active" id="cleary">clear</div>
+        <div data-color="black" class="colorpick circle picked"></div>
+        <div data-color="white" class="colorpick white circle"></div>
+        <div data-color="blue"  class="colorpick circle"></div>
+        <div data-color="green" class="colorpick circle"></div>
+        <div data-color="red"   class="colorpick circle"></div>
+      </div>
+      <div class="brushpicker">
+        <div>brush size</div>
+        <div data-size="1" class="brushsize"></div>
+        <div data-size="2" class="brushsize"></div>
+        <div data-size="3" class="brushsize"></div>
+        <div data-size="5" class="brushsize"></div>
+        <div data-size="8" class="brushsize"></div>
+        <div data-size="13" class="brushsize"></div>
+      </div>        
+      <div>
+	    To Do and stuff
+        <ul>
+          <li>brush size</li>
+          <li>save image</li>
+          <li>arbitrary color picker</li>
+          <li>transmit and store image</li>
+          <li>brush shape</li>
+        </ul>
+      </div>
+    </div>
+
+  </body>
+    <script><!--
+
+var c = document.getElementById("canv");
+var ctx = c.getContext("2d");
+
+function setDrawingControls() {
+    var undob = document.getElementById("undo");
+    var redob = document.getElementById("redo");
+
+    var size = 8;
+    var width = 400;
+    var height = 250;
+
+    var undos = [ ctx.getImageData( 0, 0, width, height ) ];
+    var paintpoint = -1;
+    var redos = [];
+
+    function blank() {
+        if( confirm( "Really clear?" ) ) {
+            ++paintpoint;
+            ctx.putImageData( undos[0], 0, 0 );
+            undos[paintpoint+1] = undos[0];
+            undos.length = paintpoint+2;
+            checkundoredo();
+        }
+    }
+
+    function checkundoredo() {
+        if( paintpoint >= 0 ) {
+            undob.classList.add('active');
+        } else {
+            undob.classList.remove('active');
+        }
+        if( paintpoint < (undos.length-2) ) {
+            redob.classList.add('active');
+        } else {
+            redob.classList.remove('active');
+        }
+    }
+
+    function undo() {
+        console.log( "Undo called. Length is " + undos.length + " point is " + paintpoint );
+        if( paintpoint >= 0 ) {
+            ctx.putImageData( undos[paintpoint--], 0, 0 );
+            checkundoredo();
+        }
+    }
+
+    function redo() {
+        console.log( "Redo called. Length is " + undos.length + " point is " + paintpoint);
+        if( paintpoint < (undos.length-2) ) {
+            ctx.putImageData( undos[++paintpoint+1], 0, 0 );
+            checkundoredo();
+        }
+    }
+
+    function startdraw(ev) {
+        //save how things are
+        c.classList.add('drawing');
+        console.log( "Start draw" );
+        draw( ev.offsetX, ev.offsetY );
+    }
+    function enddraw() {
+        if( c.classList.contains( 'drawing' ) ) {
+            c.classList.remove('drawing');
+            ++paintpoint;
+            undos[paintpoint+1] = ctx.getImageData( 0, 0, width, height );
+            console.log( "End draw ul : " + undos.length + " pp " + paintpoint);
+            undos.length = paintpoint+2;
+            checkundoredo();
+        }
+    }
+    var P2 = 2*Math.PI;
+    function movem(ev) {
+        if( c.classList.contains( 'drawing' ) ) {
+            var delx = ev.movementX;
+            var dely = ev.movementY;
+            var x2 = ev.offsetX;
+            var y2 = ev.offsetY;
+            var x1 = x2 - delx;
+            var y1 = y2 - dely;
+            var del = Math.abs(delx)+Math.abs(dely);
+            var A = 0, B = 0, a = 0, b = 0;
+            for( var i=0; i<del; i++ ) {
+                if( A > B ) {
+                    b = b + 1;
+                    B = B + delx;
+                } else {
+                    a = a + 1;
+                    A = A + dely
+                }
+                if( y1 > y2 ) {
+                    //down to up
+                    if( x1 > x2 ) {
+                        // right to left
+                        draw( x1 - a, y1 - b );
+                    } else {
+                        // left to right
+                        draw( x1 + a, y1 - b );
+                    }
+                } else {
+                    //up to down
+                    if( x1 > x2 ) {
+                        // right to left
+                        draw( x1 - a, y1 + b );
+                    } else {
+                        // left to right
+                        draw( x1 + a, y1 + b );
+                    }
+                }
+            }
+        }
+    }
+    function movet(ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        if( ev.touches.length == 1 ) {
+            var x = Math.round(ev.touches[0].pageX - c.offsetLeft );
+            var y = Math.round( ev.touches[0].pageY - c.offsetTop );
+            draw( x, y );
+        }
+    }
+    function draw(x,y) {
+        ctx.beginPath();
+        ctx.arc( x - size/2, y - size/2, size, 0, P2, true );
+        //ctx.fillRect( x - size/2, y - size/2, size, size );
+        //        ctx.stroke();
+        ctx.fill();
+    }
+
+    var undoel = document.getElementById('undo');
+    undoel.addEventListener('click', undo );
+    var redoel = document.getElementById('redo');
+    redoel.addEventListener('click', redo );
+    var clearey = document.getElementById('cleary');
+    clearey.addEventListener('click', blank );
+    
+    c.addEventListener('mousedown', startdraw );
+    c.addEventListener('mouseup', enddraw );
+    c.addEventListener('mouseout', enddraw );
+    c.addEventListener('touchstart', movet );
+    c.addEventListener('touchend', enddraw );
+
+    c.ontouchmove = movet;
+    c.onmousemove = movem;
+}
+setDrawingControls();
+
+function setColorControls() {
+
+    var picks = document.getElementsByClassName('colorpick');
+    var color = 'black';
+
+    function changecolor( ev ) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        for( var i=0; i<picks.length; i++ ) {
+            picks[i].classList.remove( 'picked' );
+        }
+        this.classList.add( 'picked' );
+        ctx.fillStyle = this.getAttribute('data-color');
+        
+    }
+
+    for( var i=0; i<picks.length; i++ ) {
+        picks[i].style.backgroundColor = picks[i].getAttribute('data-color');
+        picks[i].addEventListener('click', changecolor );
+        picks[i].addEventListener('touchstart', changecolor );
+    }
+}
+setColorControls();
+
+//-->    </script>
+  
+</html>
