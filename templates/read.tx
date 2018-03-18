@@ -1,18 +1,17 @@
-<link rel="stylesheet" type="text/css" href="/css/SPUC/comic.css" title="Default">
-<link rel="stylesheet" type="text/css" href="/css/SPUC/read.css" title="Default">
-
-
-: my $comics = $user && $path == '/mine' ? $user.get( 'finished_comics' ) : $app.get( 'finished_comics' )
+<link rel="stylesheet" type="text/css" href="/spuc/css/comic.css" title="Default">
+<link rel="stylesheet" type="text/css" href="/spuc/css/read.css" title="Default">
 
 : if ! $comics.size() {
 <div class="no-comics">No finished comics found</div>
 : } else {
 
-<h1>Read Comics</h1>
+<h1><: $title :></h1>
 
   : my $startidx = $params.idx || 0;
 
   : if $params.single {
+
+    : my $comic = $comics[$startidx];
 
 <div class="row pagination">
     : if $startidx > 0 {
@@ -23,6 +22,12 @@
     : }
 
    <a href="?path=<: $path :>&idx=<: $startidx :>&sort=<:$params.sort:>">back to list</a>
+
+   : if $user && $user._has_bookmark( $comic ) {
+  <a href="?path=<: $path :>&idx=<: $startidx :>&single=1&sort=<:$params.sort:>&action=unbookmark">unbookmark</a>
+   : } else {
+  <a href="?path=<: $path :>&idx=<: $startidx :>&single=1&sort=<:$params.sort:>&action=bookmark">bookmark</a>
+   : }
    
     : my $del = $startidx + 1;
     : if $comics.size() - $del  > 0 {
@@ -35,7 +40,6 @@
 
 <div id="comics" class="comics row">
 
-    : my $comic = $comics[$startidx];
     : if $comic {
       : include "comic.tx" { comic => $comic, small => 0, path => $path }
     : }
@@ -43,7 +47,43 @@
 </div>
 
 
+: #comments
+
+: my $comments = $comic.get('comments')
+
+<div class="comments col">
+  <form method="POST" action="?path=<:$path:>" class="col">
+    <h3>leave a comment</h3>
+    <input type="hidden" name="action" value="comment">
+    <input type="hidden" name="idx" value="<:$startidx:>">
+    <input type="hidden" name="artist" value="<:$params.artist:>">
+    <input type="hidden" name="single" value="1">
+    <textarea cols="35" name="comment"></textarea>
+    <button type="submit">Add Comment</button>
+  </form>
+
+  <div class="col">
+    : for $comments -> $comment {
+    : my $artist = $comment.get('artist')
+    <div class="row comment">
+      <a class="artist col" href="?path=/artist&artist=<:$artist.get('display_name'):>">
+        <img src="<:$artist.get('avatar').size(50,50):>">
+        <: $artist.get('display_name') :>
+      </a>
+      <p class="comment"><:$comment.get_comment:></p>
+    </div>
+    : }
+  </div>
+</div>
+
+
+: # small comic below
+
 : } else {
+
+: if $artist {
+      
+  : }
 
 <div class="row pagination">
     : if $startidx > 0 {

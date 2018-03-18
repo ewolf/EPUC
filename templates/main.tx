@@ -2,8 +2,8 @@
 <html>
   <head>
     <title>SPUC</title>
-    <link rel="stylesheet" type="text/css" href="/css/SPUC/main.css" title="Default">
-    <script src='/js/SPUC/main.js'></script>
+    <link rel="stylesheet" type="text/css" href="/spuc/css/main.css" title="Default">
+    <script src='/spuc/js/main.js'></script>
   </head>
   
   <body class="col">
@@ -32,7 +32,7 @@
       <aside class="column">
       <form method="POST" action="?path=/login" class="col" id="loginblock">
         : if $errs.size() > 0 {
-        <div id="err">
+        <div id="err col">
           : for $errs -> $err {
              <p><: $err :></p>
           : }
@@ -58,8 +58,12 @@
       <a href="?path=/play">play</a>
       <a href="?path=/start">start a comic</a>
       <a href="?path=/mine&sort=recent">my comics</a>
+      <a href="?path=/bookmarked&sort=recent">bookmarked comics</a>
       <a href="?path=/profile">my profile</a>
       <a href="?path=/logout">log out</a>
+        : if $user.get('_is_admin') {
+      <a href="?path=/logs">logs</a>
+        : }
       : }
     </nav>
 
@@ -71,7 +75,7 @@
     </div>
     : }
 
-    <main>
+    <main class="col">
       
       : if $path == '/register' && ! $user {
         : include "register.tx"
@@ -90,9 +94,21 @@
           <div class="err bigerr">reset link is stale</div>
         : }
       : } else if $path == '/mine' && $user {
-        : include "read.tx" 
-      : } else if $comics.size() > 10 {
-        : include "read.tx"
+          : include "read.tx" { comics => $user.get_finished_comics, title => 'your comics' }
+      : } else if $path == '/bookmarked' && $user {
+          : include "read.tx" { comics => $user.get('_bookmarks'), title => 'bookmarked comics' }
+      : } else if $path == '/logs' && $user && $user.get('_is_admin') {
+          : include "logs.tx"
+      : } else if $path == '/artist' {
+        : my $artist = $app.artist( $params.artist )
+          
+        : if $artist {
+          : include "read.tx" { comics => $artist.get_finished_comics, title => 'comics for ' ~ $params.artist, artist => $artist }
+        : } else {
+          : include "read.tx" { comics => $comics, title => 'recent comics' }
+        : }
+      : } else if $comics.size() > 0 {
+        : include "read.tx" { comics => $comics, title => 'recent comics' }
       : } else {
         : include "about.tx"
       : }
@@ -111,22 +127,18 @@
         <li>correct level of mail check in production</li>
         <li>locking comics and other objects (test)</li>
         <li>show artist</li>
-        <li>contact info</li>
+        <li>my contact info</li>
       </ul>
       Other TODOS
       <ul>
         <li>email for account verification</li>
         <li>in progress comics</li>
-        <li>bookmarks for comics</li>
 
         <li>modperl</li>
         
-        <li>make sure only one user is playing a comic</li>
-
         <li>testing comic</li>
         <li>UI advice</li>
         
-        <li>comic comments</li>
         <li>kudos</li>
 
         <li>group chat</li>

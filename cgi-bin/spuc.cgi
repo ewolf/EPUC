@@ -13,7 +13,7 @@ use Encode qw/ decode encode /;
 use CGI;
 
 use Data::Dumper;
-use File::Path qw/make_path/;
+use File::Path qw/make_path mkpath/;
 
 use SPUC::RequestHandler;
 use SPUC::Uploader;
@@ -25,16 +25,19 @@ use SPUC::Uploader;
 our $site         = 'localhost';
 our $spuc_path    = '/cgi-bin/spuc.cgi';
 our $basedir      = "/var/www";
-our $template_dir = "$basedir/templates/SPUC";
-our $datadir      = "$basedir/data/SPUC/";
+our $template_dir = "$basedir/templates/spuc";
+our $datadir      = "$basedir/data/spuc";
 our $lockdir      = "$basedir/lock";
 our $imagedir     = "$basedir/html/spuc/images";
 our $logdir       = '/tmp/log';
-our $group        = 'www-data';
 
-make_path( $datadir, $lockdir, $template_dir, 
+umask(0);
+
+my $group = getgrnam( 'www-data' );
+
+make_path( $datadir, $lockdir, $template_dir,
            { group => $group, mode => 0775 } );
-exit;
+
 # ---------------------------------------
 #     request
 # ---------------------------------------

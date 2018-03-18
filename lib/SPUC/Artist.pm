@@ -32,6 +32,7 @@ use MIME::Lite;
 #  ** comics **
 #  _unfinished_comics - list of comic objects
 #  finished_comics - linked list node of comic objects
+#  _bookmarks
 #
 # ** game state **
 #  _viewing_comic - current comic viewed in pagination
@@ -65,6 +66,24 @@ sub _display {
 
 sub _send_confirmation_email {
     my( $self ) = @_;
+}
+
+sub _has_bookmark {
+    my( $self, $comic ) = @_;
+    exists $self->get__bookmark_hash({})->{$comic}
+}
+
+sub bookmark {
+    my( $self, $comic ) = @_;
+    unless( $self->_has_bookmark( $comic ) ) {
+        $self->get__bookmark_hash->{$comic} = $comic;
+        $self->add_to__bookmarks( $comic );
+    }
+}
+sub unbookmark {
+    my( $self, $comic ) = @_;
+    delete $self->get__bookmark_hash->{$comic};
+    $self->remove_from__bookmarks( $comic );
 }
 
 1;

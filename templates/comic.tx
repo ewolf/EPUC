@@ -4,8 +4,11 @@
 <div class="comic col">
 : }  
   <div class="row comichead">
-  <span>&#x1F50D;</span>
-  <span class="rating">&#x2B50;&#x2B50;&#x2B50;&#x2B50;&#x2B50;</span>
+
+  : if $small {
+    <span>&#x1F50D;</span>
+  : }
+<!--  <span class="rating">&#x2B50;&#x2B50;&#x2B50;&#x2B50;&#x2B50;</span> -->
   </div>
   
   : for $comic.get('panels') -> $panel {
@@ -15,15 +18,24 @@
     : if $panel.get('type') == 'caption' {
 
   <div class="panel caption row">
-    <span class="artist"><: $panel.get('artist').get('display_name') :> </span>
+    : if ! $small {
+        <a class="artist col" href="?path=/artist&artist=<:$panel.get('artist').get('display_name'):>">
+           <img src="<:$panel.get('artist').get('avatar').size(50,50):>">
+           <: $panel.get('artist').get('display_name') :>
+        </a>
+    : }
     
-     <span class="caption">&quot;<: $panel.get('caption') :>&quot;</span>
-     <span class="captionsmall"><: $panel.get('caption') :></span>
+     <span class="caption"><: $panel.get('caption') :></span>
 
     : } else {
 
-    <div class="panel picture">
-      <span class="artist"><: $panel.get('artist').get('display_name') :> :</span>
+    <div class="panel picture row" style="text-align:center">
+    : if ! $small {
+        <a class="artist col" href="?path=/artist&artist=<:$panel.get('artist').get('display_name'):>">
+           <img src="<:$panel.get('artist').get('avatar').size(50,50):>">
+           <: $panel.get('artist').get('display_name') :>
+        </a>
+    : }
       <img class="picture" src="<: $panel.get('picture').size(500,350) :>">
 
       : }
@@ -35,4 +47,4 @@
 </a>
 : } else {
 </div>
-: }  
+: }

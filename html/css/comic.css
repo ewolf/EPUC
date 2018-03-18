@@ -3,10 +3,7 @@
     font-family: "Comic Sans MS", cursive, sans-serif;
     justify-content: space-evenly;
 }
- 
-.small .artist {
-    display: none;
-}
+
 .small img.picture {
     width: 130px;
     height: 91px;
@@ -21,18 +18,16 @@
 div.picture {
     margin: 15px 0;
 }
-.captionsmall,
-.small span.caption {
-    display: none;
-}
-.small .captionsmall  {
+.small .caption  {
     display: block;
     border: solid 1px grey;
     background-color: white;
     width: 126px;
     text-align: left;
     padding: 2px;
-    align-content: middle;
+    align-content: center;
+    font-size: medium;
+    word-wrap: break-word;
 }
 .comichead {
     justify-content: space-between;
@@ -60,7 +55,18 @@ a.comic:hover {
 }
 .artist {
     font-weight: bold;
+    text-align: center;
 }
+a.artist {
+    text-decoration: none;
+    color: black;
+}
+.artist img {
+    margin: 3px;
+    border: solid 1px grey;
+    background: white;
+}
+
 img.picture {
     border: solid 1px grey;
     background-color: white;
@@ -70,6 +76,7 @@ span.caption {
     font-style: italic;
     text-align: center;
     flex-grow: 1;
+    font-size: x-large;
     background-color: white;
 }
 div.picture {

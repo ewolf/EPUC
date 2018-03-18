@@ -14,11 +14,13 @@ body {
 nav {
     margin: 13px 0;
     justify-content: space-between;
+    flex-wrap: wrap;
     font-size: x-large;
 }
 nav > a {
     border: dotted 4px;
     padding: 8px 12px;
+    margin: 3px;
     text-decoration: none;
 }
 header {
@@ -29,7 +31,7 @@ header {
 }
 header aside {
     background-color: #FAFFFA;
-    padding: 0 1em;
+    padding: 0 5px;
     border-left: groove 8px plum;
 }
 aside > p {
@@ -83,4 +85,7 @@ input.error {
 }
 #reglink {
     margin-top: 1em;
+}
+main {
+    justify-contents: space-around;
 }

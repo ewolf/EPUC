@@ -19,9 +19,7 @@ use SPUC::Image;
 use SPUC::Panel;
 use SPUC::Session;
 
-umask( 0775 );
 our $singleton;
-
 
 #
 # Input is the url path, parameters and the session id.
@@ -62,7 +60,6 @@ sub _singleton {
 
     $singleton = bless {
         store => $store,
-        root  => $root,
         app   => $app,
         locks => [],
         notes => [],
@@ -89,8 +86,10 @@ sub reset {
 }
 
 sub err {
-    my( $self, $err ) = @_;
-    push @{$self->{errs}}, $err;
+    my( $self, $err, $user ) = @_;
+    if( $err ) {
+        push @{$self->{errs}}, $err;
+    }
 }
 
 sub has_errs {
@@ -103,13 +102,14 @@ sub errs {
 
 sub msg {
     my( $self, $msg ) = @_;
-    push @{$self->{msgs}}, $msg;
+    if( $msg ) {
+        push @{$self->{msgs}}, $msg;
+    }
 }
 
 sub msgs {
     [splice @{shift->{msgs}}];
 }
-
 
 # returns locks for unlock
 sub lock {
@@ -117,8 +117,10 @@ sub lock {
     
     my @fhs;
     for my $name (@names) {
+        print STDERR "Locking $name\n";
         open my $fh, '>', "$self->{lockdir}/$name";
         flock( $fh, 2 ); #WRITE LOCK
+        print STDERR "Got Lock for $name\n";
         push @fhs, $fh;
     }
     push @{$self->{locks}}, @fhs;
@@ -127,7 +129,9 @@ sub unlock {
     my $self = shift;
     my $fhs = $self->{locks};
     for my $fh (@$fhs) {
+        print STDERR "UnLocking\n";
         flock( $fh, 8 );
+        print STDERR "UnLocked\n";
     }
     splice @$fhs;
 }
@@ -158,11 +162,11 @@ sub note {
 }
 
 sub check_password {
-    my( $self, $pw1, $pw2, $user, $oldpw ) = @_;
+    my( $self, $pw1, $pw2, $oldpw, $user ) = @_;
 
     if( $user ) {
         if( ! $user->_checkpw( $oldpw ) ) {
-            $self->err( 'old password incorrect' );            
+            $self->err( 'old password incorrect', $user );
         }
     }
     
@@ -187,12 +191,12 @@ sub _handle {
 
     $self->reset;
     
-    my( $user, $sess, $err, $msg );
+    my( $user, $sess );
     my $action = $params->{action} || '';
     # see if the session is attached to a user. If not
     # then create a default unlogged in "session".
     if( $sess_id ) {
-        my $sessions = $self->{root}->get__sessions({});
+        my $sessions = $self->{app}->get__sessions({});
         $sess = $sessions->{$sess_id};
         if( $sess ) {
             $user = $sess->get_user;
@@ -207,7 +211,7 @@ sub _handle {
     }
     
     unless( $sess ) {
-        $sess = $self->{root}->get_default_session;
+        $sess = $self->{app}->get_default_session;
     }
 
     # --------- the decision tree based on the path
@@ -216,11 +220,13 @@ sub _handle {
         undef $sess_id;
         # LOCK root _sessions
         $self->lock( "SESSIONS" );
-        my $sessions = $self->{root}->get__sessions({});
+        my $sessions = $self->{app}->get__sessions({});
         delete $sessions->{$sess_id};
         if( $user ) {
+            $self->note( "Logged Out", $user );
             undef $user;
-            $msg = "Logged out";
+            $self->msg( "Logged out" );
+            
         }
     } #logout
 
@@ -231,9 +237,9 @@ sub _handle {
         # where it wants to
         
         # LOCK root _emails, _users, sessions
-        $self->lock( "SESSIONS", "EMAILS", "USERS" );
-        my $emails = $self->{root}->get__emails({});
-        my $unames = $self->{root}->get__users({});
+        $self->lock( "EMAILS", "USERS" );
+        my $emails = $self->{app}->get__emails({});
+        my $unames = $self->{app}->get__users({});
 
         my $pw = $params->{pw};
         my $pw2 = $params->{pw2};
@@ -261,7 +267,7 @@ sub _handle {
 #            $self->err( 'unable to verify email.' );
 #        }
 
-        if( ! $err ) {
+        if( ! $self->has_errs ) {
             # no error defined, so create the user
             # and session and attach the user to the session
             # also add to emails and unames lookups
@@ -279,15 +285,17 @@ sub _handle {
                                               } );
             $user->_setpw( $pw );
             my $found;
+
+            $self->note( "Registered", $user );
             
             $self->lock( "SESSIONS" );
-            my $sessions = $self->{root}->get__sessions({});
+            my $sessions = $self->{app}->get__sessions({});
             until( $found ) {
                 $sess_id = int(rand(2**64));
                 $found = ! $sessions->{$sess_id};
             }
 
-            $msg = "Created artist account '$un'. You are now logged in and ready to play.";
+            $self->msg( "Created artist account '$un'. You are now logged in and ready to play." );
             my $sess = $sessions->{$sess_id} =
                 $self->{store}->create_container( 'SPUC::Session', {
                     last_id => $sess_id,
@@ -307,7 +315,8 @@ sub _handle {
             my $avas = $user->get__avatars;
             my $ava = $avas->[$avaidx];
             $ava && $user->set_avatar( $ava );
-            $msg = "selected avatar";
+            $self->msg( "selected avatar" );
+            $self->note( "selected avatar", $user );
         }
 
         elsif( $action eq 'upload-avatar' ) {
@@ -328,7 +337,8 @@ sub _handle {
                 $img->set__origin_file( $dest );
                 $user->add_to__avatars( $img );
                 $user->set_avatar( $img );
-                $msg = "created new avatar";
+                $self->msg( "created new avatar" );
+                $self->note( "drew new avatar", $user );
             }
             elsif( (my $fh = $uploader->fh('avup')) ) {
                 my( $ext ) = ( $fn =~ /\.([^.]+)$/ );
@@ -345,9 +355,10 @@ sub _handle {
                     $user->add_to__avatars( $img );
                     $user->set_avatar( $img );
                     copy( $fh, $dest );
-                    $msg = "uploaded new avatar";
+                    $self->msg( "uploaded new avatar" );
+                    $self->note( "uploaded new avatar", $user );
                 } else {
-                    $self->err( "avatar file format not recognized" );
+                    $self->err( "avatar file format not recognized", $user );
                 }
             }
         } #if upload
@@ -357,32 +368,25 @@ sub _handle {
                 my $avaidx = $params->{avatar};
                 my( $delava ) = splice @$avas, $avaidx, 1;
                 $user->set__last_deleted_avatar( $delava );
-                $msg = 'deleted avatar';
+                $self->msg( 'deleted avatar', $user );
+                $self->note( "deleted avatar", $user );
             } else {
-                $self->err( 'cannot delete last avatar' );
+                $self->err( 'cannot delete last avatar', $user );
             }
         }
         elsif( $action eq 'set-bio' ) {
             my $bio = encode( 'UTF-8', $params->{bio} );
             $user->set_bio( $bio );
-            $msg = 'updated bio';
+            $self->msg( 'updated bio' );
+            $self->note( "updated bio", $user );
         }
         elsif( $action eq 'update-password' ) {
-            my $oldpw = $params->{pwold};
             my $newpw = $params->{pw};
-            # verify old password
-            if( ! $user->_checkpw( $oldpw ) ) {
-                $self->err( 'old password incorrect' );
-            }
-            if( length( $newpw ) < 8 ) {
-                $self->err( 'password too short' );
-            }
-            if( $newpw ne $params->{pw2} ) {
-                $self->err( 'password do not match' );
-            }
-            if( ! $err ) {
+            $self->check_password( $newpw, $params->{pw2}, $params->{pwold}, $user );
+            if( ! $self->has_errs ) {
                 $user->_setpw( $newpw );
-                $msg = "Updated password";
+                $self->msg( "Updated password" );
+                $self->note( "updated password", $user );
             }
         }
     } #profile
@@ -393,22 +397,23 @@ sub _handle {
         my $un = encode( 'UTF-8', $params->{un} );
         my $pw = $params->{pw};
 
-        my $emails = $self->{root}->get__emails({});
-        my $unames = $self->{root}->get__users({});
+        my $emails = $self->{app}->get__emails({});
+        my $unames = $self->{app}->get__users({});
         my $uu = $unames->{lc($un)};
         my $eu = $emails->{lc($un)};
-        $user =  $uu || $eu || $self->{root}->get_dummy_user;
+        $user =  $uu || $eu || $self->{app}->get_dummy_user;
 
         # dummy automatically fails _checkpw
         if( $user->_checkpw( $pw ) ) {
             my $found;
             $self->lock( "SESSIONS" );
-            my $sessions = $self->{root}->get__sessions({});
+            my $sessions = $self->{app}->get__sessions({});
             until( $found ) {
                 $sess_id = int(rand(2**64));
                 $found = ! $sessions->{$sess_id};
             }
-            $msg = 'logged in';
+            $self->note( "logged in", $user );
+            $self->msg( 'logged in' );
             my $sess = $user->get__session;
             delete $sessions->{$sess->get_last_id};
             $sessions->{$sess_id} = $sess;
@@ -441,7 +446,10 @@ sub _handle {
                         print $out $png;
                         close $out;
                         $img->set__origin_file( $dest );
-                        ( $msg, $err ) = $comic->add_picture( $img, $user );
+                        my( $msg, $err ) = $comic->add_picture( $img, $user );
+                        $self->msg( $msg );
+                        $self->err( $err );
+                        $self->note( "drew panel", $user );
                         $user->set__playing(undef);
                         $comic->set__player( undef );
                     }
@@ -458,7 +466,10 @@ sub _handle {
                             my $dest = "$destdir/$img.$ext";
                             $img->set__origin_file( $dest );
                             copy( $fh, $dest );
-                            ( $msg, $err ) = $comic->add_picture( $img, $user );
+                            my( $msg, $err ) = $comic->add_picture( $img, $user );
+                            $self->msg( $msg );
+                            $self->err( $err );
+                            $self->note( "uploaded panel", $user );
                             $user->set__playing(undef);
                             $comic->set__player( undef );
                         } else {
@@ -466,13 +477,16 @@ sub _handle {
                         }
                     } #file up
                     else {
-                        $self->notes( "upload called without anything to upload", $user );
+                        $self->note( "upload called without anything to upload", $user );
                     }
                 } #if comic
             } #if upload to panel
             elsif( $action eq 'caption-picture' ) {
                 my $cap = encode( 'UTF-8', $params->{caption});
-                ( $msg, $err ) = $comic->add_caption( $cap, $user );
+                my( $msg, $err ) = $comic->add_caption( $cap, $user );
+                $self->msg( $msg );
+                $self->err( $err );
+                $self->note( "added caption", $user );
                 $user->set__playing(undef);
                 $comic->set__player( undef );
             }
@@ -480,6 +494,7 @@ sub _handle {
                 my $arts = $comic->get_artists;
                 $self->lock( "UNFINISHED" );
                 for my $thing ( $self->{app}, values %$arts) {
+                    $self->note( "completed comic", $user );
                     $thing->remove_from__unfinished_comics( $comic );
                     my $fin = $thing->get_finished_comics([]);
                     unshift @$fin, $comic;
@@ -505,58 +520,86 @@ sub _handle {
         my $start = encode( 'UTF-8', $params->{start});
         # LOCK app _unfinished_comics
         $self->lock( "UNFINISHED" );
-        ( $msg, $err ) = $self->{app}->begin_strip( $user, $start );
+        my( $msg, $err ) = $self->{app}->begin_strip( $user, $start );
+        $self->msg( $msg );
+        $self->err( $err );
+        $self->note( "started comic", $user );
     }
 
     elsif( $path =~ m~^/recover_request~ && $action eq 'request-link' ) {
         my $unorem = encode( 'UTF-8', $params->{unorem});
-        my $emails = $self->{root}->get__emails({});
-        my $unames = $self->{root}->get__users({});
+        my $emails = $self->{app}->get__emails({});
+        my $unames = $self->{app}->get__users({});
         my $emu = $emails->{lc($unorem)};
         my $umu = $unames->{lc($unorem)};
         $user = $umu || $emu;
         $self->lock( "RESETS" );
         $user && $self->{app}->_send_reset_request($user);
         $self->msg( "sent reset request" );
+        $self->note( "requested reset", $user );
     }
 
     elsif( $path =~ m~^/recover~ ) {
         my $tok = $params->{tok};
-        $user = $self->{app}->get__resets({})->{$tok};
-        if( $user && 
-            $user->get__reset_token eq $tok &&
-            $user->get__reset_token_good_until > time ) 
-        {
-            if( $action eq 'update-password' ) {
-                $self->check_password( $params->{pw}, $params->{pw2} );
-                if( ! $self->has_errs ) {
-                    $user->_setpw( $params->{pw} );  
-                    $user->set__reset_token(undef);
-                    $user->set__reset_token_good_until(undef);
-                    $self->lock( "RESETS" );
-                    delete $self->{app}->get__resets({})->{$tok};
-                    $self->msg( 'updated password' );
+        if( $tok ) {
+            $user = $self->{app}->get__resets({})->{$tok};
+            if( $user && 
+                $user->get__reset_token eq $tok &&
+                $user->get__reset_token_good_until > time ) 
+            {
+                if( $action eq 'update-password' ) {
+                    $self->check_password( $params->{pw}, $params->{pw2} );
+                    if( ! $self->has_errs ) {
+                        $user->_setpw( $params->{pw} );  
+                        $user->set__reset_token(undef);
+                        $user->set__reset_token_good_until(undef);
+                        $self->lock( "RESETS" );
+                        delete $self->{app}->get__resets({})->{$tok};
+                        $self->msg( 'updated password' );
+                        $self->note( "recovered and set password", $user );
+                    }
+                } else {
+                    $self->msg( 'reset your password' );
                 }
             } else {
-                $self->msg( 'reset your password' );
+                undef $user;
             }
-        } else {
-            undef $user;
         }
-    }
-    
+    } #recover
 
-    elsif( $path =~ m~^/artist~ ) {
+    elsif( $action =~ /^(comment|bookmark|unbookmark)$/ && $user && defined( $params->{idx} ) ) {
+        my $comics;
+        if( $path eq '/mine' ) { 
+            $comics = $user->get_finished_comics;
+        }
+        elsif( $params->{artist} ) {
+            my $artist = $self->{app}->artist( $params->{artist} );
+        }
+        else {
+            $comics //= $self->{app}->get_finished_comics;
+        }
+        
+        my $comic = $comics->[$params->{idx}];
 
-    }
-    
-    if( $err ) {
-        $self->note( $err, $user );
-    }
-    if( $msg ) {
-        $self->note( $msg, $user );
-    }
-    
+        if( $comic ) { 
+            if( $action eq 'comment' && $params->{comment} =~ /\S/ ) {
+                my $comment = $self->{store}->create_container( {
+                    artist => $user,
+                    comment => $params->{comment},
+                    time => time(),
+                                                            } );
+                $comic->add_to_comments( $comment );
+                $self->note( "added comment", $user );
+            }
+            elsif( $action eq 'bookmark' ) {
+                $user->bookmark( $comic );
+            }
+            elsif( $action eq 'unbookmark' ) {
+                $user->unbookmark( $comic );
+            }
+        }
+    } #added comment or bookmark or removed bookmark
+
     $self->write_notes;
     
     $self->{store}->save;
@@ -631,7 +674,7 @@ sub _unpack {
 
 sub handle_RPC {
     my( $params, $sess_id, $uploader ) = @_;
-    my $sessions = $self->{root}->get__sessions({});
+    my $sessions = $self->{app}->get__sessions({});
 
     my $sess    = $sessions->{$sess_id};
     if( $sess ) {

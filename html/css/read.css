@@ -1,5 +1,6 @@
 .pagination {
     justify-content: space-evenly;
+    margin-bottom: 2em;
 }
 .sort {
     justify-content: space-around;    
@@ -11,4 +12,22 @@
     padding: 3em;
     margin: 5px;
     border: solid 1px purple;
+}
+div.comment {
+    border: solid 1px;
+    margin: 1px;
+    padding: 2px;
+}
+.comments {
+    margin: 3em auto;
+    max-width:40em;
+    text-align:center;
+}
+p.comment {
+    background: wheat;
+    flex-grow: 1;
+    margin: 2px;
+    padding: 3px;
+    font-family: cursive;
+    font-size: smaller;
 }

@@ -13,7 +13,7 @@ use SPUC::Panel;
 #   started  - when this was started
 #   finished - when this was completed
 #   rating   - rating of comic
-#
+#   comments - list of comments
 #   creator - who started this strip
 #   _player - Artist object who is currently playing this
 #   artists - hash (set) of artists working on this

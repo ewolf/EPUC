@@ -1,4 +1,4 @@
-<link rel="stylesheet" type="text/css" href="/css/SPUC/play.css" title="Default">
+<link rel="stylesheet" type="text/css" href="/spuc/css/play.css" title="Default">
 
 <span id="err"><:$err:></span>
 

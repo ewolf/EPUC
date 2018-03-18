@@ -8,7 +8,15 @@ use Data::Dumper;
 use Data::ObjectStore;
 use Digest::MD5;
 
-my $store = Data::ObjectStore::open_store( "/var/www/data/SPUC/", { group => 'www-data' } );
+umask(0);
+my $gid = getgrnam( 'www-data' );
+
+our $site         = 'localhost';
+our $basedir      = "/var/www";
+our $spuc_path    = '/cgi-bin/spuc.cgi';
+our $imagedir     = "$basedir/html/spuc/images";
+
+my $store = Data::ObjectStore::open_store( "/var/www/data/spuc/", { group => $gid } );
 my $root  = $store->load_root_container;
 
 # set the root password
@@ -22,6 +30,9 @@ my $root  = $store->load_root_container;
 my $app = $root->get_SPUC;
 unless( $app ) {
     $app = $store->create_container( 'SPUC::App', {
+            site      => $site,
+            spuc_path => $spuc_path,
+            imagedir  => $imagedir,
                                      } );
     $root->set_SPUC( $app );
 }
@@ -43,20 +54,20 @@ unless( $defava ) {
 #
 # Dummy user with default session
 #
-my $user = $root->get_dummy_user;
+my $user = $app->get_dummy_user;
 unless( $user ) {
     my $un = 'dummy';
 
     $user = $store->create_container( 'SPUC::Dummy', {
         display_name => $un,
         _login_name  => $un,
-        __avatar     => $root->get__default_avatar,
+        __avatar     => $app->get__default_avatar,
         _created     => time,
                                       } );
-    $root->set_dummy_user( $user );
+    $app->set_dummy_user( $user );
 }
 
-my $sess = $root->get_default_session;
+my $sess = $app->get_default_session;
 unless( $sess ) {
     $sess = $store->create_container( 'SPUC::Session', {
         user => $user,
@@ -64,8 +75,8 @@ unless( $sess ) {
             $app => $app,
         },
                                       } );
-    $root->set_default_session( $sess );
-    my $sessions = $root->get__sessions({}); 
+    $app->set_default_session( $sess );
+    my $sessions = $app->get__sessions({}); 
     $sessions->{0} = $sess;    
     $user->set__session( $sess );
 }
@@ -94,7 +105,7 @@ while( <STDIN> ) {
     }
     elsif( /^\s*admin\s+(\S+)/ ) {
         my $un = $1;
-        my $unames = $root->get__users({});
+        my $unames = $app->get__users({});
         my $user = $unames->{lc($un)};
         if( $user ) {
             $user->set__is_admin(1);
@@ -105,7 +116,7 @@ while( <STDIN> ) {
     }
     elsif( /^\s*unadmin\s+(\S+)/ ) {
         my $un = $1;
-        my $unames = $root->get__users({});
+        my $unames = $app->get__users({});
         my $user = $unames->{lc($un)};
         if( $user ) {
             $user->set__is_admin(0);
@@ -125,7 +136,7 @@ while( <STDIN> ) {
         exit;
     }
     elsif( /^\s*users/ ) {
-        my $unames = $root->get__users({});
+        my $unames = $app->get__users({});
         my( @uns ) = sort keys %$unames;
         my $longest;
         if( @uns ) {
@@ -142,7 +153,7 @@ while( <STDIN> ) {
     }
     elsif( /^\s*passwd\s+(\S+)/ ) {
         my $un = $1;
-        my $unames = $root->get__users({});
+        my $unames = $app->get__users({});
         my $user = $unames->{lc($un)};
         if( $user ) {
             print "New Password for user $un :";

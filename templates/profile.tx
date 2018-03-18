@@ -1,7 +1,7 @@
 : my $selava = $user.get('avatar')
 : my $avas = $user.get('_avatars')
 
-<link rel="stylesheet" type="text/css" href="/css/SPUC/profile.css" title="Default">
+<link rel="stylesheet" type="text/css" href="/spuc/css/profile.css" title="Default">
 
 <div class="profile" >
   <h1>Editing Profile</h1>
@@ -71,6 +71,6 @@
 
   : include "update_password.tx"
   
-  <script src="/js/SPUC/profile.js"></script>
+  <script src="/spuc/js/profile.js"></script>
 </div>
 

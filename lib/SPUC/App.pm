@@ -38,7 +38,7 @@ sub begin_strip {
         artists     => { $artist => $artist },
         last_artist => $artist,
         panels      => [ $panel ],
-        needs       => 4, # TODO - remove for prod
+        needs       => 3, # TODO - remove for prod
         app         => $self,
                                           } );
     
@@ -49,6 +49,11 @@ sub begin_strip {
     return ("started comic",'');
     
 } #begin_strip
+
+sub artist {
+    my( $self, $name ) = @_;
+    $self->get__users->{$name};
+} #artist
 
 sub find_comic_to_play {
     my( $self, $artist, $skip ) = @_;
