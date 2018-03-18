@@ -10,11 +10,9 @@
   <body class="col">
     <header class="row">
       
-      <div class="splash row">
-        <div style="display:flex;flex-direction:column">
-          <p>Scarf Poutine You Clone</p>
-          <p>Collaborative Comics</p>
-        </div>
+      <div class="splash col">
+        <p>Scarf Poutine You Clone</p>
+        <p>Collaborative Comics</p>
       </div>
       
       <aside class="column">

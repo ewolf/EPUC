@@ -4,5 +4,26 @@
     font-size: x-large;
     text-align: center;
     background-color: white;
-    padding: 1em;
+    margin: 4px 0;
+}
+.picture {
+    background-color: white;
+    border: ridge 15px lightgrey;
+    margin: 4px 0;
+}
+.panelframe {
+    margin: 0 auto;
+}
+.backer {
+    background: skyblue;
+    padding: 3px;
+    text-align:center;
+}
+#caption input {
+    border: solid black 2px;
+    font-size: large;
+    padding: 10px;
+}
+#caption button {
+    flex-shrink: 1;
 }

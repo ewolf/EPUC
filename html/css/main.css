@@ -8,11 +8,11 @@
 }
 
 body {
-    background-color: #EDE;
+    background-color: skyblue;
     font-size: large;
 }
 nav {
-    margin-top: 13px;
+    margin: 13px 0;
     justify-content: space-between;
     font-size: x-large;
 }
@@ -41,8 +41,7 @@ header aside img {
 .splash {
     align-items: center;
     background: url(/spuc.png) no-repeat;
-    background-position-y: 40px;
-    padding-left: 340px;
+    background-position-x: center;
     flex-grow: 1;
     text-align: center;
     font-weight: bold;
@@ -60,11 +59,11 @@ input.error {
 }
 .message {
     font-size: x-large;
-    width: 400px;
     border: solid #47A 4px;
     border-radius: 18px;
     background-color: #F0E7FF;
-    margin: 5px auto;
+    margin: 0px auto;
+    padding: 0 7px;
     text-align: center;
 }
 .box {

@@ -219,12 +219,16 @@ function setDrawingControls() {
     }
 
     function starttouch(ev) {
+        console.log( 'start touch' );
         if( ev.touches.length == 1 ) {
+            ev.preventDefault();
+            ev.stopPropagation();
             startdraw( ev.touches[0].pageX - c.offsetLeft,
                        ev.touches[0].pageY - c.offsetTop );
         }
     }
     function startmousedraw(ev) {
+        console.log( 'start mouse draw' );
         startdraw( ev.offsetX, ev.offsetY );
     }
     function startdraw(x,y) {
@@ -272,6 +276,7 @@ function setDrawingControls() {
         }
     }
     function movem(ev) {
+        console.log( 'move mouse' );
         if( isDrawing ) {
             if( typeof outtime !== 'undefined' ) {
                 clearTimeout( outtime );
@@ -281,6 +286,7 @@ function setDrawingControls() {
         }
     }
     function movet(ev) {
+        console.log( 'move touch' );
         ev.preventDefault();
         ev.stopPropagation();
         if( ev.touches.length == 1 ) {
@@ -295,6 +301,7 @@ function setDrawingControls() {
     } //movet
     
     function enddraw() {
+        console.log( 'end draw' );
         if( isDrawing ) {
             isDrawing = false;
             ++paintpoint;
@@ -310,6 +317,7 @@ function setDrawingControls() {
     } //enddraw
 
     function mouseout() {
+                console.log( 'mouse out' );
         if( isDrawing ) {
             outtime = setTimeout( enddraw, 300 );
         }
