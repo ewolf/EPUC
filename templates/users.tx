@@ -1,0 +1,7 @@
+<div class="col">
+: for $app.users -> $user {
+   <span class="row">
+      
+   </span>
+: }
+</div>

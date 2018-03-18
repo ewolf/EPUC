@@ -492,9 +492,15 @@ sub _handle {
                 }
                 for my $art (values %$arts) {
                     my $updates = $art->get__updates([]);
-                    unshift @$updates, { msg   => "a comic you wrote for finished",
-                                         type  => 'comic',
-                                         comic => $comic };
+                    my $all_comics = $art->get__all_comics([]);
+                    for( my $i=0; $i<@$all_comics; $i++ ) {
+                        if( $all_comics->[$i] == $comic ) {
+                            unshift @$updates, { msg   => "a comic you wrote for finished",
+                                                 type  => 'comic',
+                                                 comic => $i };
+                            last;
+                        }
+                    }
                 }
                 $self->msg( "comleted comic" );
             }

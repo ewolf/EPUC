@@ -1,0 +1,18 @@
+<link rel="stylesheet" type="text/css" href="/spuc/css/comic.css" title="Default">
+<div class="col">
+: for $app.artists -> $artist {
+   <div class="artist row">
+     <img src="<:$artist.get('avatar').size(150,150):>">
+     <div class="col">
+       <p>
+         <span class="about">About <:$artist.get('display_name'):> :
+         </span>
+       </p>
+       <p>
+         <span class="bio"><: $artist.get('bio') :></span>
+       </p>
+       <a href="?path=/artist&artist=<:$artist.get('display_name'):>">comics</a>
+     </div>
+   </div>
+: }
+</div>
