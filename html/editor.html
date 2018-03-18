@@ -34,6 +34,17 @@
       .drawtool {
           display:flex;
       }
+      .canv {
+          margin: 10px;
+      }
+      .rightpane {
+          display:flex;
+          flex-direction: column;
+      }
+      .longcontrols {
+          display:flex;
+          flex-direction: row;
+      }
       #canv {
           border:solid 1px black;
       }
@@ -76,40 +87,50 @@
   <body>
     Drawing Tool Test
     <div class="drawtool">
-      <div>
+      <div class="canv">
         <canvas id="canv" width="400" height="250">
         </canvas>
       </div>
-      <div class="colorpicker">
-        <div class="barbutton" id="undo">undo</div>
-        <div class="barbutton" id="redo">redo</div>
-        <div class="barbutton active" id="cleary">clear</div>
-        <div data-color="black" class="colorpick circle"></div>
-        <div data-color="white" class="colorpick circle"></div>
-        <div data-color="blue"  class="colorpick circle"></div>
-        <div data-color="green" class="colorpick circle"></div>
-        <div data-color="red"   class="colorpick circle"></div>
+      <div class="rightpane">
+        <div>
+          <div class="barbutton" id="undo">undo</div>
+          <div class="barbutton" id="redo">redo</div>
+          <div class="barbutton active" id="cleary">clear</div>
+        </div>
+        <div class="longcontrols">
+          <div class="colorpicker">
+            <div data-color="black" class="colorpick circle"></div>
+            <div data-color="white" class="colorpick circle"></div>
+            <div data-color="red"   class="colorpick circle"></div>
+            <div data-color="orange"   class="colorpick circle"></div>
+            <div data-color="yellow"   class="colorpick circle"></div>
+            <div data-color="green" class="colorpick circle"></div>
+            <div data-color="blue"  class="colorpick circle"></div>
+            <div data-color="purple"  class="colorpick circle"></div>
+          </div>
+          <div class="brushpicker">
+            <div>brush size</div>
+            <div data-size="1" class="brushcontrol"></div>
+            <div data-size="4" class="brushcontrol"></div>
+            <div data-size="8" class="brushcontrol"></div>
+            <div data-size="13" class="brushcontrol"></div>
+            <div data-size="21" class="brushcontrol"></div>
+            <div data-size="34" class="brushcontrol"></div>
+            <div data-size="50" class="brushcontrol"></div>
+          </div>
+        </div>
       </div>
-      <div class="brushpicker">
-        <div>brush size</div>
-        <div data-size="1" class="brushcontrol"></div>
-        <div data-size="4" class="brushcontrol"></div>
-        <div data-size="8" class="brushcontrol"></div>
-        <div data-size="13" class="brushcontrol"></div>
-        <div data-size="21" class="brushcontrol"></div>
-        <div data-size="34" class="brushcontrol"></div>
-      </div>        
+    </div>
+    
       <div>
 	    To Do and stuff
         <ul>
-          <li>brush exiting and entering the area</li>
           <li>arbitrary color picker</li>
           <li>save image</li>
           <li>transmit and store image</li>
           <li>brush shape</li>
         </ul>
       </div>
-    </div>
 
   </body>
     <script><!--
@@ -129,15 +150,17 @@ function setDrawingControls() {
     var width = 400;
     var height = 250;
 
-    var undos = [ ctx.getImageData( 0, 0, width, height ) ];
+    var blankscreen = ctx.getImageData( 0, 0, width, height );
+    var undos = [ blankscreen ];
     var paintpoint = -1;
     var redos = [];
+    var outtime;
 
     function blank() {
         if( confirm( "Really clear?" ) ) {
             ++paintpoint;
-            ctx.putImageData( undos[0], 0, 0 );
-            undos[paintpoint+1] = undos[0];
+            ctx.putImageData( blankscreen, 0, 0 );
+            undos[paintpoint+1] = blankscreen;
             undos.length = paintpoint+2;
             checkundoredo();
         }
@@ -157,7 +180,6 @@ function setDrawingControls() {
     }
 
     function undo() {
-        console.log( "Undo called. Length is " + undos.length + " point is " + paintpoint );
         if( paintpoint >= 0 ) {
             ctx.putImageData( undos[paintpoint--], 0, 0 );
             checkundoredo();
@@ -165,95 +187,117 @@ function setDrawingControls() {
     }
 
     function redo() {
-        console.log( "Redo called. Length is " + undos.length + " point is " + paintpoint);
         if( paintpoint < (undos.length-2) ) {
             ctx.putImageData( undos[++paintpoint+1], 0, 0 );
             checkundoredo();
         }
     }
 
+    function starttouch(ev) {
+        if( ev.touches.length == 1 ) {
+            isDrawing = true;
+            lastX = Math.round(ev.touches[0].pageX - c.offsetLeft );
+            lastY = Math.round(ev.touches[0].pageY - c.offsetLeft );
+            drawPoint( lastX, lastY );
+        }
+    }
     function startdraw(ev) {
         //save how things are
         isDrawing = true;
         lastX = ev.offsetX;
         lastY = ev.offsetY;
-        console.log( "Start draw" );
-        draw( ev.offsetX, ev.offsetY );
+        drawPoint( lastX, lastY );
     }
+    function movem(ev) {
+        if( isDrawing ) {
+            if( typeof outtime !== 'undefined' ) {
+                clearTimeout( outtime );
+                outtime = undefined;
+            }
+            move( ev.offsetX, ev.offsetY );
+        }
+    }
+    function movet(ev) {
+//        ev.preventDefault();
+//        ev.stopPropagation();
+        if( ev.touches.length == 1 ) {
+            if( isDrawing ) {
+                move( Math.round(ev.touches[0].pageX - c.offsetLeft ),
+                      Math.round( ev.touches[0].pageY - c.offsetTop ) );
+            } else {
+                drawPoint( Math.round(ev.touches[0].pageX - c.offsetLeft ),
+                           Math.round( ev.touches[0].pageY - c.offsetTop ) );
+            }
+        }
+    }
+    
     function enddraw() {
         if( isDrawing ) {
             isDrawing = false;
             ++paintpoint;
             undos[paintpoint+1] = ctx.getImageData( 0, 0, width, height );
-            console.log( "End draw ul : " + undos.length + " pp " + paintpoint);
             undos.length = paintpoint+2;
+            if( undos.length > 50 ) {
+                undos.shift();
+                --paintpoint;
+            }
             checkundoredo();
         }
     }
-    var P2 = 2*Math.PI;
-    function movem(ev) {
-        if( isDrawing ) {
 
-            var x2 = ev.offsetX;
-            var y2 = ev.offsetY;
-            
-            var x1 = lastX;
-            var y1 = lastY;
-            
-            lastX = x2;
-            lastY = y2;
-            
-            var delx = Math.abs(x2 - x1);
-            var dely = Math.abs(y2 - y1);
-             
-            console.log( 'y1 ' + y1 + ', y2 ' + y2 + ', dely ' + dely );
-            
-            var del = delx+dely;
-            var A = 0, B = 0, a = 0, b = 0;
-            for( var i=0; i<del; i++ ) {
-                if( A > B ) {
-                    b = b + 1;
-                    B = B + delx;
+    function mouseout() {
+        if( isDrawing ) {
+            outtime = setTimeout( enddraw, 300 );
+        }
+    }
+    
+    var P2 = 2*Math.PI;
+    
+    function move( x2, y2 ) {
+        var x1 = lastX;
+        var y1 = lastY;
+        
+        lastX = x2;
+        lastY = y2;
+        
+        var delx = Math.abs(x2 - x1);
+        var dely = Math.abs(y2 - y1);
+        
+        var del = delx+dely;
+        var A = 0, B = 0, a = 0, b = 0;
+        for( var i=0; i<del; i++ ) {
+            if( A > B ) {
+                b = b + 1;
+                B = B + delx;
+            } else {
+                a = a + 1;
+                A = A + dely
+            }
+            if( y1 > y2 ) {
+                //down to up
+                if( x1 > x2 ) {
+                    // right to left
+                    drawPoint( x1 - a, y1 - b );
                 } else {
-                    a = a + 1;
-                    A = A + dely
+                    // left to right
+                    drawPoint( x1 + a, y1 - b );
                 }
-                if( y1 > y2 ) {
-                    //down to up
-                    if( x1 > x2 ) {
-                        // right to left
-                        draw( x1 - a, y1 - b );
-                    } else {
-                        // left to right
-                        draw( x1 + a, y1 - b );
-                    }
+            } else {
+                //up to down
+                if( x1 > x2 ) {
+                    // right to left
+                    drawPoint( x1 - a, y1 + b );
                 } else {
-                    //up to down
-                    if( x1 > x2 ) {
-                        // right to left
-                        draw( x1 - a, y1 + b );
-                    } else {
-                        // left to right
-                        draw( x1 + a, y1 + b );
-                    }
+                    // left to right
+                    drawPoint( x1 + a, y1 + b );
                 }
             }
         }
     }
-    function movet(ev) {
-        ev.preventDefault();
-        ev.stopPropagation();
-        if( ev.touches.length == 1 ) {
-            var x = Math.round(ev.touches[0].pageX - c.offsetLeft );
-            var y = Math.round( ev.touches[0].pageY - c.offsetTop );
-            draw( x, y );
-        }
-    }
-    function draw(x,y) {
+
+    function drawPoint(x,y) {
         ctx.beginPath();
         ctx.arc( x, y, size, 0, P2, true );
-        //ctx.fillRect( x - size/2, y - size/2, size, size );
-        //        ctx.stroke();
         ctx.fill();
     }
 
@@ -266,12 +310,13 @@ function setDrawingControls() {
     
     c.addEventListener('mousedown', startdraw );
     c.addEventListener('mouseup', enddraw );
-    c.addEventListener('mouseout', enddraw );
-    c.addEventListener('touchstart', movet );
+    c.addEventListener('mousemove', movem );
+    c.addEventListener('mouseout', mouseout );
+    
+    c.addEventListener('touchstart', starttouch );
+    c.addEventListener('touchmove', movet );
     c.addEventListener('touchend', enddraw );
-
-    c.ontouchmove = movet;
-    c.onmousemove = movem;
+    
 }
 setDrawingControls();
 
@@ -281,8 +326,8 @@ function setSizeControls() {
 
     var picks = document.getElementsByClassName('brushcontrol');
     function changesize( ev ) {
-        ev.preventDefault();
-        ev.stopPropagation();
+//        ev.preventDefault();
+//        ev.stopPropagation();
         for( var i=0; i<picks.length; i++ ) {
             picks[i].classList.remove( 'picked' );
             picks[i].firstChild.style['background-color'] = 'white';
@@ -329,8 +374,8 @@ function setColorControls() {
     var picks = document.getElementsByClassName('colorpick');
 
     function changecolor( ev ) {
-        ev.preventDefault();
-        ev.stopPropagation();
+//        ev.preventDefault();
+//        ev.stopPropagation();
         for( var i=0; i<picks.length; i++ ) {
             picks[i].classList.remove( 'picked' );
         }
