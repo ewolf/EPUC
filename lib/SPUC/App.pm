@@ -11,7 +11,7 @@ use SPUC::Panel;
 
 #
 # Fields :
-#   _unfinished_comics
+#   _unfinished_comic_head - linkedlistnode containting comic
 #
 #
 #
@@ -27,16 +27,18 @@ sub begin_strip {
     
     my $panel = $store->create_container( 'SPUC::Panel', {
         artist  => $artist,
+        created => time,
         caption => $caption,
         type    => 'caption',
                                           } );
     
     my $comic = $store->create_container( 'SPUC::Comic', {
         creator     => $artist,
+        started     => time,
         artists     => { $artist => $artist },
         last_artist => $artist,
         panels      => [ $panel ],
-        needs       => 9,
+        needs       => 2, # TODO - remove for prod
         app         => $self,
                                           } );
     

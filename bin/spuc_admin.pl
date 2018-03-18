@@ -59,9 +59,10 @@ unless( $sess ) {
     $sess = $store->create_container( 'SPUC::Session', {
         user => $user,
         ids => {
-            $app->_id => $app,
+            $app => $app,
         },
                                       } );
+    print STDERR Data::Dumper->Dump([$sess->get_ids,"WUU"]);
     $root->set_default_session( $sess );
     my $sessions = $root->get__sessions({}); 
     $sessions->{0} = $sess;    

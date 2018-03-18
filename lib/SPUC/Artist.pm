@@ -30,10 +30,12 @@ use Digest::MD5;
 #  bio
 #
 #  ** comics **
-#  _unfinished_comics
-#  finished_comics - list of comic objects, more recent are first
+#  _unfinished_comics - list of comic objects
+#  finished_comic_head - linked list node of comic objects
 #
 # ** game state **
+#  _viewing_comic - current comic viewed in pagination
+#  _viewing_source  - 'recent', 'top', 'bookmarks', 'mine', 'inprogress', etc...
 #  _playing - comic object currently playing
 #
 sub _setpw {

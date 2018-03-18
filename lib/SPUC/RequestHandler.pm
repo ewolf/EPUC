@@ -205,7 +205,8 @@ sub handle {
         elsif( length( $pw ) < 8 ) {
             $err = 'passwords too short. Must be at least 8 characters.';
         }
-        elsif( ! Email::Valid->address( -address => $em, -tldcheck => 1, -mxcheck => 1 ) ) {
+        #        elsif( ! Email::Valid->address( -address => $em, -tldcheck => 1, -mxcheck => 1 ) ) {
+        elsif( ! Email::Valid->address( -address => $em, -tldcheck => 1 ) ) {
             $err = 'unable to verify email.';
         }
 
@@ -220,6 +221,7 @@ sub handle {
                 _login_name  => lc($un),
 
                 avatar       => $app->get__default_avatar,
+                _avatars     => [],
 
                 _created         => time,
                 _logged_in_since => time,
@@ -247,14 +249,10 @@ sub handle {
     # profile
     elsif( $path =~ m~^/profile~ && $user ) {
         if( $action eq 'select-avatar' ) {
-            my $avaid = $params->{avatar};
+            my $avaidx = $params->{avatar};
             my $avas = $user->get__avatars;
-            for my $ava (@$avas) {
-                if( $ava->_id == $avaid ) {
-                    $user->set_avatar( $ava );
-                    last;
-                }
-            }
+            my $ava = $avas->[$avaidx];
+            $ava && $user->set_avatar( $ava );
             $msg = "selected avatar";
         }
 
@@ -434,6 +432,44 @@ sub handle {
         # attach it to the free comics
     }
 
+    # view recent comics the default
+    else { # read
+        $params->{sort} ||= 'recent'; #yeah, I know..side effect
+        my $start_comic;
+        if( $user ) {
+            my $cid = $params->{comic};
+            if( $cid ) {
+                $start_comic = $store->_fetch( $cid );
+                unless( $start_comic && $start_comic->get_artists->{$user} ) {
+                    undef $start_comic;
+                }
+            }
+            if( $path =~ m~/mycomics~ ) {
+                $start_comic //= $user->get_finished_comics;
+            }
+            elsif( $path =~ m~/mypending~ ) {
+                $start_comic //= $user->get__unfinished_comics;
+            }
+            $start_comic //= $app->get_finished_comics;
+        } else {
+            my $cid = $params->{comic};
+            if( $cid ) {
+                $start_comic = $store->_fetch( $cid );
+                unless( $start_comic && $start_comic->is_complete ) {
+                    undef $start_comic;
+                }
+            } 
+            $start_comic //= $app->get_finished_comics;
+        }
+
+        my $comics;
+        if( $user && $path ) {
+            $comics = $user->get_finished_comics;
+        } else {
+            $comics = $app->get_finished_comics;
+        }
+    }
+    
     if( $err ) {
         note( $err, $user );
     }

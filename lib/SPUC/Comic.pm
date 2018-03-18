@@ -10,6 +10,10 @@ use SPUC::Panel;
 
 #
 # Fields :
+#   started  - when this was started
+#   finished - when this was completed
+#   rating   - rating of comic
+#
 #   creator - who started this strip
 #   _player - Artist object who is currently playing this
 #   artists - hash (set) of artists working on this
@@ -80,19 +84,38 @@ sub add_panel {
     }
     push @$panels, $panel;
     my $arts = $self->get_artists;
-    $arts->{$user} = $user;
-    $user->add_once_to__unfinished_comics( $self );
+
+    unless( $arts->{$user} ) {
+            my $newentry = $self->store->create_container( 'SPUC::LinkedListNode', {
+                item => $self,
+                                                           } );
+            my $unfin = $user->get__unfinished_comics;
+            if( $unfin ) {
+                $unfin->sortinto( $newentry, 'recent', sub {
+                    my( $a, $b ) = @_;
+                    
+                                  } );
+            } else {
+                $user->set__unfinished_comics( $newentry );
+            }
+            $arts->{$user} = $user;
+    }
+    
 
     if( $self->is_complete ) {
-        my $app = $self->get_app;
-        $app->remove_from__unfinished_comics( $self );
-        my $finished = $app->get_finished_comics([]);
-        unshift @$finished, $self;
+        for my $thing ( $self->get_app, values %$arts) {
+            $thing->remove_from__unfinished_comics( $self );
+            
+            my $finished = $thing->get_finished_comics;
         
-        for my $art (values %$arts) {
-            $art->remove_from__unfinished_comics( $self );
-            my $finished = $art->get_finished_comics([]);
-            unshift @$finished, $self;
+            my $newentry = $self->store->create_container( 'SPUC::LinkedListNode', {
+                item => $self,
+                                                           } );
+            if( $finished ) {
+                $finished->setprev( $newentry, 'recent' );
+                $newentry->setnext( $finished, 'recent' );
+            }
+            $thing->set_finished_comics( $newentry );
         }
         return ('comic was finished','');
     }

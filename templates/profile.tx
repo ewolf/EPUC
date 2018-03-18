@@ -27,11 +27,11 @@
         : for $avas -> $ava {
           : if $ava != $selava {
         <div class="avatar box">
-          <a href="?path=/profile&avatar=<:$ava._id:>&action=select-avatar&ava-open=1#avatars">
+          <a href="?path=/profile&avatar=<:$~ava:>&action=select-avatar&ava-open=1#avatars">
             <img src="<:$ava.size(150,150):>">
           </a>
           <div class="avatar-actions">
-            <a href="?path=/profile&ava-open=1&avatar=<:$ava._id:>&action=delete-avatar" data-id="<:$ava._id:>" class="delete">delete</a>
+            <a href="?path=/profile&ava-open=1&avatar=<:$~ava:>&action=delete-avatar" class="delete">delete</a>
           </div>
         </div>
           : }

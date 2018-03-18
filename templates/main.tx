@@ -43,12 +43,11 @@
       
     </header>
     <nav class="row">
-      <a href="?path=/read&sort=recent">recent</a>
-      <a href="?path=/read&sort=top">top rated</a>
+      <a href="?path=/read">read comics</a>
       : if $user {
       <a href="?path=/play">play</a>
       <a href="?path=/start">start a comic</a>
-      <a href="?path=/start">my comics</a>
+      <a href="?path=/read&sort=recent">my comics</a>
       <a href="?path=/profile">my profile</a>
       <a href="?path=/logout">log out</a>
       : }
@@ -75,19 +74,14 @@
 
       : if $path == '/profile' && $user {
         : include "profile.tx"
-      : }
-
-      : if $path == '/play' && $user {
+      : } else if( $path == '/play' && $user ) {
         : include "play.tx"
-      : }
-
-      : if $path == '/read' && $user {
+      : } elsif $path == '/start' && $user {
+        : include "start.tx"
+      : } else { #read is the default
         : include "read.tx"
       : }
       
-      : if $path == '/start' && $user {
-        : include "start.tx"
-      : }
       
     </main>
 

@@ -11,7 +11,7 @@ use base 'Data::ObjectStore::Container';
 #   type - 'caption' or 'picture'
 #   artist - artist obj who created this panel
 #   caption - caption text ( if type is caption )
-#
+#   created - when this was created
 #
 #
 
