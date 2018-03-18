@@ -11,15 +11,27 @@ use SPUC::Panel;
 
 #
 # Fields :
-#   _unfinished_comic_head - linkedlistnode containting comic
+#   _unfinished_comics - list
+#   finished_comics    - list
+#   default_session
+#   dummy_user
+#   _sessions - sessid -> session obj
+#   _emails - email to -> artist
+#   _unames - user name -> artist
 #
-#
-#
-#
+
+sub artist {
+    my( $self, $name ) = @_;
+    $self->get__users->{$name};
+} #artist
 
 sub begin_strip {
     my( $self, $artist, $caption ) = @_;
 
+    if( ! $artist ) {
+        return ('','missing artist');
+    }
+    
     if( length( $caption ) < 1 ) {
         return ('','missing caption');
     }
@@ -43,6 +55,7 @@ sub begin_strip {
                                           } );
     
     $artist->add_to__unfinished_comics( $comic );
+    $artist->get__comics({})->{$comic} = $comic;
 
     $self->add_to__unfinished_comics( $comic );
 
@@ -50,10 +63,6 @@ sub begin_strip {
     
 } #begin_strip
 
-sub artist {
-    my( $self, $name ) = @_;
-    $self->get__users->{$name};
-} #artist
 
 sub find_comic_to_play {
     my( $self, $artist, $skip ) = @_;

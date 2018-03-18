@@ -83,3 +83,10 @@ div.picture {
     border-top: solid 3px black;
     border-bottom: solid 3px black;
 }
+
+.kudo:visited,
+.kudo:hover,
+.kudo {
+    color: red;
+    text-decoration: none;
+}

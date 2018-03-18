@@ -37,11 +37,6 @@ sub handle {
 #
 # root container has
 #   SPUC - the SPUC app
-#   default_session
-#   dummy_user
-#   _sessions - sessid -> session obj
-#   _emails - email to -> artist
-#   _unames - user name -> artist
 sub _singleton {
     return $singleton if $singleton;
     
@@ -117,10 +112,8 @@ sub lock {
     
     my @fhs;
     for my $name (@names) {
-        print STDERR "Locking $name\n";
         open my $fh, '>', "$self->{lockdir}/$name";
         flock( $fh, 2 ); #WRITE LOCK
-        print STDERR "Got Lock for $name\n";
         push @fhs, $fh;
     }
     push @{$self->{locks}}, @fhs;
@@ -129,9 +122,7 @@ sub unlock {
     my $self = shift;
     my $fhs = $self->{locks};
     for my $fh (@$fhs) {
-        print STDERR "UnLocking\n";
         flock( $fh, 8 );
-        print STDERR "UnLocked\n";
     }
     splice @$fhs;
 }
@@ -499,6 +490,12 @@ sub _handle {
                     my $fin = $thing->get_finished_comics([]);
                     unshift @$fin, $comic;
                 }
+                for my $art (values %$arts) {
+                    my $updates = $art->get__updates([]);
+                    unshift @$updates, { msg   => "a comic you wrote for finished",
+                                         type  => 'comic',
+                                         comic => $comic };
+                }
                 $self->msg( "comleted comic" );
             }
         } #if action played
@@ -567,20 +564,26 @@ sub _handle {
         }
     } #recover
 
-    elsif( $action =~ /^(comment|bookmark|unbookmark)$/ && $user && defined( $params->{idx} ) ) {
+    elsif( $action =~ /^(comment|bookmark|unbookmark|kudo)$/ && $user && defined( $params->{idx} ) ) {
         my $comics;
         if( $path eq '/mine' ) { 
             $comics = $user->get_finished_comics;
         }
+        elsif( $path eq '/bookmarks' ) {
+            $comics = $user->get__bookmarks;
+        }
+        elsif( $path eq '/unfinished' ) {
+            $comics = $user->get__unfinished_comics;
+        }
         elsif( $params->{artist} ) {
             my $artist = $self->{app}->artist( $params->{artist} );
+            $comics = $artist->get_finished_comics;
         }
         else {
             $comics //= $self->{app}->get_finished_comics;
         }
         
         my $comic = $comics->[$params->{idx}];
-
         if( $comic ) { 
             if( $action eq 'comment' && $params->{comment} =~ /\S/ ) {
                 my $comment = $self->{store}->create_container( {
@@ -596,6 +599,12 @@ sub _handle {
             }
             elsif( $action eq 'unbookmark' ) {
                 $user->unbookmark( $comic );
+            }
+            elsif( $action eq 'kudo' ) {
+                my $panel = $comic->get_panels->[$params->{panel}];
+                if( $panel && ! $user->has_kudo_for( $panel ) ) {
+                    $user->kudo( $panel );
+                }
             }
         }
     } #added comment or bookmark or removed bookmark

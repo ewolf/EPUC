@@ -58,7 +58,13 @@
       <a href="?path=/play">play</a>
       <a href="?path=/start">start a comic</a>
       <a href="?path=/mine&sort=recent">my comics</a>
-      <a href="?path=/bookmarked&sort=recent">bookmarked comics</a>
+      <a href="?path=/unfinished&sort=recent">unfinished</a>
+      : if $user.get('_bookmarks').size() > 0  {
+        <a href="?path=/bookmarked&sort=recent">bookmarks</a>
+      : }
+      : if $user.get('_updates').size() > 0 {
+        <a href="?path=/notices">notices</a>
+      : }  
       <a href="?path=/profile">my profile</a>
       <a href="?path=/logout">log out</a>
         : if $user.get('_is_admin') {
@@ -94,21 +100,28 @@
           <div class="err bigerr">reset link is stale</div>
         : }
       : } else if $path == '/mine' && $user {
-          : include "read.tx" { comics => $user.get_finished_comics, title => 'your comics' }
+          : include "read.tx" { comics => $user.get_finished_comics }
+      : } else if $path == '/unfinished' && $user {
+          : include "read.tx" { comics => $user.get__unfinished_comics }
       : } else if $path == '/bookmarked' && $user {
-          : include "read.tx" { comics => $user.get('_bookmarks'), title => 'bookmarked comics' }
+          : include "read.tx" { comics => $user.get('_bookmarks') }
       : } else if $path == '/logs' && $user && $user.get('_is_admin') {
           : include "logs.tx"
+      : } else if $path == '/notices' && $user {
+          : include "notices.tx"
+      : } else if $path == '/comic' && $user {
+          : my $ucomics = $user.get( '_comics' );
+          : include "read.tx" { comics => [$ucomics[$params.comic]] }
       : } else if $path == '/artist' {
         : my $artist = $app.artist( $params.artist )
           
         : if $artist {
-          : include "read.tx" { comics => $artist.get_finished_comics, title => 'comics for ' ~ $params.artist, artist => $artist }
+          : include "read.tx" { comics => $artist.get_finished_comics, artist => $artist }
         : } else {
-          : include "read.tx" { comics => $comics, title => 'recent comics' }
+          : include "read.tx" { comics => $comics }
         : }
       : } else if $comics.size() > 0 {
-        : include "read.tx" { comics => $comics, title => 'recent comics' }
+        : include "read.tx" { comics => $comics }
       : } else {
         : include "about.tx"
       : }
@@ -122,27 +135,34 @@
       Min Viable Product
       TODOS
       <ul>
+        <li>in progress comics</li>
+        <li>no finished comics message for bookmarked</li>
+        
         <li>link and page for email reset password (test)</li>
         <li>email reset password (test)</li>
-        <li>correct level of mail check in production</li>
         <li>locking comics and other objects (test)</li>
-        <li>show artist</li>
-        <li>my contact info</li>
+        
+        <li>correct level of mail check in production</li>
+        
+        <li>spuc contact info</li>
       </ul>
       Other TODOS
       <ul>
+        <li>admin deactivate comics - just remove from finished and put into deactivated</li>
+        <li>admin edit comics</li>
+        
+        <li>time in comments</li>
+        <li>group chat</li>
+
         <li>email for account verification</li>
-        <li>in progress comics</li>
 
         <li>modperl</li>
         
         <li>testing comic</li>
         <li>UI advice</li>
         
-        <li>kudos</li>
 
-        <li>group chat</li>
-        
+                
         <li>permissions/group datastore. Maybe a spuc admin group?</li>
         
         <li>spuc_admin.pl actions</li>

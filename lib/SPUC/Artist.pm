@@ -70,7 +70,7 @@ sub _send_confirmation_email {
 
 sub _has_bookmark {
     my( $self, $comic ) = @_;
-    exists $self->get__bookmark_hash({})->{$comic}
+    defined $self->get__bookmark_hash({})->{$comic}
 }
 
 sub bookmark {
@@ -86,4 +86,20 @@ sub unbookmark {
     $self->remove_from__bookmarks( $comic );
 }
 
+sub has_kudo_for {
+    my( $self, $panel ) = @_;
+    defined $self->get__kudos({})->{$panel};
+}
+sub kudo {
+    my( $self, $panel ) = @_;
+    $self->get__kudos({})->{$panel} = $panel;
+    $panel->set_kudos( 1 + $panel->get_kudos );
+    $panel->set__kudo_givers({})->{$self} = $self;
+    my $artist = $panel->get_artist;
+    
+    my $updates = $artist->get__updates([]);
+    unshift @$updates, { msg  => "you got a kudo",
+                         type => 'comic',
+                         comic => $panel->get_comic };
+}
 1;

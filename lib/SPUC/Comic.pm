@@ -57,6 +57,7 @@ sub add_caption {
         artist  => $user,
         caption => $caption,
         type    => 'caption',
+        comic   => $self,
                                                 } );
     $self->add_panel( $panel, $user );
 }
@@ -70,6 +71,7 @@ sub add_picture {
         artist  => $user,
         picture => $picture,
         type    => 'picture',
+        comic   => $self,
                                           } );
     $self->add_panel( $panel, $user );
 }
@@ -87,6 +89,8 @@ sub add_panel {
     my $arts = $self->get_artists;
 
     $user->add_once_to__unfinished_comics( $self );
+    $user->get__comics({})->{$self} = $self;
+    
     $arts->{$user} = $user;
 
     return ('added panel','');

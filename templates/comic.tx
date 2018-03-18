@@ -1,9 +1,10 @@
 : if $small {
-<a class="comic col" href="?path=<:$path:>&single=1&idx=<:$idx:>&sort=<:$params.sort:>">
+<a class="comic col" href="?path=<:$path:>&single=1&idx=<:$idx:>&sort=<:$params.sort:><: $artist ? '&artist=' ~ $artist.get('display_name') : '':>">
 : } else {
 <div class="comic col">
 : }  
-  <div class="row comichead">
+
+<div class="row comichead">
 
   : if $small {
     <span>&#x1F50D;</span>
@@ -15,34 +16,36 @@
   
     : my $type = $panel.get('type')
   
-    : if $panel.get('type') == 'caption' {
-
-  <div class="panel caption row">
+  <div class="panel <: $type :> row">
     : if ! $small {
+      <div class="col">
         <a class="artist col" href="?path=/artist&artist=<:$panel.get('artist').get('display_name'):>">
            <img src="<:$panel.get('artist').get('avatar').size(50,50):>">
            <: $panel.get('artist').get('display_name') :>
         </a>
+        <span><: $panel.get('kudos') :>
+        : if $user.has_kudo_for( $panel ) || $user == $panel.get('artist') {
+          <span class="kudo">&#x2764;</span>
+        : } else {
+          <a href="?path=<: $path :>&idx=<: $startidx :>&single=1&panel=<:$~panel:>&sort=<:$params.sort:>&action=kudo<: $artist ? '&artist=' ~ $artist.get('display_name') : '':>" class="kudo">&#x1F49B;</a>
+        : }
+        </span>
+      </div>
     : }
-    
+
+    :if $type == 'caption' {
+      
      <span class="caption"><: $panel.get('caption') :></span>
 
     : } else {
 
-    <div class="panel picture row" style="text-align:center">
-    : if ! $small {
-        <a class="artist col" href="?path=/artist&artist=<:$panel.get('artist').get('display_name'):>">
-           <img src="<:$panel.get('artist').get('avatar').size(50,50):>">
-           <: $panel.get('artist').get('display_name') :>
-        </a>
-    : }
       <img class="picture" src="<: $panel.get('picture').size(500,350) :>">
 
-      : }
-    </div>
-
     : }
+  </div>
 
+  : }
+  
 : if $small {
 </a>
 : } else {
