@@ -1,0 +1,30 @@
+<link rel="stylesheet" type="text/css" href="/spuc/css/read.css" title="Default">
+<h2>SPUC Admin Logs</h2>
+
+: my $logs = $app.get( '_log' );
+: my $startidx = $params.idx || 0
+
+<div class="row pagination">
+: if $startidx > 0 {
+   : my $del = $startidx - 100 >= 0 ? $startidx - 100 : 0;
+  <a href="?path=<: $path :>&idx=<: $del :>">newer</a>
+: } else {
+  <span class="disabled">newer</span>
+: }
+
+   : my $del = $startidx + 100;
+   : if $logs.size() - $del > 0 {
+   <a href="?path=<: $path :>&idx=<: $del :>">older</a>
+   : } else {
+   <span class="disabled">older</span>
+   : }
+</div>
+
+: for [0..99] -> $i {
+  : my $idx = $i + $startidx;
+  : my $line = $logs[$idx];
+  : if $line {
+      <p class="logline"><: $line :></p>
+  : }
+
+: }
