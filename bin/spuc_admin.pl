@@ -4,14 +4,21 @@ use strict;
 use warnings;
 
 use Data::Dumper;
+use Digest::MD5;
+
+use lib '/home/coyo/proj/EPUC/lib';
 
 use Data::ObjectStore;
-use Digest::MD5;
+use SPUC::App;
+use SPUC::Artist;
+use SPUC::Dummy;
+use SPUC::Image;
+use SPUC::Session;
 
 umask(0);
 my $gid = getgrnam( 'www-data' );
 
-our $site         = 'localhost';
+our $site         = 'madyote.com';
 our $basedir      = "/var/www";
 our $spuc_path    = '/cgi-bin/spuc.cgi';
 our $imagedir     = "$basedir/html/spuc/images";

@@ -254,9 +254,9 @@ sub _handle {
             $self->err( 'passwords too short. Must be at least 8 characters.' );
         }
         #        elsif( ! Email::Valid->address( -address => $em, -tldcheck => 1, -mxcheck => 1 ) ) {
-#        elsif( ! Email::Valid->address( -address => $em, -tldcheck => 1 ) ) {
-#            $self->err( 'unable to verify email.' );
-#        }
+        elsif( ! Email::Valid->address( -address => $em, -tldcheck => 1 ) ) {
+            $self->err( 'unable to verify email.' );
+        }
 
         if( ! $self->has_errs ) {
             # no error defined, so create the user
@@ -534,6 +534,7 @@ sub _handle {
         $user && $self->{app}->_send_reset_request($user);
         $self->msg( "sent reset request" );
         $self->note( "requested reset", $user );
+	undef $user;
     }
 
     elsif( $path =~ m~^/recover~ ) {

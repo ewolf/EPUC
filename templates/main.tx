@@ -95,7 +95,7 @@
         : include "recover_request.tx"
       : } else if $path == '/recover' {
         : if $user {
-          : include "update_password.tx" { nooriginal => 1, path => '/recover?tok=' ~ $user.get__reset_token }
+          : include "update_password.tx" { path => '/recover', tok => $user.get__reset_token }
         : } else {
           <div class="err bigerr">reset link is stale</div>
         : }

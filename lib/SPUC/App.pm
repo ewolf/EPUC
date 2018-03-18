@@ -50,7 +50,7 @@ sub begin_strip {
         artists     => { $artist => $artist },
         last_artist => $artist,
         panels      => [ $panel ],
-        needs       => 3, # TODO - remove for prod
+        needs       => 9,
         app         => $self,
                                           } );
     
@@ -113,7 +113,7 @@ sub _send_reset_request {
 
     my $site = $self->get_site;
     my $path = $self->get_spuc_path;
-    my $link = "https://$site/$path\?path=/recover\&tok=$restok";
+    my $link = "https://$site$path\?path=/recover\&tok=$restok";
     
     my $body_html = <<"END";
 <body>
@@ -145,7 +145,7 @@ Thanks
 END
 
     my $msg = MIME::Lite->new(
-        From => "noreply@$site",
+        From => "noreply\@$site",
         To   => $user->get__email,
         Subject => 'SPUC Password Reset',
         Type => 'multipart/alternative',
