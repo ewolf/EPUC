@@ -44,8 +44,8 @@ sub note {
 
     my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
     my $tdis = sprintf( "[%02d/%02d/%02d %02d:%02d]", $year%100,$mon+1,$mday,$hour,$min );
-    
-    my $msg = "$tdis $txt - ".$user->_display;
+
+    my $msg = "$tdis $txt - ".( $user ? $user->_display : '?' );
     my $log = $app->get_log([]);
     print $logfh "$msg\n";
     print STDERR "$msg\n";
