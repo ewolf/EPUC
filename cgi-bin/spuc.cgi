@@ -8,12 +8,14 @@ use lib '/home/wolf/proj/EPUC/lib';
 use lib '/home/wolf/proj/Yote/ObjectStore/lib';
 use lib '/home/wolf/proj/Yote/FixedRecordStore/lib';
 
-use SPUC::RequestHandler;
 
 use Encode qw/ decode encode /;
 use CGI;
 
 use Data::Dumper;
+use File::Path qw/make_path/;
+
+use SPUC::RequestHandler;
 use SPUC::Uploader;
 
 # ---------------------------------------
@@ -30,12 +32,9 @@ our $imagedir     = "$basedir/html/spuc/images";
 our $logdir       = '/tmp/log';
 our $group        = 'www-data';
 
-make_path( $datadir, { group      => $group, mode => 0775 } );
-make_path( $lockdir, { group      => $group, mode => 0775 } );
-make_path( $template_dir, { group => $group, mode => 0775 } );
-
-umask( 0664 );
-
+make_path( $datadir, $lockdir, $template_dir, 
+           { group => $group, mode => 0775 } );
+exit;
 # ---------------------------------------
 #     request
 # ---------------------------------------

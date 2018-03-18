@@ -8,9 +8,7 @@ use Data::Dumper;
 use Data::ObjectStore;
 use Digest::MD5;
 
-umask( 0664 );
-
-my $store = Data::ObjectStore::open_store( "/var/www/data/SPUC/" );
+my $store = Data::ObjectStore::open_store( "/var/www/data/SPUC/", { group => 'www-data' } );
 my $root  = $store->load_root_container;
 
 # set the root password

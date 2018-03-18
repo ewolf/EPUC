@@ -106,10 +106,10 @@
       Min Viable Product
       TODOS
       <ul>
-        <li>link and page for email reset password</li>
-        <li>email reset password</li>
+        <li>link and page for email reset password (test)</li>
+        <li>email reset password (test)</li>
         <li>correct level of mail check in production</li>
-        <li>locking comics and other objects</li>
+        <li>locking comics and other objects (test)</li>
         <li>show artist</li>
         <li>contact info</li>
       </ul>

@@ -19,7 +19,7 @@ use SPUC::Image;
 use SPUC::Panel;
 use SPUC::Session;
 
-
+umask( 0775 );
 our $singleton;
 
 
@@ -48,7 +48,7 @@ sub _singleton {
     return $singleton if $singleton;
     
     my $options = shift;
-    my $store = Data::ObjectStore::open_store( $options->{datadir} );
+    my $store = Data::ObjectStore::open_store( $options->{datadir}, $options );
     my $root  = $store->load_root_container;
     my $app   = $root->get_SPUC;
     unless( $app ) {
@@ -73,6 +73,7 @@ sub _singleton {
             map { $_ => $options->{$_} } qw( site spuc_path basedir template_dir datadir lockdir imagedir logdir group ),
     }, 'SPUC::RequestHandler';
     open( $singleton->{logfh}, '>>', $options->{logdir} );
+    $singleton;
 }
 
 #
