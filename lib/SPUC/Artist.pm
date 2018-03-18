@@ -33,4 +33,16 @@ sub _checkpw {
     $enc_pw eq $self->get__enc_pw;
 }
 
+sub _display {
+    my $self = shift;
+    my $ln = $self->get__login_name;
+    my $dn = $self->get_display_name;
+    if( $ln ne $dn ) {
+        return "$dn/$ln";
+    } else {
+        return $ln;
+    }
+}
+
+
 1;

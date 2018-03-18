@@ -2,7 +2,13 @@
 <div id="editor">
   <div class="drawtool">
     
-    <div class="canv">
+    <div class="canv col">
+      <form id="edform" method="POST" action="?path=<: $path :>" enctype="application/x-www-form-urlencoded">
+        <input type="hidden" name="action" value="<: $action :>">
+        <input type="hidden" name="ava-open" value="1">
+        <input type="hidden" id="upper" name="<:$upname:>">
+        <button type="button" id="upedit">Upload</button>
+      </form>
       <canvas id="canv">
       </canvas>
       
@@ -25,12 +31,6 @@
           </div>
         </div>
       </div>
-      <form id="edform" method="POST" action="?path=/profile" enctype="application/x-www-form-urlencoded">
-        <input type="hidden" name="action" value="upload-avatar">
-        <input type="hidden" name="ava-open" value="1">
-        <input type="hidden" id="avuper" name="avup">
-        <button type="button" id="upedit">Upload</button>
-      </form>
     </div>
     
     <div>
@@ -74,5 +74,9 @@
     </div>
 
   </div>
-</div>    
+</div>
+<script>
+  var width = <: $width :>;
+  var height = <: $height :>;
+</script>
 <script src='/js/SPUC/editor.js'></script>

@@ -1,6 +1,3 @@
-var width = 150;
-var height = 150;
-
 var h = byId("editor");
 var eye = byId("eyedrop");
 var c = byId("canv");
@@ -497,10 +494,12 @@ var uped = byId('upedit');
 uped.addEventListener('click', function(ev) {
     ev.preventDefault();
     ev.stopPropagation();
-    var avup = byId('avuper');
+    var upper = byId('upper');
     var edform = byId('edform');
-    avup.value = c.toDataURL('image/png');
+    upper.value = c.toDataURL('image/png');
     edform.submit();
 } );
 var selimg = oneByClass( 'selava' );
-ctx.drawImage( selimg, 0, 0 );
+if( selimg ) {
+    ctx.drawImage( selimg, 0, 0 );
+}

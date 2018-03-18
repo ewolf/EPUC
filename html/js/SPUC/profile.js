@@ -1,4 +1,8 @@
 
+
+
+
+// --------------- OPEN CLOSE FOR MANAGE AVATARS
 var openedits = byClass( 'toggleedit' );
 var avedit = byId( 'avedit' );
 
@@ -28,6 +32,18 @@ fileinput.addEventListener( 'change', function() {
         submit.removeAttribute( 'disabled' );
     }
 } );
+
+// DELETE AVATARS
+var dels = byClass('delete');
+dels.forEach( function( delly ) {
+    delly.addEventListener( 'click', function(ev) {
+        if( ! confirm( 'really delete avatar' ) ) {
+            ev.preventDefault();
+            ev.stopPropagation();
+        }
+    } );
+} );
+
 
 
 // ------------- CHANGE PASSWORD

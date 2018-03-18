@@ -12,7 +12,9 @@ use JSON;
 
 use SPUC::App;
 use SPUC::Artist;
+use SPUC::Comic;
 use SPUC::Image;
+use SPUC::Panel;
 use SPUC::Session;
 
 our $xslate = new Text::Xslate(
@@ -20,16 +22,21 @@ our $xslate = new Text::Xslate(
     );
 our $store = Data::ObjectStore::open_store( "/var/www/data/SPUC/" );
 our $root  = $store->load_root_container;
+our $app   = $root->get_SPUC;
 our $logfh;
 open( $logfh, '>>', "/tmp/log" );
 
 sub note {
-    my( $txt, $lvl ) = @_;
-    $lvl //= 1;
-    my $log = $root->get_log([]);
-    print $logfh "$txt\n";
-    print STDERR "$txt\n";
-    unshift @$log, "$lvl $txt";
+    my( $txt, $user ) = @_;
+
+    my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+    my $tdis = sprintf( "[%02d/%02d/%02d %02d:%02d]", $year%100,$mon+1,$mday,$hour,$min );
+    
+    my $msg = "$tdis $txt - ".$user->_display;
+    my $log = $app->get_log([]);
+    print $logfh "$msg\n";
+    print STDERR "$msg\n";
+    unshift @$log, "$msg";
 }
 
 sub _pack {
@@ -81,7 +88,7 @@ sub _unpack {
 sub handle_RPC {
     my( $params, $sess_id, $uploader ) = @_;
     my $sessions = $root->get__sessions({});
-    
+
     my $sess    = $sessions->{$sess_id};
     if( $sess ) {
         my $payload = from_json( $params->{p} );
@@ -90,14 +97,14 @@ sub handle_RPC {
         if( $id == 0 ) {
             if( $method eq 'load' ) {
                 my $user = $sess->get_user;
-                
+
             }
         }
         my $args    = _unpack( $payload->{a}, $sess );
         # just return the user object if its loaded
-    }        
+    }
     else {
-        
+
     }
 } #handleRPC
 
@@ -110,20 +117,18 @@ sub handle_RPC {
 #
 sub handle {
     my( $path, $params, $sess_id, $uploader ) = @_;
-    
+
     # might be on to something here
     # in order to avoid a race condition, the getid and transationcs are handy
     # however, if we could have some sort of list that, when appended to, appends to a similar index row.
     # yes, I think we can do this with what we havre now. Just
     # use the new id creating feature in Data::Objectsore coupled with
     # the fixed  record store's atomicic id generation to get a file coordinated store
-    
-    my $sessions = $root->get__sessions({}); 
-    my( $user, $sess, $err, $msg );
-    my $action = $params->{action};
 
-    print STDERR Data::Dumper->Dump(["$path,$action,WEREWRO"]);
-    
+    my $sessions = $root->get__sessions({});
+    my( $user, $sess, $err, $msg );
+    my $action = $params->{action} || '';
+
     # see if the session is attached to a user. If not
     # then create a default unlogged in "session".
     if( $sess_id ) {
@@ -131,35 +136,28 @@ sub handle {
         if( $sess ) {
             $user = $sess->get_user;
             unless( $user ) {
-                note( "invalid sessions (no user) $sess_id" );
+                note( "invalid sessions (no user) $sess_id", 4 );
             }
         } else {
-            note( "session not found for $sess_id" );
+            note( "session not found for $sess_id", 4 );
         }
     }
     unless( $sess ) {
         $sess = $root->get_default_session;
     }
 
-    
+
     if( $path =~ m~^/comic~ ) {
 
     }
 
-    
+
     elsif( $path =~ m~^/artist~ ) {
-        
+
     }
 
-    
-    elsif( $path =~ m~^/create~ ) {
-        
-    }
-
-    
     elsif( $path =~ m~^/logout~ ) {
         if( $user ) {
-            note( "$user logged out", 3 );
             delete $sessions->{$sess_id};
             undef $sess_id;
             undef $user;
@@ -167,7 +165,7 @@ sub handle {
         }
     } #logout
 
-    
+
     elsif( $path =~ m~^/register~ ) {
         # just do squishy for now and organically
         # grow this, dont yet force it. code can move
@@ -175,7 +173,7 @@ sub handle {
 
         my $emails = $root->get__emails({});
         my $unames = $root->get__users({});
-        
+
         my $pw = $params->{pw};
         my $pw2 = $params->{pw2};
         my $un = $params->{un};
@@ -198,18 +196,18 @@ sub handle {
             $err = 'unable to verify email.';
         }
 
-        if( ! $err ) {            
+        if( ! $err ) {
             # no error defined, so create the user
             # and session and attach the user to the session
             # also add to emails and unames lookups
             $user = $store->create_container( 'SPUC::Artist', {
                 display_name => $un,
-                
+
                 _email       => $em,
                 _login_name  => $un,
 
-                __avatar     => $root->get__default_avatar,
-                
+                __avatar     => $app->get__default_avatar,
+
                 _created         => time,
                 _logged_in_since => time,
                                               } );
@@ -219,16 +217,15 @@ sub handle {
                 $sess_id = int(rand(2**64));
                 $found = ! $sessions->{$sess_id};
             }
-            note( "created user $un", 0 );
-            
+
             $msg = "Created artist account '$un'. You are now logged in and ready to play. An email will be delivered to the address given for account confirmation.";
-            my $sess = $sessions->{$sess_id} = 
+            my $sess = $sessions->{$sess_id} =
                 $store->create_container( 'SPUC::Session', {
                     last_id => $sess_id,
                     user    => $user,
                                           } );
             $user->set__session( $sess );
-                
+
             $unames->{$un} = $user;
             $emails->{$em} = $user;
         }
@@ -245,11 +242,11 @@ sub handle {
                     last;
                 }
             }
+            $msg = "selected avatar";
         }
-        
+
         elsif( $action eq 'upload-avatar' ) {
             my $fn = $params->{avup};
-            print STDERR Data::Dumper->Dump([$fn,"SPROINT"]);
             if( $fn =~ /^data:image\/png;base64,(.*)/ ) {
                 my $png = MIME::Base64::decode( $1 );
                 my $img = $store->create_container( 'SPUC::Image',
@@ -264,6 +261,7 @@ sub handle {
                 $img->set__origin_file( $dest );
                 $user->add_to__avatars( $img );
                 $user->set_avatar( $img );
+                $msg = "created new avatar";
             }
             elsif( (my $fh = $uploader->fh('avup')) ) {
                 my( $ext ) = ( $fn =~ /\.([^.]+)$/ );
@@ -278,6 +276,9 @@ sub handle {
                     $user->add_to__avatars( $img );
                     $user->set_avatar( $img );
                     copy( $fh, $dest );
+                    $msg = "uploaded new avatar";
+                } else {
+                    $err = "avatar file format not recognized";
                 }
             }
         } #if upload
@@ -300,9 +301,9 @@ sub handle {
         }
         elsif( $action eq 'set-bio' ) {
             $user->set_bio( $params->{bio} );
+            $msg = 'updated bio';
         }
         elsif( $action eq 'update-password' ) {
-            print STDERR Data::Dumper->Dump(["NORF"]);
             my $oldpw = $params->{pwold};
             my $newpw = $params->{pw};
             # verify old password
@@ -320,17 +321,14 @@ sub handle {
                 $msg = "Updated password";
             }
         }
-        else {
-            print STDERR Data::Dumper->Dump(["NOSET"]);
-        }
     } #profile
 
-    
+
     # login
     elsif( $path =~ m~^/login~ && ! $user ) {
         my $un = $params->{un};
         my $pw = $params->{pw};
-        
+
         my $unames = $root->get__users({});
         $user = $unames->{$un} || $root->get_dummy_user;
 
@@ -341,24 +339,105 @@ sub handle {
                 $sess_id = int(rand(2**64));
                 $found = ! $sessions->{$sess_id};
             }
-            
+            $msg = 'logged in';
             my $sess = $user->get__session;
             delete $sessions->{$sess->get_last_id};
             $sessions->{$sess_id} = $sess;
             $sess->set_last_id( $sess_id );
+        } else {
+            $err = 'login failed';
         }
     } #login
 
+    # play
+    elsif( $path =~ m~^/play~ && $user ) {
+        if( $action eq 'upload-panel' ) {
+            my $comic = $user->get__playing;
+            if( $comic ) {
+                my $fn = $params->{uppanel};
+                if( $fn =~ /^data:image\/png;base64,(.*)/ ) {
+                    my $png = MIME::Base64::decode( $1 );
+                    my $img = $store->create_container( 'SPUC::Image',
+                                                        {
+                                                            _original_name => 'upload',
+                                                            extension      => 'png',
+                                                        });
+                    my $dest = "/var/www/html/spuc/images/$img.png";
+                    open my $out, '>', $dest;
+                    print $out $png;
+                    close $out;
+                    $img->set__origin_file( $dest );
+                    ( $msg, $err ) = $comic->add_picture( $img, $user );
+                    $user->set__playing(undef);
+                    $comic->set__player( undef );
+                    if( $comic->is_complete ) {
+                        
+                    }
+                }
+                elsif( (my $fh = $uploader->fh('avup')) ) {
+                    my( $ext ) = ( $fn =~ /\.([^.]+)$/ );
+                    if( $ext =~ /^(png|jpeg|jpg|gif)$/ ) {
+                        my $img = $store->create_container( 'SPUC::Image',
+                                                            {
+                                                                _original_name => $fn,
+                                                                extension      => $ext,
+                                                            });
+                        my $dest = "/var/www/html/spuc/images/$img.$ext";
+                        $img->set__origin_file( $dest );
+                        copy( $fh, $dest );
+                        ( $msg, $err ) = $comic->add_picture( $img, $user );
+                        $user->set__playing(undef);
+                        $comic->set__player( undef );
+                    } else {
+                        $err = "avatar file format not recognized";
+                    }
+                } #file up
+            } #if comic
+        } #if upload to panel
+        elsif( $action eq 'caption-picture' ) {
+            my $comic = $user->get__playing;
+            my $cap = $params->{caption};
+            ( $msg, $err ) = $comic->add_caption( $cap, $user );
+            $user->set__playing(undef);
+            $comic->set__player( undef );
+        }
+
+        my $comic = $app->find_comic_to_play( $user, $params->{skip} );
+        if( $comic ) {
+            $user->set__playing( $comic );
+            $comic->set__player( $user );
+            $msg = "found comic to play";
+        } else {
+            $msg = "no comic found. start one?";
+        }
+    } #play
+
+    # start new comic
+    elsif( $path =~ m~^/start~ && $user ) {
+        ( $msg, $err ) = $app->begin_strip( $user, $params->{start} );
+        # start a comic object
+        # attach it to the creator
+        # attach it to the free comics
+    }
+
+    if( $err ) {
+        note( $err, $user );
+    }
+    if( $msg ) {
+        note( $msg, $user );
+    }
+
     $store->save;
-    
+
     # try the rule you can register if you
     # are already logged in
-    print STDERR Data::Dumper->Dump([$err,$msg,"MSG"]);
+
     # show the homepage
     my $txt = $xslate->render( "main.tx", {
-        path   => $path,
+        path   => $path,        
         params => $params,
         user   => $user,
+        app    => $app,
         err    => $err,
         msg    => $msg,
                                } );

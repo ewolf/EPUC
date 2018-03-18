@@ -1,0 +1,7 @@
+<h1>Begin a new comic</h1>
+<span id="err"><:$err:></span>
+<form class="col" method="POST" action="?path=/start">
+  <textarea placeholder="write your starting caption" name="start"></textarea>
+  <button id="startcomic" type="submit">start the comic</button>
+</form>
+<script src="/js/SPUC/start.js"></script>

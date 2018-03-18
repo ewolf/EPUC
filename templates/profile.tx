@@ -25,25 +25,16 @@
       <a name="avatars">
       <div class="avatars row box">
         : for $avas -> $ava {
-        : if $ava == $selava {
-<!--        <div class="selected avatar">
-          <img src="<:$ava.size(150,150):>">
-          Selected
-        </div> -->
-        : } else {
+          : if $ava != $selava {
         <div class="avatar box">
           <a href="?path=/profile&avatar=<:$ava._id:>&action=select-avatar&ava-open=1#avatars">
             <img src="<:$ava.size(150,150):>">
           </a>
           <div class="avatar-actions">
             <a href="?path=/profile&ava-open=1&avatar=<:$ava._id:>&action=delete-avatar" data-id="<:$ava._id:>" class="delete">delete</a>
-<!--            <a href="#" data-id="<:$ava._id:>" class="copy">copy</a>
-            <a href="?path=/profile&avatar=<:$ava._id:>&action=select-avatar#avatars">select</a>
-            <a href="#" data-id="<:$ava._id:>" class="edit">edit</a>
--->
           </div>
         </div>
-        : }
+          : }
         : }
       </div>
       <form method="POST" id="avup" action="?path=/profile" enctype="multipart/form-data" class="box">
@@ -57,7 +48,7 @@
       <h3>Draw Avatar</h3>
       <p>This is a copy of your selected avatar. The selected avatar will not be overwritten</p>
       <div id="ava_edit" class="box">
-        : include "editor.tx"
+        : include "editor.tx" { width => 150, height => 150, action => 'upload-avatar', path => '/profile', upname => 'avup' }
       </div>
     </div>
   </section>
@@ -65,8 +56,7 @@
   <h2>Bio</h2>
   <form id="bio" method="POST" action="?path=/profile" class="col">
     <input type="hidden" name="action" value="set-bio">
-    <span>Write a little about yourself</span>
-    <textarea name="bio" cols="80" rows="7"><: $user.get('bio') :></textarea>
+    <textarea placeholder="Write a little about yourself" name="bio" cols="80" rows="7"><: $user.get('bio') :></textarea>
     <div><button type="submit">Update</button></div>
   </form>
 

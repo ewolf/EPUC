@@ -27,7 +27,6 @@
           my profile
         : }
         </a>
-        <p><a href="?path=/logout">log out</a></p>
       
       : } else if $path != '/register' {
       <form method="POST" action="?path=/login">
@@ -42,6 +41,16 @@
       </aside>
       
     </header>
+    <nav class="row">
+      <a href="?path=/read">read comics</a>
+      : if $user {
+      <a href="?path=/play">play</a>
+      <a href="?path=/start">start a comic</a>
+      <a href="?path=/start">in-progress comics</a>
+      <a href="?path=/profile">edit profile</a>
+      <a href="?path=/logout">log out</a>
+      : }
+    </nav>
 
     : if $msg {
     <div class="message"><p><:$msg:></p></div>
@@ -65,6 +74,18 @@
       : if $path == '/profile' && $user {
         : include "profile.tx"
       : }
+
+      : if $path == '/play' && $user {
+        : include "play.tx"
+      : }
+
+      : if $path == '/read' && $user {
+        : include "read.tx"
+      : }
+      
+      : if $path == '/start' && $user {
+        : include "start.tx"
+      : }
       
     </main>
 
@@ -72,21 +93,25 @@
     <footer class="message" style="margin-top:100px">
       TODOS
       <ul>
-        <li>panel upload vs drawing</li>
-        <li>integrate drawing tool</li>
-
-        <li>reediting images, copying and deleting them</li>
-        
-        <li>permissions/group datastore. Maybe a spuc admin group?</li>
-        <li>spuc_admin.pl actions</li>
-        
-        
-        <li>porting comics and users</li>
-        <li>begin comic</li>
         <li>presenting comics</li>
+        <li>in progress comics</li>
+
+        <li>testing comic</li>
+        <li>UI advice</li>
         
         <li>comic comments</li>
         <li>kudos</li>
+        <li>pagination in general</li>
+        
+        <li>images on the filesystem</li>
+        <li>permissions/group datastore. Maybe a spuc admin group?</li>
+        
+        <li>spuc_admin.pl actions</li>
+        <li>show admins</li>
+        <li>log view for admin</li>
+        <li>logging for all things done</li>
+        
+        <li>porting comics and users</li>
         
         <li>RPC</li>
         <li>yote js -> server</li>

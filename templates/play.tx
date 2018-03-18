@@ -1,0 +1,37 @@
+<link rel="stylesheet" type="text/css" href="/css/SPUC/play.css" title="Default">
+
+<h1>Play the comic</h1>
+
+<span id="err"><:$err:></span>
+
+: my $comic = $user.get('_playing')
+
+: if $comic && $user == $comic.get('_player') {
+  :  my $pan = $comic.last_panel
+  
+  : if $pan.get('type') == 'caption' {
+    <h2>Draw a picture for</h2>
+    <p id="caption">&quot;<: $pan.get('caption') :>&quot;</p>
+
+    <p><a class="skip" href="?path=/play&skip=1">Skip this comic</a></p>
+    
+    <form method="POST" action="?path=/play" enctype="multipart/form-data" class="box row">
+      <input type="hidden" name="action" value="upload-panel">
+      <input id="panelup" name="uppanel" type="file" accept="image/x-png,image/png,image/gif,image/jpeg">
+      <button id="panelsub" type="submit">upload a picture</button>
+    </form>
+
+    : include "editor.tx" { width => 500, height => 350, action => 'upload-panel', path => '/play', upname => 'uppanel' }
+    
+  : } else {
+    <div class="col">
+      <img src="<:$pan.get('picture').size(500,350):>">
+      <p><a class="skip" href="?path=/play&skip=1">Skip this comic</a></p>
+      <form id="caption" method="POST" action="?path=/play" class="col">
+        <input type="hidden" name="action" value="caption-picture">
+        <textarea name="caption" cols="80" rows="2"></textarea>
+        <div><button type="submit">Submit Caption</button></div>
+      </form>
+    </div>
+  : }
+: }

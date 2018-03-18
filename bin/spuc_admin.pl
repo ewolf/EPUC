@@ -15,19 +15,6 @@ my $root  = $store->load_root_container;
 # view logs?
 
 #
-# set the default avatar
-#
-my $defava = $root->get__default_avatar;
-unless( $defava ) {
-    $defava = $store->create_container( 'SPUC::Image', {
-        _original_name => 'question.png',
-        extension => 'png',
-        _origin_file => "/var/www/html/spuc/images/question.png",
-                                        } );
-    $root->set__default_avatar( $defava );
-}
-
-#
 # The SPUC app itself
 #
 my $app = $root->get_SPUC;
@@ -36,6 +23,20 @@ unless( $app ) {
                                      } );
     $root->set_SPUC( $app );
 }
+
+#
+# set the default avatar
+#
+my $defava = $app->get__default_avatar;
+unless( $defava ) {
+    $defava = $store->create_container( 'SPUC::Image', {
+        _original_name => 'question.png',
+        extension => 'png',
+        _origin_file => "/var/www/html/spuc/images/question.png",
+                                        } );
+    $app->set__default_avatar( $defava );
+}
+
 
 #
 # Dummy user with default session
@@ -70,7 +71,7 @@ unless( $sess ) {
 
 $store->save;
 
-print "SPUC ADMIN. Type 'help' to get help\n";
+print "SPUC ADMIN. Type 'help' to get help\n\nSPUC>";
 while( <STDIN> ) {
     if( /^(\?|help)/ ) {
         print "SPUC ADMIN COMMANDS\n";
@@ -81,8 +82,14 @@ while( <STDIN> ) {
                     "passwd <user> - set user password",
                     "logs - list logs (unimplemented)",
                     "users - list users",
+                    "admin user - make user into an admin",
+                    "unadmin user - make user into an admin",
+                    "exit - end admin program",
                     "other stuff - no idea yet",
                     "" );
+    }
+    elsif( /^\s*exit/ ) {
+        exit;
     }
     elsif( /^\s*defava\s+(\S+)/ ) {
         $defava->set__origin_file( $1 );
@@ -122,6 +129,7 @@ while( <STDIN> ) {
         }
     }
     $store->save;
+    print "SPUC>";
 }
 
 
