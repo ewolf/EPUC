@@ -196,7 +196,7 @@ sub handle {
         if( $emails->{$em} ) {
             $err = 'email already registered';
         }
-        elsif( $unames->{$un} ) {
+        elsif( $unames->{lc($un)} ) {
             $err = 'username already taken';
         }
         elsif( $pw ne $pw2 ) {
@@ -217,7 +217,7 @@ sub handle {
                 display_name => $un,
 
                 _email       => $em,
-                _login_name  => $un,
+                _login_name  => lc($un),
 
                 avatar       => $app->get__default_avatar,
 
@@ -239,7 +239,7 @@ sub handle {
                                           } );
             $user->set__session( $sess );
 
-            $unames->{$un} = $user;
+            $unames->{lc($un)} = $user;
             $emails->{$em} = $user;
         }
     } #register
@@ -344,7 +344,7 @@ sub handle {
         my $pw = $params->{pw};
 
         my $unames = $root->get__users({});
-        $user = $unames->{$un} || $root->get_dummy_user;
+        $user = $unames->{lc($un)} || $root->get_dummy_user;
 
         # dummy automatically fails _checkpw
         if( $user->_checkpw( $pw ) ) {
