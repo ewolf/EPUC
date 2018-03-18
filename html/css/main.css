@@ -1,0 +1,73 @@
+.col {
+    display: flex;
+    flex-direction: column;
+}
+.row {
+    display: flex;
+    flex-direction: row;
+}
+
+body {
+    background-color: #EDE;
+    font-size: large;
+}
+nav {
+    margin-top: 13px;
+    justify-content: space-between;
+    font-size: x-large;
+}
+nav > a {
+    border: dotted 4px;
+    padding: 8px 12px;
+    text-decoration: none;
+}
+header {
+    background-color: white;
+    font-size: 32px;
+    text-align: center;
+    border: groove 8px plum;
+}
+header aside {
+    background-color: #FAFFFA;
+    padding: 0 1em;
+    border-left: groove 8px plum;
+}
+aside > p {
+    margin: 0;
+}
+header aside img {
+    border: solid 1px black;
+}
+.splash {
+    align-items: center;
+    background: url(/spuc.png) no-repeat;
+    background-position-y: 40px;
+    padding-left: 340px;
+    flex-grow: 1;
+    text-align: center;
+    font-weight: bold;
+    font-style: italic;
+}
+
+main {
+    justify-content: center;
+}
+main form * {
+    margin: 2px;
+}
+input.error {
+    background-color: pink;
+}
+.message {
+    font-size: x-large;
+    width: 400px;
+    border: solid #47A 4px;
+    border-radius: 18px;
+    background-color: #F0E7FF;
+    margin: 5px auto;
+    text-align: center;
+}
+.box {
+    border: solid 4px gray;
+    padding: 3px;
+}

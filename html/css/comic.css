@@ -1,0 +1,69 @@
+.comics {
+    font-size: large;
+    font-family: "Comic Sans MS", cursive, sans-serif;
+    justify-content: space-evenly;
+}
+ 
+.small .artist {
+    display: none;
+}
+.small img.picture {
+    width: 125px;
+    height: 89px;
+}
+.small div.picture {
+    border: none;
+}
+.small div.panel {
+    padding: 0px 0;
+    margin: 3px 0;
+}
+div.picture {
+    margin: 15px 0;
+}
+.captionsmall,
+.small span.caption {
+    display: none;
+}
+.small .captionsmall  {
+    display: block;
+    border: solid 1px grey;
+    background-color: white;
+    width: 121px;
+    text-align: left;
+    padding: 2px;
+    align-content: middle;
+}
+.comichead {
+    justify-content: space-between;
+    padding: 3px;
+    margin-bottom: 3px;
+}
+.rating {
+    background-color:white;
+    border: solid 1px;
+}
+.comic {
+    background-color: white;
+    border: solid 1px grey;
+    background-color: #DDD;
+    padding: 0 8px;
+}
+.artist {
+    font-weight: bold;
+}
+img.picture {
+    border: solid 1px grey;
+    background-color: white;
+    vertical-align:middle;
+}
+span.caption {
+    font-style: italic;
+    text-align: center;
+    flex-grow: 1;
+    background-color: white;
+}
+div.picture {
+    border-top: solid 3px black;
+    border-bottom: solid 3px black;
+}

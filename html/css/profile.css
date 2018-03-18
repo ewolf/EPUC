@@ -1,0 +1,46 @@
+.profile > form,
+.profile > section {
+    font-size: larger;
+    margin-left: 2em;
+}
+.selava {
+    margin-right: 15px;
+    float: left;
+}
+.open#avedit {
+    display: flex;
+    flex-direction: column;
+}
+#avedit {
+    display: none;
+    margin-top: 3px;
+}
+.avatars {
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    
+    background-color: #EAEEEB;
+}
+.avatars .selected {
+    border: double 5px black;
+}
+.avatar {
+    margin: 10px; auto;
+    min-width: 150px;
+    min-height: 150px;
+//    border: solid 1px black;
+}
+.avatars > * {
+    margin: 0 3px;
+}
+.avatar-actions {
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+}
+#avup {
+    justify-content: space-evenly;
+    margin: 30px 0;
+}
+form button, form input, form textarea {
+    font-size: larger;
+}

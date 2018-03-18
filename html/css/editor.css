@@ -1,0 +1,144 @@
+.erasorbrush,
+.brushsize {
+    border: solid 1px black;
+    margin: 7px auto;
+}
+.brushcontrol.picked {
+    border: solid 4px black;
+}
+.brushcontrol {
+    background-color: white;
+    border: solid 1px black;
+    margin: 7px;
+    padding: 3px;
+    cursor:pointer;
+}
+
+/*  COLOR CREATOR */
+#composite {
+//    display: none;
+}
+
+.colorslide {
+    width:256px;
+    margin:7px 0;
+    border: solid 1px black;
+}
+.slider.atend {
+    margin-left:255px;
+}
+.slider {
+    width: 3em;
+    background-color: black;
+    border:solid 3px black;
+    cursor:pointer;
+}
+/*  COLOR SELECT */
+span.colorpick {
+    display:inline-block;
+    margin: 3px;
+}
+.colorpick {
+    border: solid 1px black;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    margin: 7px auto;
+}
+#eyedrop, #erase {
+    background-color: white;
+    font-size: smaller;
+    width: initial;
+    text-align: center;
+    padding: 3px;
+}
+.colorpick.eyedrop.picked {
+    border: solid 1px black;
+    width: 40px;
+    height: 40px;
+    background-color: silver;
+}
+#erase {
+    border: solid 1px black;
+}
+#erase.picked {
+    background-color: silver;
+}
+.colorpick.picked {
+    border: double 6px white;
+    width: 35px;
+    height: 35px;
+}
+.colorpick.picked.white {
+    border: double 6px black;
+    width: 35px;
+    height: 35px;
+}
+
+/* LAYOUT */
+.drawtool {
+    display:flex;
+}
+.canv {
+    margin: 10px;
+}
+.rightpane {
+    display:flex;
+    flex-direction: column;
+}
+.longcontrols {
+    display:flex;
+    flex-direction: row;
+}
+#canv {
+    border: ridge 15px lightgrey;
+    //background-color: rgba(255,255,255,255);
+    background-color: white;
+}
+
+/* GENERIC CONTROLS */
+.colorpicker,.brushpicker {
+    font-size: larger;
+    background-color: lightgray;
+    border:solid 1px black;
+    padding: 0 3px;
+}
+.circle.picked {
+    -moz-border-radius: 25px;
+    -webkit-border-radius: 25px;
+    border-radius: 25px;
+}
+.circle {
+    width: 30px;
+    height: 30px;
+    -moz-border-radius: 15px;
+    -webkit-border-radius: 15px;
+    border-radius: 15px;
+}
+.erasing .brushsize {
+    display: none;
+}
+.erasorbrush {
+    display: none;
+}
+.erasing .erasorbrush {
+    display: block;
+}
+#palette {
+    max-width: 250px;
+}
+.barbutton {
+    cursor:not-allowed;
+    color:gray;
+    background-color:lightgrey;
+    padding: 3px;
+    margin: 4px;
+    border: solid 1px gray;
+}
+
+.active.barbutton {
+    border: solid 1px grey;
+    background-color: white;
+    cursor:pointer;
+    color:black;
+}
