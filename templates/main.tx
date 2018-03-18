@@ -31,8 +31,12 @@
       : } else if $path != '/register' {
       <aside class="column">
       <form method="POST" action="?path=/login" class="col" id="loginblock">
-        : if $err {
-        <span id="err"><:$err:></span>
+        : if $errs.size() > 0 {
+        <div id="err">
+          : for $errs -> $err {
+             <p><: $err :></p>
+          : }
+        </div>
         <a href="?path=/recover_request">recover password</a>
         : } 
         <input type="text" name="un" placeholder="user or email">
@@ -59,8 +63,12 @@
       : }
     </nav>
 
-    : if $msg {
-    <div class="message"><p><:$msg:></p></div>
+    : if $msgs.size() > 0 {
+    <div class="message col">
+        : for $msgs -> $msg {
+           <p><: $msg :></p>
+        : }
+    </div>
     : }
 
     <main>
@@ -77,7 +85,7 @@
         : include "recover_request.tx"
       : } else if $path == '/recover' {
         : if $user {
-          : include "update_password.tx" { nooriginal => 1 }
+          : include "update_password.tx" { nooriginal => 1, path => '/recover?tok=' ~ $user.get__reset_token }
         : } else {
           <div class="err bigerr">reset link is stale</div>
         : }

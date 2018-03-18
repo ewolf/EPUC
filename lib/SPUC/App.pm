@@ -97,7 +97,9 @@ sub _send_reset_request {
     $user->set__reset_token( $restok );
     $user->set__reset_token_good_until( $gooduntil );
 
-    my $link = "https://madyote.com/cgi-bin/yote.cgi\?path=/recover\&tok=$restok";
+    my $site = $self->get_site;
+    my $path = $self->get_spuc_path;
+    my $link = "https://$site/$path\?path=/recover\&tok=$restok";
     
     my $body_html = <<"END";
 <body>
@@ -129,7 +131,7 @@ Thanks
 END
 
     my $msg = MIME::Lite->new(
-        From => 'noreply@madyote.com',
+        From => "noreply@$site",
         To   => $user->get__email,
         Subject => 'SPUC Password Reset',
         Type => 'multipart/alternative',

@@ -17,6 +17,26 @@ use Data::Dumper;
 use SPUC::Uploader;
 
 # ---------------------------------------
+#     config
+# ---------------------------------------
+
+our $site         = 'localhost';
+our $spuc_path    = '/cgi-bin/spuc.cgi';
+our $basedir      = "/var/www";
+our $template_dir = "$basedir/templates/SPUC";
+our $datadir      = "$basedir/data/SPUC/";
+our $lockdir      = "$basedir/lock";
+our $imagedir     = "$basedir/html/spuc/images";
+our $logdir       = '/tmp/log';
+our $group        = 'www-data';
+
+make_path( $datadir, { group      => $group, mode => 0775 } );
+make_path( $lockdir, { group      => $group, mode => 0775 } );
+make_path( $template_dir, { group => $group, mode => 0775 } );
+
+umask( 0664 );
+
+# ---------------------------------------
 #     request
 # ---------------------------------------
 
@@ -47,7 +67,17 @@ if( $path eq '/RPC' ) {
 }
 else {
     ( $content_ref, $status, $new_sess_id )
-        = SPUC::RequestHandler::handle( $path, $params, $sess_id, $uploader );
+        = SPUC::RequestHandler::handle( $path, $params, $sess_id, $uploader, {
+            site         => $site,
+            spuc_path    => $spuc_path,
+            basedir      => $basedir,
+            template_dir => $template_dir,
+            datadir      => $datadir,
+            lockdir      => $lockdir,
+            imagedir     => $imagedir,
+            logdir       => $logdir,
+            group        => $group,
+                                        } );
     $content_type = 'text/html;charset=UTF-8';
 
 }
@@ -78,7 +108,6 @@ print $q->header(
     -status => $status,
     -charset => 'utf-8',
  );
-#print "<html><body>FOO      🔍</body></html>"
-#my $out = $$content_ref;
+
 my $out = $$content_ref;
 print $out;
