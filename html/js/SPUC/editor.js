@@ -1,242 +1,7 @@
-<!DOCTYPE html>
-<html>
-
-  <head id="html">
-    <style>
-    /*  BRUSH */
-       .erasorbrush,
-       .brushsize {
-           border: solid 1px black;
-           margin: 7px auto;
-       }
-       .brushcontrol.picked {
-          border: solid 4px black;
-       }
-       .brushcontrol {
-           border: solid 1px black;
-           margin: 7px;
-           cursor:pointer;
-       }
-
-       /*  COLOR CREATOR */
-       #composite {
-           display: none;
-       }
-       
-       .colorslide {
-           width:256px;
-           margin:7px 0;
-           border: solid 1px black;
-       }
-       .slider.atend {
-           margin-left:255px;
-       }
-       .slider {
-          width: 3em;
-          background-color: black;
-          border:solid 3px black;
-          cursor:pointer;
-       }
-       /*  COLOR SELECT */
-       span.colorpick {
-           display:inline-block;
-           margin: 3px;
-       }
-       .colorpick {
-          border: solid 1px black;
-          width: 40px;
-          height: 40px;
-          cursor: pointer;
-          margin: 7px auto;
-       }
-       .colorpick.eyedrop.picked {
-          border: solid 1px black;
-          width: 40px;
-          height: 40px;
-          background-color: silver;
-       }
-       #erase {
-         border: solid 1px black;
-       }
-       #erase.picked {
-              background-color: silver;
-       }
-       .colorpick.picked {
-          border: double 6px white;
-          width: 35px;
-          height: 35px;
-      }
-      .colorpick.picked.white {
-          border: double 6px black;
-          width: 35px;
-          height: 35px;
-      }
-
-      /* LAYOUT */
-      .drawtool {
-          display:flex;
-      }
-
-      .canv {
-          margin: 10px;
-      }
-      .rightpane {
-          display:flex;
-          flex-direction: column;
-      }
-      .longcontrols {
-          display:flex;
-          flex-direction: row;
-       }
-      #canv {
-          border:solid 1px black;
-          //background-color: rgba(255,255,255,255);
-          background-color: white;
-      }
-
-      /* GENERIC CONTROLS */
-      .colorpicker,.brushpicker {
-          align: middle;
-          border:solid 1px black;
-      }
-      .circle.picked {
-          -moz-border-radius: 25px;
-          -webkit-border-radius: 25px;
-          border-radius: 25px;
-      }
-      .circle {
-          width: 30px;
-          height: 30px;
-          -moz-border-radius: 15px;
-          -webkit-border-radius: 15px;
-          border-radius: 15px;
-      }
-      .erasing .brushsize {
-          display: none;
-      }
-      .erasorbrush {
-          display: none;
-      }
-      .erasing .erasorbrush {
-          display: block;
-      }
-
-      .barbutton {
-          cursor:not-allowed;
-          color:gray;
-          background-color:lightgrey;
-          padding: 3px;
-          margin: 4px;
-          border: solid 1px gray;
-      }
-      
-      .active.barbutton {
-          border: solid 1px grey;
-          background-color: white;
-          cursor:pointer;
-          color:black;
-      }
-
-    </style>
-  </head>
-  
-  <body id="body">
-    Drawing Tool Test<br>
-    <div class="drawtool">
-      <div class="canv">
-        <canvas id="canv">
-        </canvas>
-        
-        <div>
-          Palette
-          <div id="palette">
-            <span id="composite" class="colorpick circle"></span>
-          </div>
-          <div class="slide-controls">
-            <div data-color-idx="0" class="colorslide">
-              <span class="slider">&nbsp;</span>
-            </div>
-            <div data-color-idx="1" class="colorslide">
-              <span class="slider">&nbsp;</span>
-            </div>
-            <div data-color-idx="2" class="colorslide">
-              <span class="slider">&nbsp;</span>
-            </div>
-            <div data-color-idx="3" class="colorslide">
-              <span class="slider atend">&nbsp;</span>
-            </div>
-          </div>
-        </div>
-
-      
-        <div>
-          <span id="x"></span>, <span id="y"></span> to 
-          <span id="xx"></span>, <span id="yy"></span> (
-          <span id="dx"></span>, <span id="dy"></span>)<br>
-        <span>To save, right click below<br>
-        and select save image as.</span>
-          <div class="imghome">
-            <img id="imgy">
-          </div>
-        </div>
-        <div>
-	      To Do and stuff
-          <ul>
-            <li>picking light color border bug</li>
-            <li>transmit and store image</li>
-            <li>brush shape</li>
-          </ul>
-        </div>
-      </div>
-    
-      <div class="rightpane">
-        <div>
-          <div class="barbutton" id="undo">undo</div>
-          <div class="barbutton" id="redo">redo</div>
-          <div class="barbutton active" id="cleary">clear</div>
-        </div>
-        <div class="longcontrols">
-          <div class="colorpicker">
-            <div data-color="eyedrop" id="eyedrop" class="eyedrop colorpick">grab a color</div>
-            <div data-color="erase" id="erase" class="colorpick">erase</div>
-            <div data-color="rgba(0,0,0,255)" class="colorpick circle"></div>
-            <div data-color="rgba(255,255,255,255)" class="colorpick circle white"></div>
-            <div data-color="rgba(255,0,0,255)"   class="colorpick circle"></div>
-            <div data-color="rgba(255,164,0,255)"   class="colorpick circle"></div>
-            <div data-color="rgba(255,255,0,255)"   class="colorpick circle"></div>
-            <div data-color="rgba(0,128,0,255)" class="colorpick circle"></div>
-            <div data-color="rgba(0,0,255,255)"  class="colorpick circle"></div>
-            <div data-color="rgba(128,0,128,255)"  class="colorpick circle"></div>
-          </div>
-          <div class="brushpicker">
-            <div>brush size</div>
-            <div data-size="1" class="brushcontrol"></div>
-            <div data-size="4" class="brushcontrol"></div>
-            <div data-size="8" class="brushcontrol"></div>
-            <div data-size="13" class="brushcontrol"></div>
-            <div data-size="21" class="brushcontrol"></div>
-            <div data-size="34" class="brushcontrol"></div>
-            <div data-size="50" class="brushcontrol"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </body>
-    <script><!--
-
-function shoex( x1, y1, x2, y2, dx, dy ) {
-  document.getElementById('x').textContent = x1;
-  document.getElementById('y').textContent = y1;
-  document.getElementById('xx').textContent = x2;
-  document.getElementById('yy').textContent = y2;
-  document.getElementById('dx').textContent = dx;
-  document.getElementById('dy').textContent = dy;
-}
-
-var width = 10;
+var width = 150;
 var height = 150;
 
-var h = document.getElementById("body");
+var h = document.getElementById("editor");
 var eye = document.getElementById("eyedrop");
 var c = document.getElementById("canv");
 c.height = height;
@@ -403,12 +168,12 @@ setup_sliders();
 function setDrawingControls() {
     var undob = document.getElementById("undo");
     var redob = document.getElementById("redo");
-    var iy = document.getElementById( 'imgy' );
+//    var iy = document.getElementById( 'imgy' );
 
 
     var blankscreen = ctx.getImageData( 0, 0, width, height );
-    iy.src = c.toDataURL("image/png");
-    iy.style['border'] = '1px black solid';
+//    iy.src = c.toDataURL("image/png");
+//    iy.style['border'] = '1px black solid';
 
     var undos = [ blankscreen ];
     var paintpoint = -1;
@@ -436,7 +201,7 @@ function setDrawingControls() {
         } else {
             redob.classList.remove('active');
         }
-        iy.src = c.toDataURL("image/png" );
+//        iy.src = c.toDataURL("image/png" );
 
     }
 
@@ -564,8 +329,6 @@ function setDrawingControls() {
         var delx = Math.abs(x2 - x1);
         var dely = Math.abs(y2 - y1);
 
-//        shoex( x1, y1, x2, y2, delx, dely );
-        
         var del = delx+dely;
         var A = 0, B = 0, a = 0, b = 0;
         for( var i=0; i<del; i++ ) {
@@ -599,7 +362,6 @@ function setDrawingControls() {
     } //move
 
     function drawPoint(x,y) {
-shoex(x,y);
         if( isErase ) {
             ctx.clearRect( x - size/2, y - size/2, size, size );
         } else {
@@ -728,7 +490,12 @@ function setColorControls() {
 } //setColorControls
 setColorControls();
 
-
-//-->    </script>
-  
-</html>
+var uped = document.getElementById('upedit');
+uped.addEventListener('click', function(ev) {
+    ev.preventDefault();
+    ev.stopPropagation();
+    var avup = document.getElementById('avup');
+    var edform = document.getElementById('edform');
+    avup.value = c.toDataURL('image/png');
+    edform.submit();
+} );

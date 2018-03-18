@@ -1,0 +1,68 @@
+<link rel="stylesheet" type="text/css" href="/css/SPUC/editor.css" title="Default">
+<div id="editor">
+  Drawing Tool Test<br>
+  <div class="drawtool">
+    <div class="canv">
+      <canvas id="canv">
+      </canvas>
+      
+      <div>
+        Palette
+        <div id="palette">
+          <span id="composite" class="colorpick circle"></span>
+        </div>
+        <div class="slide-controls">
+          <div data-color-idx="0" class="colorslide">
+            <span class="slider">&nbsp;</span>
+          </div>
+          <div data-color-idx="1" class="colorslide">
+            <span class="slider">&nbsp;</span>
+          </div>
+          <div data-color-idx="2" class="colorslide">
+            <span class="slider">&nbsp;</span>
+          </div>
+          <div data-color-idx="3" class="colorslide">
+            <span class="slider atend">&nbsp;</span>
+          </div>
+        </div>
+      </div>
+      <form id="edform" method="POST" action="?path=/profile" enctype="multipart/form-data">
+        <input type="hidden" id="avup" name="avup">
+        <button type="button" id="upedit">Upload</button>
+      </form>
+    </div>
+    
+    <div class="rightpane">
+      <div>
+        <div class="barbutton" id="undo">undo</div>
+        <div class="barbutton" id="redo">redo</div>
+        <div class="barbutton active" id="cleary">clear</div>
+      </div>
+      <div class="longcontrols">
+        <div class="colorpicker">
+          <div data-color="eyedrop" id="eyedrop" class="eyedrop colorpick">grab a color</div>
+          <div data-color="erase" id="erase" class="colorpick">erase</div>
+          <div data-color="rgba(0,0,0,255)" class="colorpick circle"></div>
+          <div data-color="rgba(255,255,255,255)" class="colorpick circle white"></div>
+          <div data-color="rgba(255,0,0,255)"   class="colorpick circle"></div>
+          <div data-color="rgba(255,164,0,255)"   class="colorpick circle"></div>
+          <div data-color="rgba(255,255,0,255)"   class="colorpick circle"></div>
+          <div data-color="rgba(0,128,0,255)" class="colorpick circle"></div>
+          <div data-color="rgba(0,0,255,255)"  class="colorpick circle"></div>
+          <div data-color="rgba(128,0,128,255)"  class="colorpick circle"></div>
+        </div>
+        <div class="brushpicker">
+          <div>brush size</div>
+          <div data-size="1" class="brushcontrol"></div>
+          <div data-size="4" class="brushcontrol"></div>
+          <div data-size="8" class="brushcontrol"></div>
+          <div data-size="13" class="brushcontrol"></div>
+          <div data-size="21" class="brushcontrol"></div>
+          <div data-size="34" class="brushcontrol"></div>
+          <div data-size="50" class="brushcontrol"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>    
+<script src='/js/SPUC/editor.js'></script>

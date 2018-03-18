@@ -6,8 +6,12 @@ use warnings;
 use Data::ObjectStore;
 use Digest::MD5;
 use Email::Valid;
+use File::Copy;
+use MIME::Base64;
 use Text::Xslate qw(mark_raw);
+use JSON;
 
+use SPUC::App;
 use SPUC::Artist;
 use SPUC::Image;
 use SPUC::Session;
@@ -29,6 +33,75 @@ sub note {
     unshift @$log, "$lvl $txt";
 }
 
+sub _pack {
+    my( $item, $session ) = @_;
+    my $r = ref($item);
+    if( $r eq 'HASH' ) {
+        my $tied = tied (%$item);
+        if( $tied ) {
+            return $session->stow( $item );
+        } else {
+            return { map { $_ => _pack($item->{$_},$session) } keys %$item };
+        }
+    }
+    elsif( $r eq 'ARRAY' ) {
+        my $tied = tied (@$item);
+        if( $tied ) {
+            return $session->stow( $item );
+        } else {
+            return [ map { _pack($_,$session) } @$item ];
+        }
+    }
+    elsif( $r ) {
+        return $session->stow( $item );
+    }
+    elsif( defined( $r ) ) {
+        return "v$r";
+    }
+    return undef;
+} #_pack
+
+sub _unpack {
+    my( $item, $session ) = @_;
+    my $r = ref($item);
+    if( $r eq 'HASH' ) {
+        return { map { $_ => _unpack($_,$session) } keys %$item };
+    }
+    elsif( $r eq 'ARRAY' ) {
+        return [ map { _unpack($_,$session) } @$item ];
+    }
+    elsif( $r =~ /^v(.*)/ ) {
+        return $1;
+    }
+    elsif( $r =~ /^u/ ) {
+        return undef;
+    }
+    return $session->fetch( $r );
+}
+
+sub handle_RPC {
+    my( $params, $sess_id, $uploader ) = @_;
+    my $sessions = $root->get__sessions({});
+    
+    my $sess    = $sessions->{$sess_id};
+    if( $sess ) {
+        my $payload = from_json( $params->{p} );
+        my $method  = $payload->{m};
+        my $id      = $payload->{i};
+        if( $id == 0 ) {
+            if( $method eq 'load' ) {
+                my $user = $sess->get_user;
+                
+            }
+        }
+        my $args    = _unpack( $payload->{a}, $sess );
+        # just return the user object if its loaded
+    }        
+    else {
+        
+    }
+} #handleRPC
+
 #
 # Input is the url path, parameters and the session id.
 #
@@ -47,17 +120,23 @@ sub handle {
     # the fixed  record store's atomicic id generation to get a file coordinated store
     
     my $sessions = $root->get__sessions({}); 
-    my( $user, $err, $msg );
+    my( $user, $sess, $err, $msg );
     
     # see if the session is attached to a user. If not
     # then create a default unlogged in "session".
     if( $sess_id ) {
-        $user = $sessions->{$sess_id};
-        
-        unless( $user ) {
-            note( "invalid sessions $sess_id" );
+        $sess = $sessions->{$sess_id};
+        if( $sess ) {
+            $user = $sess->get_user;
+            unless( $user ) {
+                note( "invalid sessions (no user) $sess_id" );
+            }
+        } else {
+            note( "session not found for $sess_id" );
         }
-        
+    }
+    unless( $sess ) {
+        $sess = $root->get_default_session;
     }
 
     if( $path =~ m~^/comic~ ) {
@@ -134,12 +213,83 @@ sub handle {
             note( "created user $un", 0 );
             
             $msg = "Created artist account '$un'. You are now logged in and ready to play. An email will be delivered to the address given for account confirmation.";
-            $sessions->{$sess_id} = $user;
+            my $sess = $sessions->{$sess_id} = 
+                $store->create_container( 'SPUC::Session', {
+                    last_id => $sess_id,
+                    user    => $user,
+                                          } );
+            $user->set__session( $sess );
+                
             $unames->{$un} = $user;
             $emails->{$em} = $user;
         }
     }
-    elsif( $path =~ m~^/login/~ ) {
+    elsif( $path =~ m~^/profile~ ) {
+        if( (my $avaid = $params->{avatar}) ) {
+            my $avas = $user->get__avatars;
+            for my $ava (@$avas) {
+                if( $ava->_id == $avaid ) {
+                    $user->set_avatar( $ava );
+                    last;
+                }
+            }
+        }
+        elsif( (my $fn = $params->{avup}) ) {
+            if( $fn =~ /^data:image\/png;base64,(.*)/ ) {
+                my $png = MIME::Base64::decode( $1 );
+                my $img = $store->create_container( 'SPUC::Image',
+                                                    {
+                                                        _original_name => 'upload',
+                                                        extension      => 'png',
+                                                    });
+                my $dest = "/var/www/html/spuc/images/$img.png";
+                open my $out, '>', $dest;
+                print $out $png;
+                close $out;
+                $img->set__origin_file( $dest );
+                $user->add_to__avatars( $img );
+            }
+            elsif( (my $fh = $uploader->fh('avup')) ) {
+                my( $ext ) = ( $fn =~ /\.([^.]+)$/ );
+                if( $ext =~ /^(png|jpeg|jpg|gif)$/ ) {
+                    my $img = $store->create_container( 'SPUC::Image',
+                                                        {
+                                                            _original_name => $fn,
+                                                            extension      => $ext,
+                                                        });
+                    my $dest = "/var/www/html/spuc/images/$img.$ext";
+                    $img->set__origin_file( $dest );
+                    $user->add_to__avatars( $img );
+                    copy( $fh, $dest );
+                }
+            }
+        }
+    }
+    elsif( $path =~ m~^/login~ ) {
+        my $un = $params->{un};
+        my $pw = $params->{pw};
+        
+        my $enc_pw = crypt( $pw, length( $pw ) . Digest::MD5::md5_hex($un) );
+        my $unames = $root->get__users({});
+        $user = $unames->{$un};
+        if( $user ) {
+            if( $user->get__enc_pw eq $enc_pw ) {
+                my $found;
+                until( $found ) {
+                    $sess_id = int(rand(2**64));
+                    $found = ! $sessions->{$sess_id};
+                }
+
+                my $sess = $user->get__session;
+                delete $sessions->{$sess->get_last_id};
+                $sessions->{$sess_id} = $sess;
+                $sess->set_last_id( $sess_id );
+            }
+        } else {
+            $root->get_dummy_user;
+        }
+            
+        
         
     }
 

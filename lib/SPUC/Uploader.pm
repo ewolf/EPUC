@@ -7,7 +7,7 @@ sub from_cgi {
 
 sub fh {
     my( $self, $field ) = @_;
-    $self->{q}->upload( field );
+    $self->{q}->upload( $field );
 }
 
 1;
