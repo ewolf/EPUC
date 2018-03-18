@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
 
-  <head>
+  <head id="html">
     <style>
-      /*  BRUSH */
+    /*  BRUSH */
+       .erasorbrush,
        .brushsize {
            border: solid 1px black;
            margin: 7px auto;
@@ -54,6 +55,12 @@
           height: 40px;
           background-color: silver;
        }
+       #erase {
+         border: solid 1px black;
+       }
+       #erase.picked {
+              background-color: silver;
+       }
        .colorpick.picked {
           border: double 6px white;
           width: 35px;
@@ -84,7 +91,7 @@
       #canv {
           border:solid 1px black;
           //background-color: rgba(255,255,255,255);
-          background-color: lightblue;
+          background-color: white;
       }
 
       /* GENERIC CONTROLS */
@@ -104,7 +111,16 @@
           -webkit-border-radius: 15px;
           border-radius: 15px;
       }
-      
+      .erasing .brushsize {
+          display: none;
+      }
+      .erasorbrush {
+          display: none;
+      }
+      .erasing .erasorbrush {
+          display: block;
+      }
+
       .barbutton {
           cursor:not-allowed;
           color:gray;
@@ -124,8 +140,8 @@
     </style>
   </head>
   
-  <body>
-    Drawing Tool Test
+  <body id="body">
+    Drawing Tool Test<br>
     <div class="drawtool">
       <div class="canv">
         <canvas id="canv">
@@ -154,12 +170,19 @@
 
       
         <div>
+          <span id="x"></span>, <span id="y"></span> to 
+          <span id="xx"></span>, <span id="yy"></span> (
+          <span id="dx"></span>, <span id="dy"></span>)<br>
+        <span>To save, right click below<br>
+        and select save image as.</span>
+          <div class="imghome">
+            <img id="imgy">
+          </div>
+        </div>
+        <div>
 	      To Do and stuff
           <ul>
-            <li>color creator</li>
-            <li>color picker w/ creator</li>
-            <li>picking white bug</li>
-            <li>save image</li>
+            <li>picking light color border bug</li>
             <li>transmit and store image</li>
             <li>brush shape</li>
           </ul>
@@ -198,16 +221,29 @@
         </div>
       </div>
     </div>
-    To save your drawing, right click on the image below.
-    <div>
-    <div class="imghome">
-      <img id="imgy">
-    </div>
-    </div>
   </body>
     <script><!--
+
+function shoex( x1, y1, x2, y2, dx, dy ) {
+  document.getElementById('x').textContent = x1;
+  document.getElementById('y').textContent = y1;
+  document.getElementById('xx').textContent = x2;
+  document.getElementById('yy').textContent = y2;
+  document.getElementById('dx').textContent = dx;
+  document.getElementById('dy').textContent = dy;
+}
+
+var width = 100;
+var height = 150;
+
+var h = document.getElementById("body");
 var eye = document.getElementById("eyedrop");
 var c = document.getElementById("canv");
+c.height = height;
+c.width = width;
+c.style['width'] = width + 'px';
+c.style['height'] = height + 'px';
+
 var pal = document.getElementById("palette");
 var ctx = c.getContext("2d");
 var size = 8;
@@ -363,18 +399,15 @@ function setup_sliders() {
 setup_sliders();
 
 
+
 function setDrawingControls() {
     var undob = document.getElementById("undo");
     var redob = document.getElementById("redo");
     var iy = document.getElementById( 'imgy' );
 
-    var width = 400;
-    var height = 250;
-    c.style['width'] = width;
-    c.style['height'] = height;
 
     var blankscreen = ctx.getImageData( 0, 0, width, height );
-    iy.src = c.toDataURL("image/png" );
+    iy.src = c.toDataURL("image/png");
     iy.style['border'] = '1px black solid';
 
     var undos = [ blankscreen ];
@@ -524,11 +557,14 @@ function setDrawingControls() {
         var x1 = lastX;
         var y1 = lastY;
         
+        
         lastX = x2;
         lastY = y2;
         
         var delx = Math.abs(x2 - x1);
         var dely = Math.abs(y2 - y1);
+
+//        shoex( x1, y1, x2, y2, delx, dely );
         
         var del = delx+dely;
         var A = 0, B = 0, a = 0, b = 0;
@@ -563,6 +599,7 @@ function setDrawingControls() {
     } //move
 
     function drawPoint(x,y) {
+shoex(x,y);
         if( isErase ) {
             ctx.clearRect( x - size/2, y - size/2, size, size );
         } else {
@@ -634,6 +671,11 @@ function setSizeControls() {
         pickin.style['border-radius'] = rsize;
         pickout.addEventListener('click', changesize );
         pickout.addEventListener('touchstart', changesize );
+        var erasr = document.createElement('p');
+        erasr.classList.add( 'erasorbrush' );
+        erasr.style.width = bsize;
+        erasr.style.height = bsize;
+        pickout.appendChild( erasr );
     }
 } //setSizeControls
 setSizeControls();
@@ -648,9 +690,15 @@ var changecolor = function changecolor() {
     if( color === 'eyedrop' ) {
         isEyedrop = true;
         isErase = false;
+        h.classList.remove('erasing');
         c.style.cursor = 'crosshair';
     } else {
         isErase = color === 'erase';
+        if( isErase ) {
+            h.classList.add('erasing');
+        } else {
+            h.classList.remove('erasing');
+        }
         isEyedrop = false;
         c.style.cursor = 'default';
         ctx.fillStyle = color;
