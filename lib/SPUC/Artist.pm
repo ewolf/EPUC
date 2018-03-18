@@ -11,14 +11,31 @@ use Digest::MD5;
 
 #
 # Fields :
+#
+# ** credentials**
 #  display_name
 #  _email
 #  _login_name
 #  _enc_pw
-#  _created
-#  _logged_in_since
 #
-
+# ** session management **
+#  _session - session object
+#  _created  - time
+#  _logged_in_since - time
+#
+# ** about the user **
+#  _avatars
+#  _deleted_avatars
+#  avatar
+#  bio
+#
+#  ** comics **
+#  _unfinished_comics
+#  finished_comics - list of comic objects, more recent are first
+#
+# ** game state **
+#  _playing - comic object currently playing
+#
 sub _setpw {
     my( $self, $pw ) = @_;
     my $un = $self->get__login_name;

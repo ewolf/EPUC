@@ -1,10 +1,25 @@
 <link rel="stylesheet" type="text/css" href="/css/SPUC/comic.css" title="Default">
+<link rel="stylesheet" type="text/css" href="/css/SPUC/read.css" title="Default">
 
 <h1>Read Comics</h1>
 
-<button type="button" id="flip">flip</button>
-
 : my $comics = $app.get( 'finished_comics' )
+: my $first = $comics[$startidx]
+
+LINK THE COMICS TOGETHER SOMEHOW
+
+INTELLIGENT LISTS?
+
+PLACEHOLDER OBJECTS IN LISTS, LIKE INODES?
+
+
+
+<div class="col pagination">
+  <a href="?path=/read&start=1">newer</a>
+  <button type="button" id="flip">flip</button>
+  <a href="?path=/read&start=1">older</a>
+</div>
+
 
 <div id="comics" class="comics row small">
 

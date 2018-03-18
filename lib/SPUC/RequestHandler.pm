@@ -24,6 +24,17 @@ our $xslate = new Text::Xslate(
     );
 our $store = Data::ObjectStore::open_store( "/var/www/data/SPUC/" );
 our $root  = $store->load_root_container;
+
+#
+# root container has
+#   SPUC - the SPUC app
+#   default_session
+#   dummy_user
+#   _sessions - sessid -> session obj
+#   _emails - email to -> artist
+#   _unames - user name -> artist
+
+
 our $app   = $root->get_SPUC;
 our $logfh;
 open( $logfh, '>>', "/tmp/log" );
@@ -208,7 +219,7 @@ sub handle {
                 _email       => $em,
                 _login_name  => $un,
 
-                __avatar     => $app->get__default_avatar,
+                avatar       => $app->get__default_avatar,
 
                 _created         => time,
                 _logged_in_since => time,
@@ -373,9 +384,6 @@ sub handle {
                     ( $msg, $err ) = $comic->add_picture( $img, $user );
                     $user->set__playing(undef);
                     $comic->set__player( undef );
-                    if( $comic->is_complete ) {
-                        
-                    }
                 }
                 elsif( (my $fh = $uploader->fh('avup')) ) {
                     my( $ext ) = ( $fn =~ /\.([^.]+)$/ );
@@ -403,9 +411,12 @@ sub handle {
             ( $msg, $err ) = $comic->add_caption( $cap, $user );
             $user->set__playing(undef);
             $comic->set__player( undef );
+            if( $comic->is_complete ) {
+                $msg = "comleted comic";
+            }
         }
 
-        my $comic = $app->find_comic_to_play( $user, $params->{skip} );
+        my $comic = $user->get__playing || $app->find_comic_to_play( $user, $params->{skip} );
         if( $comic ) {
             $user->set__playing( $comic );
             $comic->set__player( $user );

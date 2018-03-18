@@ -11,7 +11,7 @@ use SPUC::Panel;
 
 #
 # Fields :
-#
+#   _unfinished_comics
 #
 #
 #
@@ -63,8 +63,11 @@ sub find_comic_to_play {
     my( $comic ) = sort { $a->has_artist($artist) && $b->has_artist($artist) ? 
                               $a->is_last_artist($artist) && $b->is_last_artist($artist) ? 0 : $a->is_last_artist($artist) ? 1 : -1
                               : $a->has_artist($artist) ? 1 : -1 
-    } sort { (0*$b) + rand() <=> (0*$a) + rand() }
-    grep { (! $skip) || $_ ne $last_comic }
+    } # comics that this artist has not contributed to are sorted first. comics that this artist was the last one
+      #  to contribute to are sorted last
+    sort { (0*$b) + rand() <=> (0*$a) + rand() }  # initial random sort
+    grep { (! $skip) || $_ ne $last_comic } # if the comic was skipped dont show it again
+    grep { ! $_->get__player }  #comics not being currently played
     @$comics;
 
     $comic;

@@ -8,6 +8,18 @@ use base 'Data::ObjectStore::Container';
 
 use SPUC::Panel;
 
+#
+# Fields :
+#   creator - who started this strip
+#   _player - Artist object who is currently playing this
+#   artists - hash (set) of artists working on this
+#   last_artist - artist object last to add a panel
+#   panels - list of Panel objects that make this up
+#   needs - number of panels this needs to have to be complete
+#   app - app object
+#
+#
+
 sub needs {
     my $self = shift;
 }

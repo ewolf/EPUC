@@ -6,6 +6,14 @@ use warnings;
 use Data::ObjectStore;
 use base 'Data::ObjectStore::Container';
 
+#
+# FIELDS
+#
+#   _original_name
+#   extension
+#   _origin_file
+#
+
 sub src {
     my $self = shift;
     my $of = $self->get__origin_file;
