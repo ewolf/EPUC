@@ -20,6 +20,8 @@ my $root  = $store->load_root_container;
 my $defava = $root->get__default_avatar;
 unless( $defava ) {
     $defava = $store->create_container( 'SPUC::Image', {
+        _original_name => 'question.png',
+        extension => 'png',
         _origin_file => "/var/www/html/spuc/images/question.png",
                                         } );
     $root->set__default_avatar( $defava );
@@ -42,8 +44,7 @@ my $user = $root->get_dummy_user;
 unless( $user ) {
     my $un = 'dummy';
 
-    # the dummy isn't actually an artist object; it will have no methods
-    $user = $store->create_container( {
+    $user = $store->create_container( 'SPUC::Dummy', {
         display_name => $un,
         _login_name  => $un,
         __avatar     => $root->get__default_avatar,

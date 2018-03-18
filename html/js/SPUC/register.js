@@ -58,6 +58,8 @@ function check() {
     
     if( errs.length === 0 ) {
         but.removeAttribute( 'disabled' );
+    } else {
+        but.setAttribute( 'disabled', true );
     }
     
     error( errs );

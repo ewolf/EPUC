@@ -1,15 +1,17 @@
 var width = 150;
 var height = 150;
 
-var h = document.getElementById("editor");
-var eye = document.getElementById("eyedrop");
-var c = document.getElementById("canv");
+var h = byId("editor");
+var eye = byId("eyedrop");
+var c = byId("canv");
 c.height = height;
 c.width = width;
 c.style['width'] = width + 'px';
 c.style['height'] = height + 'px';
 
-var pal = document.getElementById("palette");
+var pal = byId("palette");
+var compo = byId("composite");
+
 var ctx = c.getContext("2d");
 var size = 8;
 var maxUndos = 50;
@@ -53,7 +55,6 @@ function setup_sliders() {
     var sat   = ['#FF0000','#00FF00','#0000FF','#FFFFFF' ];
     var unsat = ['#FFFFFF','#FFFFFF','#FFFFFF','#000000' ];
     
-    var compo = document.getElementById("composite");
     
     function setup_slider(sliderbox) {
         var sliding = false;
@@ -99,6 +100,7 @@ function setup_sliders() {
             ev.stopPropagation();
             sliding = false;
             lastslide = this;
+            console.log( ev );
             updateslide( ev.offsetX );
         } );
 
@@ -166,9 +168,9 @@ setup_sliders();
 
 
 function setDrawingControls() {
-    var undob = document.getElementById("undo");
-    var redob = document.getElementById("redo");
-//    var iy = document.getElementById( 'imgy' );
+    var undob = byId("undo");
+    var redob = byId("redo");
+//    var iy = byId( 'imgy' );
 
 
     var blankscreen = ctx.getImageData( 0, 0, width, height );
@@ -371,11 +373,11 @@ function setDrawingControls() {
         }
     } //drawPoint
 
-    var undoel = document.getElementById('undo');
+    var undoel = byId('undo');
     undoel.addEventListener('click', undo );
-    var redoel = document.getElementById('redo');
+    var redoel = byId('redo');
     redoel.addEventListener('click', redo );
-    var clearey = document.getElementById('cleary');
+    var clearey = byId('cleary');
     clearey.addEventListener('click', blank );
     
     c.addEventListener('mousedown', startmousedraw );
@@ -394,7 +396,7 @@ setDrawingControls();
 
 function setSizeControls() {
 
-    var picks = document.getElementsByClassName('brushcontrol');
+    var picks = byClass('brushcontrol');
     function changesize( ev ) {
         for( var i=0; i<picks.length; i++ ) {
             picks[i].classList.remove( 'picked' );
@@ -442,7 +444,7 @@ function setSizeControls() {
 } //setSizeControls
 setSizeControls();
 var colorcontrol = {};
-var picks = document.getElementsByClassName('colorpick');
+var picks = byClass('colorpick');
 var changecolor = function changecolor() {    
     for( var i=0; i<picks.length; i++ ) {
         picks[i].classList.remove( 'picked' );
@@ -465,6 +467,7 @@ var changecolor = function changecolor() {
         c.style.cursor = 'default';
         ctx.fillStyle = color;
         pickedBrush.style.backgroundColor = color;
+        compo.style.backgroundColor = color;        
     }
 }
 function setColorControls() {
@@ -490,12 +493,14 @@ function setColorControls() {
 } //setColorControls
 setColorControls();
 
-var uped = document.getElementById('upedit');
+var uped = byId('upedit');
 uped.addEventListener('click', function(ev) {
     ev.preventDefault();
     ev.stopPropagation();
-    var avup = document.getElementById('avup');
-    var edform = document.getElementById('edform');
+    var avup = byId('avuper');
+    var edform = byId('edform');
     avup.value = c.toDataURL('image/png');
     edform.submit();
 } );
+var selimg = oneByClass( 'selava' );
+ctx.drawImage( selimg, 0, 0 );

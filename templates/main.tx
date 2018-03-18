@@ -6,36 +6,41 @@
     <script src='/js/SPUC/main.js'></script>
   </head>
   
-  <body>
-    <header>
-      <div id="splash">
-        <p>Scarf Poutine You Clone</p>
-        <div style="background:url(/spuc.png) no-repeat;width:300px;height:150px;display:flex;flex-direction:column;align-content:space-between;">
+  <body class="col">
+    <header class="row">
+      
+      <div class="splash row">
+        <div style="display:flex;flex-direction:column">
+          <p>Scarf Poutine You Clone</p>
+          <p>Collaborative Comics</p>
         </div>
-        <p>Collaborative Comics</p>
       </div>
+      
+      <aside class="column">
       : if $user {
-      <div id="userhead">
-        <: $user.get('display_name') :>
+        <p><: $user.get('display_name') :></p>
         : my $ava = $user.get('avatar')
         <a href="?path=/profile">
           : if $ava {
-          <img src="<:$ava.size(100,100):>">
+          <img src="<:$ava.size(150,150):>">
         : } else {
           my profile
         : }
         </a>
-        <a href="?path=/logout">log out</a>
-      </div>
+        <p><a href="?path=/logout">log out</a></p>
+      
       : } else if $path != '/register' {
       <form method="POST" action="?path=/login">
-        <: $loginerror :>
+        <span id="err"><:$err:></span>
         <input type="text" name="un" placeholder="user">
         <input type="password" name="pw" placeholder="password">
         <button type="submit">Log In</button>
         <a href="?path=/register">register</a>
       </form>
       : }
+      
+      </aside>
+      
     </header>
 
     : if $msg {
@@ -58,70 +63,35 @@
       : }
 
       : if $path == '/profile' && $user {
-        : my $selava = $user.get('avatar')
-        : my $avas = $user.get('_avatars')
-      
-      <div class="profile" >
-        <p class="info">Editing Profile</p>
-        <section>
-          <h2>Avatars</h2>
-          <p>You can upload multiple avatars and select the one you want to be shown.</p>
-          <div style="flex-direction: row; display: flex;">
-            : for $avas -> $ava {
-              : if $ava == $selava {
-            <div style="border: solid 3px black">
-              <img src="<:$ava.size(100,100):>" style="margin:auto">
-            </div>
-              : } else {
-            <a href="?path=/profile&avatar=<:$ava._id:>">
-              <img src="<:$ava.size(100,100):>" style="margin:auto">
-            </a>
-              : }
-            : }
-          </div>
-          <form method="POST" action="?path=/profile" enctype="multipart/form-data">
-            Upload New Avatar
-            <input name="avup" type="file">
-            <button style="margin:auto" type="submit">upload</button>
-          </form>
-          
-          <a href="#">Draw New Avatar</a>
-          
-          <div id="ava_edit">
-            : include "editor.tx"
-          </div>
-        </section>
-        
-        <script src="/js/SPUC/profile.js"></script>
-      </div>
+        : include "profile.tx"
       : }
       
     </main>
 
-    <div class="message">
+    <hr>
+    <footer class="message" style="margin-top:100px">
       TODOS
       <ul>
-        <li>avatar drawing -> image</li>
+        <li>panel upload vs drawing</li>
+        <li>integrate drawing tool</li>
 
-        <li>image sizes and resizing</li>
         <li>reediting images, copying and deleting them</li>
-
         
-        <li>RPC</li>
-        <li>yote js -> server</li>
-
         <li>permissions/group datastore. Maybe a spuc admin group?</li>
         <li>spuc_admin.pl actions</li>
+        
+        
         <li>porting comics and users</li>
         <li>begin comic</li>
         <li>presenting comics</li>
+        
         <li>comic comments</li>
         <li>kudos</li>
-        <li>panel upload vs drawing</li>
-        <li>image resizing/scaling</li>
-        <li>integrate drawing tool</li>
+        
+        <li>RPC</li>
+        <li>yote js -> server</li>
       </ul>
-    </div>
+    </footer>
     
   </body>
 </html>

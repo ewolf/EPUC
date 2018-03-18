@@ -1,6 +1,12 @@
 function byName( name ) {
     return document.getElementsByName( name )[0];
 }
+function byClass( name ) {
+    return Object.values( document.getElementsByClassName( name ) );
+}
+function oneByClass( name ) {
+    return Object.values( document.getElementsByClassName( name ) )[0];
+}
 function byId( id ) {
     return document.getElementById( id );
 }

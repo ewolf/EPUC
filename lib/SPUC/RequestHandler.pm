@@ -4,7 +4,6 @@ use strict;
 use warnings;
 
 use Data::ObjectStore;
-use Digest::MD5;
 use Email::Valid;
 use File::Copy;
 use MIME::Base64;
@@ -121,6 +120,9 @@ sub handle {
     
     my $sessions = $root->get__sessions({}); 
     my( $user, $sess, $err, $msg );
+    my $action = $params->{action};
+
+    print STDERR Data::Dumper->Dump(["$path,$action,WEREWRO"]);
     
     # see if the session is attached to a user. If not
     # then create a default unlogged in "session".
@@ -139,15 +141,22 @@ sub handle {
         $sess = $root->get_default_session;
     }
 
+    
     if( $path =~ m~^/comic~ ) {
 
     }
+
+    
     elsif( $path =~ m~^/artist~ ) {
         
     }
+
+    
     elsif( $path =~ m~^/create~ ) {
         
     }
+
+    
     elsif( $path =~ m~^/logout~ ) {
         if( $user ) {
             note( "$user logged out", 3 );
@@ -156,7 +165,9 @@ sub handle {
             undef $user;
             $msg = "Logged out";
         }
-    }
+    } #logout
+
+    
     elsif( $path =~ m~^/register~ ) {
         # just do squishy for now and organically
         # grow this, dont yet force it. code can move
@@ -191,20 +202,18 @@ sub handle {
             # no error defined, so create the user
             # and session and attach the user to the session
             # also add to emails and unames lookups
-            my $enc_pw = crypt( $pw, length( $pw ) . Digest::MD5::md5_hex($un) );
-
             $user = $store->create_container( 'SPUC::Artist', {
                 display_name => $un,
                 
                 _email       => $em,
                 _login_name  => $un,
-                _enc_pw      => $enc_pw,
 
                 __avatar     => $root->get__default_avatar,
                 
                 _created         => time,
                 _logged_in_since => time,
                                               } );
+            $user->_setpw( $pw );
             my $found;
             until( $found ) {
                 $sess_id = int(rand(2**64));
@@ -223,9 +232,12 @@ sub handle {
             $unames->{$un} = $user;
             $emails->{$em} = $user;
         }
-    }
-    elsif( $path =~ m~^/profile~ ) {
-        if( (my $avaid = $params->{avatar}) ) {
+    } #register
+
+    # profile
+    elsif( $path =~ m~^/profile~ && $user ) {
+        if( $action eq 'select-avatar' ) {
+            my $avaid = $params->{avatar};
             my $avas = $user->get__avatars;
             for my $ava (@$avas) {
                 if( $ava->_id == $avaid ) {
@@ -234,7 +246,10 @@ sub handle {
                 }
             }
         }
-        elsif( (my $fn = $params->{avup}) ) {
+        
+        elsif( $action eq 'upload-avatar' ) {
+            my $fn = $params->{avup};
+            print STDERR Data::Dumper->Dump([$fn,"SPROINT"]);
             if( $fn =~ /^data:image\/png;base64,(.*)/ ) {
                 my $png = MIME::Base64::decode( $1 );
                 my $img = $store->create_container( 'SPUC::Image',
@@ -248,6 +263,7 @@ sub handle {
                 close $out;
                 $img->set__origin_file( $dest );
                 $user->add_to__avatars( $img );
+                $user->set_avatar( $img );
             }
             elsif( (my $fh = $uploader->fh('avup')) ) {
                 my( $ext ) = ( $fn =~ /\.([^.]+)$/ );
@@ -260,44 +276,84 @@ sub handle {
                     my $dest = "/var/www/html/spuc/images/$img.$ext";
                     $img->set__origin_file( $dest );
                     $user->add_to__avatars( $img );
+                    $user->set_avatar( $img );
                     copy( $fh, $dest );
                 }
             }
+        } #if upload
+        elsif( $action eq 'delete-avatar' ) {
+            my $avaid = $params->{avatar};
+            my $avas = $user->get__avatars;
+            my $selava = $user->get_avatar;
+            if( @$avas > 1 ) {
+                for my $ava (@$avas) {
+                    if( $ava->_id == $avaid && $ava->_id != $selava->_id ) {
+                        $user->remove_from__avatars( $ava );
+                        $user->add_to__deleted_avatars( $ava );
+                        $msg = 'deleted avatar';
+                        last;
+                    }
+                }
+            } else {
+                $err = 'cannot delete last avatar';
+            }
         }
-    }
-    elsif( $path =~ m~^/login~ ) {
+        elsif( $action eq 'set-bio' ) {
+            $user->set_bio( $params->{bio} );
+        }
+        elsif( $action eq 'update-password' ) {
+            print STDERR Data::Dumper->Dump(["NORF"]);
+            my $oldpw = $params->{pwold};
+            my $newpw = $params->{pw};
+            # verify old password
+            if( ! $user->_checkpw( $oldpw ) ) {
+                $err = 'old password incorrect';
+            }
+            if( length( $newpw ) < 8 ) {
+                $err = 'password too short';
+            }
+            if( $newpw ne $params->{pw2} ) {
+                $err = 'password do not match';
+            }
+            if( ! $err ) {
+                $user->_setpw( $newpw );
+                $msg = "Updated password";
+            }
+        }
+        else {
+            print STDERR Data::Dumper->Dump(["NOSET"]);
+        }
+    } #profile
+
+    
+    # login
+    elsif( $path =~ m~^/login~ && ! $user ) {
         my $un = $params->{un};
         my $pw = $params->{pw};
         
-        my $enc_pw = crypt( $pw, length( $pw ) . Digest::MD5::md5_hex($un) );
         my $unames = $root->get__users({});
-        $user = $unames->{$un};
-        if( $user ) {
-            if( $user->get__enc_pw eq $enc_pw ) {
-                my $found;
-                until( $found ) {
-                    $sess_id = int(rand(2**64));
-                    $found = ! $sessions->{$sess_id};
-                }
+        $user = $unames->{$un} || $root->get_dummy_user;
 
-                my $sess = $user->get__session;
-                delete $sessions->{$sess->get_last_id};
-                $sessions->{$sess_id} = $sess;
-                $sess->set_last_id( $sess_id );
+        # dummy automatically fails _checkpw
+        if( $user->_checkpw( $pw ) ) {
+            my $found;
+            until( $found ) {
+                $sess_id = int(rand(2**64));
+                $found = ! $sessions->{$sess_id};
             }
-        } else {
-            $root->get_dummy_user;
-        }
             
-        
-        
-    }
+            my $sess = $user->get__session;
+            delete $sessions->{$sess->get_last_id};
+            $sessions->{$sess_id} = $sess;
+            $sess->set_last_id( $sess_id );
+        }
+    } #login
 
     $store->save;
     
     # try the rule you can register if you
     # are already logged in
-    
+    print STDERR Data::Dumper->Dump([$err,$msg,"MSG"]);
     # show the homepage
     my $txt = $xslate->render( "main.tx", {
         path   => $path,

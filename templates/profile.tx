@@ -1,0 +1,85 @@
+: my $selava = $user.get('avatar')
+: my $avas = $user.get('_avatars')
+
+<link rel="stylesheet" type="text/css" href="/css/SPUC/profile.css" title="Default">
+
+<div class="profile" >
+  <h1>Editing Profile</h1>
+  
+  <h2>Avatars</h2>
+  <section id="avatars" class="col">
+    <div>
+      <a href="#" class="toggleedit">
+        <img src="<:$selava.size(150,150):>" class="selava">
+      </a>
+      <p>You can have multiple avatars and select the one to show.</p>
+      : if $params['ava-open'] {
+      <a id="avatoggle" class="toggleedit" href="?path=/profile#avatars">Close</a>
+      : } else {
+      <a id="avatoggle" class="toggleedit" href="?path=/profile&action=manage-avatars#avatars">Manage Avatars</a>
+      : } 
+    </div>
+      
+    <div id="avedit" class="<: $params['ava-open'] ? 'open' : '' :>">
+      <h3>Select Avatar</h3>
+      <a name="avatars">
+      <div class="avatars row box">
+        : for $avas -> $ava {
+        : if $ava == $selava {
+<!--        <div class="selected avatar">
+          <img src="<:$ava.size(150,150):>">
+          Selected
+        </div> -->
+        : } else {
+        <div class="avatar box">
+          <a href="?path=/profile&avatar=<:$ava._id:>&action=select-avatar&ava-open=1#avatars">
+            <img src="<:$ava.size(150,150):>">
+          </a>
+          <div class="avatar-actions">
+            <a href="?path=/profile&ava-open=1&avatar=<:$ava._id:>&action=delete-avatar" data-id="<:$ava._id:>" class="delete">delete</a>
+<!--            <a href="#" data-id="<:$ava._id:>" class="copy">copy</a>
+            <a href="?path=/profile&avatar=<:$ava._id:>&action=select-avatar#avatars">select</a>
+            <a href="#" data-id="<:$ava._id:>" class="edit">edit</a>
+-->
+          </div>
+        </div>
+        : }
+        : }
+      </div>
+      <form method="POST" id="avup" action="?path=/profile" enctype="multipart/form-data" class="box">
+        <h3>Upload Avatar</h3>
+        <input type="hidden" name="action" value="upload-avatar">
+        <input type="hidden" name="ava-open" value="1">
+        <input id="avfileinput" name="avup" type="file" accept="image/x-png,image/png,image/gif,image/jpeg">
+        <button id="avsub" type="submit">upload</button>
+      </form>
+      
+      <h3>Draw Avatar</h3>
+      <p>This is a copy of your selected avatar. The selected avatar will not be overwritten</p>
+      <div id="ava_edit" class="box">
+        : include "editor.tx"
+      </div>
+    </div>
+  </section>
+
+  <h2>Bio</h2>
+  <form id="bio" method="POST" action="?path=/profile" class="col">
+    <input type="hidden" name="action" value="set-bio">
+    <span>Write a little about yourself</span>
+    <textarea name="bio" cols="80" rows="7"><: $user.get('bio') :></textarea>
+    <div><button type="submit">Update</button></div>
+  </form>
+
+  <h2>Update Password</h2>
+  <form method="POST" action="?path=/profile" class="col">
+    <input type="hidden" name="action" value="update-password">
+    <input type="password" name="pwold" placeholder="old password">
+    <input type="password" name="pw" placeholder="password">
+    <input type="password" name="pw2" placeholder="repeat password">
+    <span id="err"><:$err:></span>
+    <button id="uppw" type="submit">update</button>
+  </form>
+  
+  <script src="/js/SPUC/profile.js"></script>
+</div>
+
