@@ -4,6 +4,7 @@
     <title>SPUC</title>
     <link rel="stylesheet" type="text/css" href="/css/SPUC/main.css" title="Default">
     <script src='/js/SPUC/main.js'></script>
+    <meta charset='utf-8'>
   </head>
   
   <body class="col">
@@ -42,12 +43,13 @@
       
     </header>
     <nav class="row">
-      <a href="?path=/read">read comics</a>
+      <a href="?path=/read&sort=recent">recent</a>
+      <a href="?path=/read&sort=top">top rated</a>
       : if $user {
       <a href="?path=/play">play</a>
       <a href="?path=/start">start a comic</a>
-      <a href="?path=/start">in-progress comics</a>
-      <a href="?path=/profile">edit profile</a>
+      <a href="?path=/start">my comics</a>
+      <a href="?path=/profile">my profile</a>
       <a href="?path=/logout">log out</a>
       : }
     </nav>
@@ -94,14 +96,15 @@
       TODOS
       <ul>
         <li>presenting comics</li>
+        <li>pagination in general</li>
         <li>in progress comics</li>
+        <li>bookmarks for comics</li>
 
         <li>testing comic</li>
         <li>UI advice</li>
         
         <li>comic comments</li>
         <li>kudos</li>
-        <li>pagination in general</li>
         
         <li>images on the filesystem</li>
         <li>permissions/group datastore. Maybe a spuc admin group?</li>

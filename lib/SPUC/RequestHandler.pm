@@ -5,6 +5,7 @@ use warnings;
 
 use Data::ObjectStore;
 use Email::Valid;
+use Encode qw/ decode encode /;
 use File::Copy;
 use MIME::Base64;
 use Text::Xslate qw(mark_raw);
@@ -19,6 +20,7 @@ use SPUC::Session;
 
 our $xslate = new Text::Xslate(
     path => "/var/www/templates/SPUC",
+    input_layer => ':utf8',
     );
 our $store = Data::ObjectStore::open_store( "/var/www/data/SPUC/" );
 our $root  = $store->load_root_container;
@@ -300,7 +302,8 @@ sub handle {
             }
         }
         elsif( $action eq 'set-bio' ) {
-            $user->set_bio( $params->{bio} );
+            my $bio = encode( 'UTF-8', $params->{bio} );
+            $user->set_bio( $bio );
             $msg = 'updated bio';
         }
         elsif( $action eq 'update-password' ) {
@@ -396,7 +399,7 @@ sub handle {
         } #if upload to panel
         elsif( $action eq 'caption-picture' ) {
             my $comic = $user->get__playing;
-            my $cap = $params->{caption};
+            my $cap = encode( 'UTF-8', $params->{caption});
             ( $msg, $err ) = $comic->add_caption( $cap, $user );
             $user->set__playing(undef);
             $comic->set__player( undef );

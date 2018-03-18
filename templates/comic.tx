@@ -1,0 +1,31 @@
+<div class="comic col">
+  
+  <div class="row comichead">
+    <span>🔍</span>
+    <span class="rating">⭐⭐⭐⭐⭐</span>
+  </div>
+  
+  : for $comic.get('panels') -> $panel {
+  
+    : my $type = $panel.get('type')
+  
+    : if $panel.get('type') == 'caption' {
+
+  <div class="panel caption row">
+    
+    <span class="artist"><: $panel.get('artist').get('display_name') :> :</span>
+    <span class="caption">&quot;<: $panel.get('caption') :>&quot;</span>
+    <div class="captionsmall"><: $panel.get('caption') :></div>
+
+    : } else {
+
+    <div class="panel picture">
+      <span class="artist"><: $panel.get('artist').get('display_name') :> :</span>
+      <img class="picture" src="<: $panel.get('picture').size(500,350) :>">
+
+      : }
+    </div>
+
+    : }
+
+</div>
