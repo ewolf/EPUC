@@ -1,5 +1,8 @@
+: if $small {
+<a class="comic col" href="?path=<:$path:>&single=1&idx=<:$idx:>&sort=<:$params.sort:>">
+: } else {
 <div class="comic col">
-  
+: }  
   <div class="row comichead">
     <span>🔍</span>
     <span class="rating">⭐⭐⭐⭐⭐</span>
@@ -28,4 +31,8 @@
 
     : }
 
+: if $small {
+</a>
+: } else {
 </div>
+: }  

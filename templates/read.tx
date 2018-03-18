@@ -3,33 +3,76 @@
 
 <h1>Read Comics</h1>
 
-: my $comics = $app.get( 'finished_comics' )
-/
+: my $comics = $user && $path == '/mine' ? $user.get( 'finished_comics' ) : $app.get( 'finished_comics' )
 
-<div class="sort row">
-  <span>Show</span>
-  <a class="" href="?path=/read&sort=recent">recent</a>
-  <a class="" href="?path=/read&sort=top">top rated</a>
+: my $startidx = $params.idx || 0;
+
+: if $params.single {
+
+<div class="row pagination">
+  : if $startidx > 0 {
+    : my $del = $startidx - 1;
+   <a href="?path=<: $path :>&idx=<: $del :>&single=1&sort=<:$params.sort:>">newer</a>
+  : } else {
+   <span class="disabled">newer</span>
+  : }
+
+   <a href="?path=<: $path :>&idx=<: $startidx :>&sort=<:$params.sort:>">back to list</a>
+   
+  : my $del = $startidx + 1;
+  : if $comics.size() - $del  > 0 {
+   <a href="?path=<: $path :>&idx=<: $del :>&single=1&sort=<:$params.sort:>">older</a>
+  : } else {
+   <span class="disabled">older</span>
+  : }
 </div>
 
 
-<div class="col pagination">
-  <a href="?path=/read&source=<:$params.source:>&back=4">newer</a>
-  <button type="button" id="flip">flip</button>
-  <a href="?path=/read&source=<:$params.source:>&forward=4">newer</a>
+<div id="comics" class="comics row">
+
+  : my $comic = $comics[$startidx];
+  : if $comic {
+    : include "comic.tx" { comic => $comic, small => 0, path => $path }
+  : }
+     
+</div>
+
+
+: } else {
+
+<div class="row pagination">
+  : if $startidx > 0 {
+    : my $del = $startidx - 4 >= 0 ? $startidx - 4 : 0;
+   <a href="?path=<: $path :>&idx=<: $del :>&sort=<:$params.sort:>">newer</a>
+  : } else {
+   <span class="disabled">newer</span>
+  : }
+
+  : my $del = $startidx + 4;
+  : if $comics.size() - $del  > 0 {
+   <a href="?path=<: $path :>&idx=<: $del :>&sort=<:$params.sort:>">older</a>
+  : } else {
+   <span class="disabled">older</span>
+  : }
 </div>
 
 
 <div id="comics" class="comics row small">
 
-: for [0..3] -> $idx {
-
-  : include "comic.tx" { comic => $comics[$idx+$startidx] }
-
+: for [0..3] -> $i {
+  : my $idx = $i + $startidx;
+  : my $comic = $comics[$idx];
+  : if $comic {
+    : include "comic.tx" { comic => $comic, small => 1, idx => $idx, path => $path }
+  : }
 : }
      
 </div>
+
+: }
+
 <script>
+  if(0){
   var c = byId( 'comics' )
   var f = byId( 'flip' );
   var bool = false;
@@ -41,4 +84,5 @@
       }
       bool = ! bool;
   } );
+  }
 </script>

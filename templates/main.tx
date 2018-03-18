@@ -43,11 +43,11 @@
       
     </header>
     <nav class="row">
-      <a href="?path=/read">read comics</a>
+      <a href="?path=/read&sort=recent">read comics</a>
       : if $user {
       <a href="?path=/play">play</a>
       <a href="?path=/start">start a comic</a>
-      <a href="?path=/read&sort=recent">my comics</a>
+      <a href="?path=/mine&sort=recent">my comics</a>
       <a href="?path=/profile">my profile</a>
       <a href="?path=/logout">log out</a>
       : }
@@ -76,7 +76,7 @@
         : include "profile.tx"
       : } else if( $path == '/play' && $user ) {
         : include "play.tx"
-      : } elsif $path == '/start' && $user {
+      : } else if $path == '/start' && $user {
         : include "start.tx"
       : } else { #read is the default
         : include "read.tx"
@@ -87,10 +87,14 @@
 
     <hr>
     <footer class="message" style="margin-top:100px">
+      Min Viable Product
       TODOS
       <ul>
-        <li>presenting comics</li>
-        <li>pagination in general</li>
+        <li>locking comics and other objects</li>
+      </ul>
+      Other TODOS
+      <ul>
+        <li>admin class user</li>
         <li>in progress comics</li>
         <li>bookmarks for comics</li>
 
@@ -101,6 +105,8 @@
         
         <li>comic comments</li>
         <li>kudos</li>
+
+        <li>group chat</li>
         
         <li>images on the filesystem</li>
         <li>permissions/group datastore. Maybe a spuc admin group?</li>

@@ -85,37 +85,14 @@ sub add_panel {
     push @$panels, $panel;
     my $arts = $self->get_artists;
 
-    unless( $arts->{$user} ) {
-            my $newentry = $self->store->create_container( 'SPUC::LinkedListNode', {
-                item => $self,
-                                                           } );
-            my $unfin = $user->get__unfinished_comics;
-            if( $unfin ) {
-                $unfin->sortinto( $newentry, 'recent', sub {
-                    my( $a, $b ) = @_;
-                    
-                                  } );
-            } else {
-                $user->set__unfinished_comics( $newentry );
-            }
-            $arts->{$user} = $user;
-    }
-    
+    $user->add_once_to__unfinished_comics( $self );
+    $arts->{$user} = $user;
 
     if( $self->is_complete ) {
         for my $thing ( $self->get_app, values %$arts) {
             $thing->remove_from__unfinished_comics( $self );
-            
-            my $finished = $thing->get_finished_comics;
-        
-            my $newentry = $self->store->create_container( 'SPUC::LinkedListNode', {
-                item => $self,
-                                                           } );
-            if( $finished ) {
-                $finished->setprev( $newentry, 'recent' );
-                $newentry->setnext( $finished, 'recent' );
-            }
-            $thing->set_finished_comics( $newentry );
+            my $fin = $thing->get_finished_comics([]);
+            unshift @$fin, $self;
         }
         return ('comic was finished','');
     }

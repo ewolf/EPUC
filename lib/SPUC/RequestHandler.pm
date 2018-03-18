@@ -44,7 +44,6 @@ sub note {
 
     my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
     my $tdis = sprintf( "[%02d/%02d/%02d %02d:%02d]", $year%100,$mon+1,$mday,$hour,$min );
-
     my $msg = "$tdis $txt - ".( $user ? $user->_display : '?' );
     my $log = $app->get_log([]);
     print $logfh "$msg\n";
@@ -141,7 +140,6 @@ sub handle {
     my $sessions = $root->get__sessions({});
     my( $user, $sess, $err, $msg );
     my $action = $params->{action} || '';
-
     # see if the session is attached to a user. If not
     # then create a default unlogged in "session".
     if( $sess_id ) {
@@ -149,30 +147,24 @@ sub handle {
         if( $sess ) {
             $user = $sess->get_user;
             unless( $user ) {
-                note( "invalid sessions (no user) $sess_id", 4 );
+                note( "invalid sessions (no user) $sess_id", $user );
+                undef $sess_id;
             }
         } else {
-            note( "session not found for $sess_id", 4 );
+            note( "session not found for $sess_id", $user );
+            undef $sess_id;
         }
     }
+    
     unless( $sess ) {
         $sess = $root->get_default_session;
     }
 
 
-    if( $path =~ m~^/comic~ ) {
-
-    }
-
-
-    elsif( $path =~ m~^/artist~ ) {
-
-    }
-
-    elsif( $path =~ m~^/logout~ ) {
+    if( $path =~ m~^/logout~ ) {
+        undef $sess_id;
+        delete $sessions->{$sess_id};
         if( $user ) {
-            delete $sessions->{$sess_id};
-            undef $sess_id;
             undef $user;
             $msg = "Logged out";
         }
@@ -193,7 +185,7 @@ sub handle {
         my $em = $params->{em};
 
         # see if the account or email is already registered
-        if( $emails->{$em} ) {
+        if( $emails->{lc($em)} ) {
             $err = 'email already registered';
         }
         elsif( $unames->{lc($un)} ) {
@@ -242,7 +234,7 @@ sub handle {
             $user->set__session( $sess );
 
             $unames->{lc($un)} = $user;
-            $emails->{$em} = $user;
+            $emails->{lc($em)} = $user;
         }
     } #register
 
@@ -358,6 +350,7 @@ sub handle {
             $sess->set_last_id( $sess_id );
         } else {
             $err = 'login failed';
+            undef $user;
         }
     } #login
 
@@ -383,7 +376,7 @@ sub handle {
                     $user->set__playing(undef);
                     $comic->set__player( undef );
                 }
-                elsif( (my $fh = $uploader->fh('avup')) ) {
+                elsif( (my $fh = $uploader->fh('uppanel')) ) {
                     my( $ext ) = ( $fn =~ /\.([^.]+)$/ );
                     if( $ext =~ /^(png|jpeg|jpg|gif)$/ ) {
                         my $img = $store->create_container( 'SPUC::Image',
@@ -401,6 +394,9 @@ sub handle {
                         $err = "avatar file format not recognized";
                     }
                 } #file up
+                else {
+                    print STDERR Data::Dumper->Dump(["YIP"]);
+                }
             } #if comic
         } #if upload to panel
         elsif( $action eq 'caption-picture' ) {
@@ -425,50 +421,19 @@ sub handle {
     } #play
 
     # start new comic
-    elsif( $path =~ m~^/start~ && $user ) {
+    elsif( $path =~ m~^/start~ && $user && $action eq 'start-comic' ) {
         ( $msg, $err ) = $app->begin_strip( $user, $params->{start} );
-        # start a comic object
-        # attach it to the creator
-        # attach it to the free comics
     }
 
-    # view recent comics the default
-    else { # read
-        $params->{sort} ||= 'recent'; #yeah, I know..side effect
-        my $start_comic;
-        if( $user ) {
-            my $cid = $params->{comic};
-            if( $cid ) {
-                $start_comic = $store->_fetch( $cid );
-                unless( $start_comic && $start_comic->get_artists->{$user} ) {
-                    undef $start_comic;
-                }
-            }
-            if( $path =~ m~/mycomics~ ) {
-                $start_comic //= $user->get_finished_comics;
-            }
-            elsif( $path =~ m~/mypending~ ) {
-                $start_comic //= $user->get__unfinished_comics;
-            }
-            $start_comic //= $app->get_finished_comics;
-        } else {
-            my $cid = $params->{comic};
-            if( $cid ) {
-                $start_comic = $store->_fetch( $cid );
-                unless( $start_comic && $start_comic->is_complete ) {
-                    undef $start_comic;
-                }
-            } 
-            $start_comic //= $app->get_finished_comics;
-        }
+    elsif( $path =~ m~^/comic~ ) {
 
-        my $comics;
-        if( $user && $path ) {
-            $comics = $user->get_finished_comics;
-        } else {
-            $comics = $app->get_finished_comics;
-        }
     }
+
+
+    elsif( $path =~ m~^/artist~ ) {
+
+    }
+
     
     if( $err ) {
         note( $err, $user );

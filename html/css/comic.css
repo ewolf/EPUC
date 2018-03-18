@@ -43,7 +43,16 @@ div.picture {
     background-color:white;
     border: solid 1px;
 }
+a.comic {
+    text-decoration: none;
+    color: black;
+}
+a.comic:hover {
+    color: black;
+}
+
 .comic {
+    text-decoration: none;
     background-color: white;
     border: solid 1px grey;
     background-color: #DDD;

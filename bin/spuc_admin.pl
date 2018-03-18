@@ -3,8 +3,11 @@
 use strict;
 use warnings;
 
+use Data::Dumper;
+
 use Data::ObjectStore;
 use Digest::MD5;
+
 
 my $store = Data::ObjectStore::open_store( "/var/www/data/SPUC/" );
 my $root  = $store->load_root_container;
@@ -62,7 +65,6 @@ unless( $sess ) {
             $app => $app,
         },
                                       } );
-    print STDERR Data::Dumper->Dump([$sess->get_ids,"WUU"]);
     $root->set_default_session( $sess );
     my $sessions = $root->get__sessions({}); 
     $sessions->{0} = $sess;    
@@ -80,17 +82,38 @@ while( <STDIN> ) {
                     "? or help - this entry",
                     "defava - show default avatar image",
                     "defava <filename> - set default avatar image",
-                    "passwd <user> - set user password",
-                    "logs - list logs (unimplemented)",
-                    "users - list users",
-                    "admin user - make user into an admin",
-                    "unadmin user - make user into an admin",
                     "exit - end admin program",
-                    "other stuff - no idea yet",
+                    "passwd <user> - set user password",
+                    "users - list users",
+                    
+                    "admin <user> - make user into an admin",
+                    "logs - list logs (unimplemented)",
+
+                    "user <user> - details about user",
+
                     "" );
     }
-    elsif( /^\s*exit/ ) {
-        exit;
+    elsif( /^\s*admin\s+(\S+)/ ) {
+        my $un = $1;
+        my $unames = $root->get__users({});
+        my $user = $unames->{lc($un)};
+        if( $user ) {
+            $user->set__is_admin(1);
+            print "'$un' is now an admin.\n";
+        } else {
+            print "User '$un' not found\n";
+        }
+    }
+    elsif( /^\s*unadmin\s+(\S+)/ ) {
+        my $un = $1;
+        my $unames = $root->get__users({});
+        my $user = $unames->{lc($un)};
+        if( $user ) {
+            $user->set__is_admin(0);
+            print "'$un' is no longer an admin.\n";
+        } else {
+            print "User '$un' not found\n";
+        }
     }
     elsif( /^\s*defava\s+(\S+)/ ) {
         $defava->set__origin_file( $1 );
@@ -98,6 +121,9 @@ while( <STDIN> ) {
     }
     elsif( /^\s*defava/ ) {
         print "Default Avatar Image at "  . $defava->get__origin_file . "\n";
+    }
+    elsif( /^\s*exit/ ) {
+        exit;
     }
     elsif( /^\s*users/ ) {
         my $unames = $root->get__users({});
@@ -112,23 +138,33 @@ while( <STDIN> ) {
         }
         for my $un (@uns) {
             my $user = $unames->{$un};
-            printf "%${longest}s %s\n",$un, $user->get__email;
+            printf "%${longest}s %s %s\n",$un, $user->get__email, $user->get__is_admin ? 'admin-user' : '';
         }
     }
     elsif( /^\s*passwd\s+(\S+)/ ) {
         my $un = $1;
-        print "New Password for user $un :";
-        my $pw1 = <STDIN>;
-        chomp( $pw1 );
-        print "Repeat Password :";
-        my $pw2 = <STDIN>;
-        chomp( $pw2 );
-        if( $pw1 ne $pw2 ) {
-            print "Passwords don't match\n";
+        my $unames = $root->get__users({});
+        my $user = $unames->{lc($un)};
+        if( $user ) {
+            print "New Password for user $un :";
+            my $pw1 = <STDIN>;
+            chomp( $pw1 );
+            print "Repeat Password :";
+            my $pw2 = <STDIN>;
+            chomp( $pw2 );
+            if( $pw1 ne $pw2 ) {
+                print "Passwords don't match\n";
+            } elsif( length($pw1) < 4 ) {
+                print "Password too short\n";
+            } else {
+                $user->_setpw( $pw1 );
+                print "Password updated\n";
+            }
         } else {
-            print "Password updated\n";
+            print "User '$un' not found\n";
         }
-    }
+    } # password <user>
+    
     $store->save;
     print "SPUC>";
 }
