@@ -135,8 +135,7 @@
       Min Viable Product
       TODOS
       <ul>
-        <li>in progress comics</li>
-        <li>no finished comics message for bookmarked</li>
+        <li>time in comments</li>
         
         <li>link and page for email reset password (test)</li>
         <li>email reset password (test)</li>
@@ -151,7 +150,6 @@
         <li>admin deactivate comics - just remove from finished and put into deactivated</li>
         <li>admin edit comics</li>
         
-        <li>time in comments</li>
         <li>group chat</li>
 
         <li>email for account verification</li>
@@ -166,7 +164,7 @@
         <li>permissions/group datastore. Maybe a spuc admin group?</li>
         
         <li>spuc_admin.pl actions</li>
-        <li>log view for admin</li>
+
         <li>logging for all things done</li>
         
         <li>porting comics and users</li>
