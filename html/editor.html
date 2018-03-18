@@ -3,12 +3,23 @@
 
   <head>
     <style>
+       .brushsize {
+           border: solid 1px black;
+           margin: 7px auto;
+       }
+       .brushcontrol.picked {
+          border: solid 4px black;
+       }
+       .brushcontrol {
+           border: solid 1px black;
+           margin: 7px;
+       }
       .colorpick {
           border: solid 1px black;
           width: 40px;
           height: 40px;
-          cursor:pointer;
-          margin:7px auto;
+          cursor: pointer;
+          margin: 7px auto;
       }
       .colorpick.picked {
           border: double 6px white;
@@ -20,13 +31,20 @@
           width: 35px;
           height: 35px;
       }
-      .colorpicker {
+      .drawtool {
+          display:flex;
+      }
+      #canv {
+          border:solid 1px black;
+      }
+     .colorpicker,.brushpicker {
           align: middle;
           border:solid 1px black;
       }
       .circle.picked {
           -moz-border-radius: 25px;
           -webkit-border-radius: 25px;
+          border-radius: 25px;
       }
       .circle {
           width: 30px;
@@ -57,36 +75,36 @@
   
   <body>
     Drawing Tool Test
-    <div style="display:flex">
+    <div class="drawtool">
       <div>
-        <canvas id="canv" width="400" height="250" style="border:solid 1px black;">
+        <canvas id="canv" width="400" height="250">
         </canvas>
       </div>
       <div class="colorpicker">
         <div class="barbutton" id="undo">undo</div>
         <div class="barbutton" id="redo">redo</div>
         <div class="barbutton active" id="cleary">clear</div>
-        <div data-color="black" class="colorpick circle picked"></div>
-        <div data-color="white" class="colorpick white circle"></div>
+        <div data-color="black" class="colorpick circle"></div>
+        <div data-color="white" class="colorpick circle"></div>
         <div data-color="blue"  class="colorpick circle"></div>
         <div data-color="green" class="colorpick circle"></div>
         <div data-color="red"   class="colorpick circle"></div>
       </div>
       <div class="brushpicker">
         <div>brush size</div>
-        <div data-size="1" class="brushsize"></div>
-        <div data-size="2" class="brushsize"></div>
-        <div data-size="3" class="brushsize"></div>
-        <div data-size="5" class="brushsize"></div>
-        <div data-size="8" class="brushsize"></div>
-        <div data-size="13" class="brushsize"></div>
+        <div data-size="1" class="brushcontrol"></div>
+        <div data-size="4" class="brushcontrol"></div>
+        <div data-size="8" class="brushcontrol"></div>
+        <div data-size="13" class="brushcontrol"></div>
+        <div data-size="21" class="brushcontrol"></div>
+        <div data-size="34" class="brushcontrol"></div>
       </div>        
       <div>
 	    To Do and stuff
         <ul>
-          <li>brush size</li>
-          <li>save image</li>
+          <li>brush exiting and entering the area</li>
           <li>arbitrary color picker</li>
+          <li>save image</li>
           <li>transmit and store image</li>
           <li>brush shape</li>
         </ul>
@@ -98,12 +116,16 @@
 
 var c = document.getElementById("canv");
 var ctx = c.getContext("2d");
+var size = 8;
+var lastX, lastY;
+var color = 'black';
+var isDrawing = false;
+var pickedBrush;
 
 function setDrawingControls() {
     var undob = document.getElementById("undo");
     var redob = document.getElementById("redo");
 
-    var size = 8;
     var width = 400;
     var height = 250;
 
@@ -152,13 +174,15 @@ function setDrawingControls() {
 
     function startdraw(ev) {
         //save how things are
-        c.classList.add('drawing');
+        isDrawing = true;
+        lastX = ev.offsetX;
+        lastY = ev.offsetY;
         console.log( "Start draw" );
         draw( ev.offsetX, ev.offsetY );
     }
     function enddraw() {
-        if( c.classList.contains( 'drawing' ) ) {
-            c.classList.remove('drawing');
+        if( isDrawing ) {
+            isDrawing = false;
             ++paintpoint;
             undos[paintpoint+1] = ctx.getImageData( 0, 0, width, height );
             console.log( "End draw ul : " + undos.length + " pp " + paintpoint);
@@ -168,14 +192,23 @@ function setDrawingControls() {
     }
     var P2 = 2*Math.PI;
     function movem(ev) {
-        if( c.classList.contains( 'drawing' ) ) {
-            var delx = ev.movementX;
-            var dely = ev.movementY;
+        if( isDrawing ) {
+
             var x2 = ev.offsetX;
             var y2 = ev.offsetY;
-            var x1 = x2 - delx;
-            var y1 = y2 - dely;
-            var del = Math.abs(delx)+Math.abs(dely);
+            
+            var x1 = lastX;
+            var y1 = lastY;
+            
+            lastX = x2;
+            lastY = y2;
+            
+            var delx = Math.abs(x2 - x1);
+            var dely = Math.abs(y2 - y1);
+             
+            console.log( 'y1 ' + y1 + ', y2 ' + y2 + ', dely ' + dely );
+            
+            var del = delx+dely;
             var A = 0, B = 0, a = 0, b = 0;
             for( var i=0; i<del; i++ ) {
                 if( A > B ) {
@@ -218,7 +251,7 @@ function setDrawingControls() {
     }
     function draw(x,y) {
         ctx.beginPath();
-        ctx.arc( x - size/2, y - size/2, size, 0, P2, true );
+        ctx.arc( x, y, size, 0, P2, true );
         //ctx.fillRect( x - size/2, y - size/2, size, size );
         //        ctx.stroke();
         ctx.fill();
@@ -242,10 +275,58 @@ function setDrawingControls() {
 }
 setDrawingControls();
 
+
+
+function setSizeControls() {
+
+    var picks = document.getElementsByClassName('brushcontrol');
+    function changesize( ev ) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        for( var i=0; i<picks.length; i++ ) {
+            picks[i].classList.remove( 'picked' );
+            picks[i].firstChild.style['background-color'] = 'white';
+        }
+
+        this.classList.add( 'picked' );
+        pickedBrush = this.firstChild;
+        this.firstChild.style['background-color'] = color;
+        
+        size = this.getAttribute('data-size');
+        
+    }
+
+    for( var i=0; i<picks.length; i++ ) {
+        var pickout = picks[i];
+        var pickin = document.createElement('p');
+        pickout.appendChild( pickin );
+
+        var bsize = pickout.getAttribute('data-size');
+        if( bsize == size ) {
+            pickout.classList.add( 'picked' );
+            pickin.classList.add( 'picked' );
+            pickedBrush = pickin;
+        }
+        
+        pickin.classList.add( 'brushsize' );
+        
+        var rsize = (bsize/2)+'px';
+        
+        bsize += 'px';
+        pickin.style.width = bsize;
+        pickin.style.height = bsize;
+        pickin.style['-moz-border-radius'] = rsize;
+        pickin.style['-webkit-border-radius'] = rsize;
+        pickin.style['border-radius'] = rsize;
+        pickout.addEventListener('click', changesize );
+        pickout.addEventListener('touchstart', changesize );
+    }
+} //setSizeControls
+setSizeControls();
+
 function setColorControls() {
 
     var picks = document.getElementsByClassName('colorpick');
-    var color = 'black';
 
     function changecolor( ev ) {
         ev.preventDefault();
@@ -254,17 +335,28 @@ function setColorControls() {
             picks[i].classList.remove( 'picked' );
         }
         this.classList.add( 'picked' );
-        ctx.fillStyle = this.getAttribute('data-color');
-        
+        color = this.getAttribute('data-color');
+        ctx.fillStyle = color;
+        pickedBrush.style.backgroundColor = color;
     }
 
     for( var i=0; i<picks.length; i++ ) {
-        picks[i].style.backgroundColor = picks[i].getAttribute('data-color');
-        picks[i].addEventListener('click', changecolor );
-        picks[i].addEventListener('touchstart', changecolor );
+        var pick = picks[i];
+        var pickcolor = pick.getAttribute('data-color');
+        pick.style.backgroundColor = pickcolor;
+        if( pickcolor == color ) {
+            pickedBrush.style.backgroundColor = color;
+            pick.classList.add( 'picked' );
+        }
+        if( pickcolor == 'white' ) {
+            pick.classList.add( 'white' );
+        }
+        pick.addEventListener('click', changecolor );
+        pick.addEventListener('touchstart', changecolor );
     }
-}
+} //setColorControls
 setColorControls();
+
 
 //-->    </script>
   

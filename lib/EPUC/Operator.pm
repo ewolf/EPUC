@@ -74,7 +74,6 @@ sub _check_actions {
     my $subtemplate = $path_args->{'p'} || 'view';
     if( $subtemplate ) {
         if( ! $login && ( $subtemplate !~ /^(view|search|login|news|about)$/ ) ) {
-            print STDERR Data::Dumper->Dump(["SSESS EXPIRED ON ($subtemplate)"]);
             $subtemplate = 'login';
             if( $action ne 'login' ) {
                 $self->msg( "Your session has expired. Please Log In.");
@@ -87,27 +86,29 @@ sub _check_actions {
     my $avatar = $login ? $login->get_avatar : undef;
 
     if( $subtemplate eq 'login' ) {
-	if( $action eq 'login' ) {
-	    my( $un, $pw ) = ( $req->param('un'), $req->param('pw') );
-	    if( $un && $pw ) {
-		eval {
-		    undef $self->{login};
-		    $login = $app->login( $un, $pw );
-		    $self->{login} = $login;
-		};
-		if( $login ) {
-		    $self->msg( "Login successfull" );
-		    $self->redirect( '/spuc' );
-		    return;
-		}
-	    }
-	}
+        if( $action eq 'login' ) {
+            my( $un, $pw ) = ( $req->param('un'), $req->param('pw') );
+            if( $un && $pw ) {
+                eval {
+                    undef $self->{login};
+                    $login = $app->login( $un, $pw );
+                    $self->{login} = $login;
+                };
+                if( $login ) {
+                    $self->msg( "Login successfull" );
+                    $self->redirect( '/spuc' );
+                    return;
+                } else {
+                    $self->err( $@ );
+                }
+            }
+        }
     }
     elsif( $subtemplate eq 'logout' ) {
-	$self->logout;
+        $self->logout;
         $self->msg( 'logged out' );
-	$self->redirect( '/spuc' );
-	return;
+        $self->redirect( '/spuc' );
+        return;
     }
     if( $login ) {
         if( $login->get_is_admin ) {

@@ -11,4 +11,6 @@ use lib '/home/wolf/proj/Yote/YoteBase/lib';
 use lib '/home/wolf/proj/Yote/ServerYote/lib';
 use lib '/home/wolf/proj/EPUC/lib';
 
-print STDERR Data::Dumper->Dump(["HI THERE SETUP"]);
+print STDERR Data::Dumper->Dump(["HI THERE EPUC SETUP"]);
+
+1;
