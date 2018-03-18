@@ -403,8 +403,7 @@ sub handle {
                 $msg = "comleted comic";
             }
         }
-
-        my $comic = $user->get__playing || $app->find_comic_to_play( $user, $params->{skip} );
+        my $comic = $app->find_comic_to_play( $user, $params->{skip} );
         if( $comic ) {
             $user->set__playing( $comic );
             $comic->set__player( $user );

@@ -502,10 +502,12 @@ var uped = byId('upedit');
 uped.addEventListener('click', function(ev) {
     ev.preventDefault();
     ev.stopPropagation();
-    var upper = byId('upper');
-    var edform = byId('edform');
-    upper.value = c.toDataURL('image/png');
-    edform.submit();
+    if( confirm( 'really use this picture' ) ) {
+        var upper = byId('upper');
+        var edform = byId('edform');
+        upper.value = c.toDataURL('image/png');
+        edform.submit();
+    }
 } );
 var selimg = oneByClass( 'selava' );
 if( selimg ) {

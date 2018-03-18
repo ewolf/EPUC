@@ -19,13 +19,13 @@
       <button id="panelsub" type="submit">upload a picture</button>
     </form>
 
-    : include "editor.tx" { width => 500, height => 350, action => 'upload-panel', path => '/play', upname => 'uppanel' }
+    : include "editor.tx" { width => 900, height => 630, action => 'upload-panel', path => '/play', upname => 'uppanel' }
     
   : } else {
     <h2>Caption or <a class="skip" href="?path=/play&skip=1">skip</a></h2>
     <div class="col backer">
       <div class="col panelframe">
-        <img class="picture" src="<:$pan.get('picture').size(500,400):>">
+        <img class="picture" src="<:$pan.get('picture').size(900,630):>">
         <form id="caption" method="POST" action="?path=/play" class="row">
           <input type="hidden" name="action" value="caption-picture">
           <input type="text" name="caption" placeholder="your caption here" size="80">

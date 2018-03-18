@@ -38,7 +38,7 @@ sub begin_strip {
         artists     => { $artist => $artist },
         last_artist => $artist,
         panels      => [ $panel ],
-        needs       => 2, # TODO - remove for prod
+        needs       => 3, # TODO - remove for prod
         app         => $self,
                                           } );
     
@@ -54,10 +54,14 @@ sub find_comic_to_play {
     my( $self, $artist, $skip ) = @_;
     
     my $last_comic = $artist->get__playing;
-    if( ! $skip && $last_comic ) {
-        return $last_comic;
+    print STDERR Data::Dumper->Dump(["$skip,$last_comic buu"]);
+    if( $last_comic ) {
+        if( $skip ) {
+            $last_comic->set__player(undef);
+        } else {
+            return $last_comic;
+        }
     }
-    
     my $comics = $self->get__unfinished_comics;
 
     # comics are randomly sorted, other than comics with this artist are sorted last and

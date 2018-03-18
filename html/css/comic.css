@@ -8,8 +8,8 @@
     display: none;
 }
 .small img.picture {
-    width: 125px;
-    height: 89px;
+    width: 130px;
+    height: 91px;
 }
 .small div.picture {
     border: none;
@@ -29,7 +29,7 @@ div.picture {
     display: block;
     border: solid 1px grey;
     background-color: white;
-    width: 121px;
+    width: 126px;
     text-align: left;
     padding: 2px;
     align-content: middle;

@@ -1,0 +1,11 @@
+#starter {
+    border: solid black 2px;
+    font-size: large;
+    padding: 10px;
+}
+#startcomic {
+    flex-shrink: 1;
+}
+#poststart {
+    justify-content: space-evenly;
+}

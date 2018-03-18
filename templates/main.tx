@@ -28,12 +28,12 @@
         </a>
       
       : } else if $path != '/register' {
-      <form method="POST" action="?path=/login">
+      <form method="POST" action="?path=/login" class="col" id="loginblock">
         <span id="err"><:$err:></span>
         <input type="text" name="un" placeholder="user">
         <input type="password" name="pw" placeholder="password">
         <button type="submit">Log In</button>
-        <a href="?path=/register">register</a>
+        <a id="reglink" href="?path=/register">register</a>
       </form>
       : }
       
@@ -41,7 +41,10 @@
       
     </header>
     <nav class="row">
+      : my $comics = $app.get( 'finished_comics' )      
+      : if $comics.size > 0 {
       <a href="?path=/read&sort=recent">read comics</a>
+      : }
       : if $user {
       <a href="?path=/play">play</a>
       <a href="?path=/start">start a comic</a>
@@ -76,8 +79,10 @@
         : include "play.tx"
       : } else if $path == '/start' && $user {
         : include "start.tx"
-      : } else { #read is the default
+      : } else if $comics.size > 0 {
         : include "read.tx"
+      : } else {
+        : include "about.tx"
       : }
       
       

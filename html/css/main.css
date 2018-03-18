@@ -42,6 +42,7 @@ header aside img {
     align-items: center;
     background: url(/spuc.png) no-repeat;
     background-position-x: center;
+    background-position-y: center;
     flex-grow: 1;
     text-align: center;
     font-weight: bold;
@@ -69,4 +70,13 @@ input.error {
 .box {
     border: solid 4px gray;
     padding: 3px;
+}
+#loginblock {
+    padding-top: 1em;
+}
+#loginblock > * {
+    margin: 3px 0;
+}
+#reglink {
+    margin-top: 1em;
 }
