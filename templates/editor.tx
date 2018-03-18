@@ -7,7 +7,7 @@
         <input type="hidden" name="action" value="<: $action :>">
         <input type="hidden" name="ava-open" value="1">
         <input type="hidden" id="upper" name="<:$upname:>">
-        <button type="button" id="upedit">Upload</button>
+        <button type="button" id="upedit">Use this Picture</button>
       </form>
       <canvas id="canv">
       </canvas>

@@ -286,18 +286,12 @@ sub handle {
             }
         } #if upload
         elsif( $action eq 'delete-avatar' ) {
-            my $avaid = $params->{avatar};
             my $avas = $user->get__avatars;
-            my $selava = $user->get_avatar;
-            if( @$avas > 1 ) {
-                for my $ava (@$avas) {
-                    if( $ava->_id == $avaid && $ava->_id != $selava->_id ) {
-                        $user->remove_from__avatars( $ava );
-                        $user->add_to__deleted_avatars( $ava );
-                        $msg = 'deleted avatar';
-                        last;
-                    }
-                }
+            if( @$avas > 0 ) {
+                my $avaidx = $params->{avatar};
+                my( $delava ) = splice @$avas, $avaidx, 1;
+                $user->set__last_deleted_avatar( $delava );
+                $msg = 'deleted avatar';
             } else {
                 $err = 'cannot delete last avatar';
             }

@@ -10,7 +10,7 @@
   <section id="avatars" class="col">
     <div>
       <a href="#" class="toggleedit">
-        <img src="<:$selava.size(150,150):>" class="selava">
+        <img src="<:$selava.size(600,600):>" class="selava">
       </a>
       <p>You can have multiple avatars and select the one to show.</p>
       : if $params['ava-open'] {
@@ -20,13 +20,15 @@
       : } 
     </div>
       
-    <div id="avedit" class="<: $params['ava-open'] ? 'open' : '' :>">
+    <div id="avedit" class="<: $params['ava-open'] || $avas.size < 2 ? 'open' : '' :>">
+      : if $avas.size() > 0 {
       <h3>Select Avatar</h3>
       <a name="avatars">
       <div class="avatars row box">
         : for $avas -> $ava {
-          : if $ava != $selava {
-        <div class="avatar box">
+          : if  $ava != $selava {
+        <div class="avatar box">        ( <: $ava :>, <: $selava :> )
+
           <a href="?path=/profile&avatar=<:$~ava:>&action=select-avatar&ava-open=1#avatars">
             <img src="<:$ava.size(150,150):>">
           </a>
@@ -37,6 +39,7 @@
           : }
         : }
       </div>
+      : }
       <form method="POST" id="avup" action="?path=/profile" enctype="multipart/form-data" class="box">
         <h3>Upload Avatar</h3>
         <input type="hidden" name="action" value="upload-avatar">
@@ -48,7 +51,7 @@
       <h3>Draw Avatar</h3>
       <p>This is a copy of your selected avatar. The selected avatar will not be overwritten</p>
       <div id="ava_edit" class="box">
-        : include "editor.tx" { width => 150, height => 150, action => 'upload-avatar', path => '/profile', upname => 'avup' }
+        : include "editor.tx" { width => 600, height => 600, action => 'upload-avatar', path => '/profile', upname => 'avup' }
       </div>
     </div>
   </section>

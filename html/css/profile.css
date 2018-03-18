@@ -6,6 +6,8 @@
 .selava {
     margin-right: 15px;
     float: left;
+    width: 150px;
+    height: 150px;
 }
 .open#avedit {
     display: flex;
