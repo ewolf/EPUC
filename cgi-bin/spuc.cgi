@@ -81,5 +81,4 @@ print $q->header(
 #print "<html><body>FOO      🔍</body></html>"
 #my $out = $$content_ref;
 my $out = $$content_ref;
-print STDERR $out;
 print $out;

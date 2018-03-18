@@ -35,7 +35,7 @@
         <span id="err"><:$err:></span>
         <a href="?path=/recover_request">recover password</a>
         : } 
-        <input type="text" name="un" placeholder="user">
+        <input type="text" name="un" placeholder="user or email">
         <input type="password" name="pw" placeholder="password">
         <button type="submit">Log In</button>
         <a id="reglink" href="?path=/register">sign up</a>
@@ -73,7 +73,7 @@
         : include "play.tx"
       : } else if $path == '/start' && $user && ( $params.action != 'start-comic' || $err ) {
         : include "start.tx"
-      : } else if $path == '/recover_request' {
+      : } else if $path == '/recover_request' && ! $msg {
         : include "recover_request.tx"
       : } else if $path == '/recover' {
         : if $user {

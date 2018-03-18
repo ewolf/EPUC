@@ -19,11 +19,17 @@ use SPUC::Image;
 use SPUC::Panel;
 use SPUC::Session;
 
+our $basedir = "/var/www";
+our $datadir = "$basedir/data/SPUC/";
+our $lockdir = "$basedir/lock";
+our $imagedir = "$basedir/html/spuc/images";
+
 our $xslate = new Text::Xslate(
-    path => "/var/www/templates/SPUC",
+    path => "$basedir/templates/SPUC",
     input_layer => ':utf8',
     );
-our $store = Data::ObjectStore::open_store( "/var/www/data/SPUC/" );
+make_path( $datadir );
+our $store = Data::ObjectStore::open_store( $datadir );
 our $root  = $store->load_root_container;
 
 #
@@ -46,7 +52,9 @@ sub note {
     my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
     my $tdis = sprintf( "[%02d/%02d/%02d %02d:%02d]", $year%100,$mon+1,$mday,$hour,$min );
     my $msg = "$tdis $txt - ".( $user ? $user->_display : '?' );
-    my $log = $app->get_log([]);
+    # LOCK app _log
+    push @locks, lock( "LOG" );
+    my $log = $app->get__log([]);
     print $logfh "$msg\n";
     print STDERR "$msg\n";
     unshift @$log, "$msg";
@@ -121,6 +129,26 @@ sub handle_RPC {
     }
 } #handleRPC
 
+# returns locks for unlock
+sub lock {
+    my( @names ) = @_;
+    my @fhs;
+    make_path( $lockdir );
+        
+    for my $name (@names) {
+        open my $fh, '>', "$lockdir/$name";
+        flock( $fh, 2 ); #WRITE LOCK
+        push @fhs, $fh;
+    }
+    @fhs;
+}
+sub unlock {
+    my @fhs = shift;
+    for my $fh (@fhs) {
+        flock( $fh, 8 );
+    }
+}
+
 #
 # Input is the url path, parameters and the session id.
 #
@@ -138,12 +166,12 @@ sub handle {
     # use the new id creating feature in Data::Objectsore coupled with
     # the fixed  record store's atomicic id generation to get a file coordinated store
 
-    my $sessions = $root->get__sessions({});
-    my( $user, $sess, $err, $msg );
+    my( $user, $sess, $err, $msg, @locks );
     my $action = $params->{action} || '';
     # see if the session is attached to a user. If not
     # then create a default unlogged in "session".
     if( $sess_id ) {
+        my $sessions = $root->get__sessions({});
         $sess = $sessions->{$sess_id};
         if( $sess ) {
             $user = $sess->get_user;
@@ -164,6 +192,10 @@ sub handle {
 
     if( $path =~ m~^/logout~ ) {
         undef $sess_id;
+        # LOCK root _sessions
+        push @locks, lock( "SESSIONS" );
+        my $sessions = $root->get__sessions({});
+        
         delete $sessions->{$sess_id};
         if( $user ) {
             undef $user;
@@ -176,14 +208,16 @@ sub handle {
         # just do squishy for now and organically
         # grow this, dont yet force it. code can move
         # where it wants to
-
+        
+        # LOCK root _emails, _users, sessions
+        push @locks, lock( "SESSIONS", "EMAILS", "USERS" );
         my $emails = $root->get__emails({});
         my $unames = $root->get__users({});
 
         my $pw = $params->{pw};
         my $pw2 = $params->{pw2};
         my $un = encode( 'UTF-8', $params->{un} );
-        my $em = $params->{em};
+        my $em = encode( 'UTF-8',$params->{em} );
 
         # see if the account or email is already registered
         if( $emails->{lc($em)} ) {
@@ -191,6 +225,9 @@ sub handle {
         }
         elsif( $unames->{lc($un)} ) {
             $err = 'username already taken';
+        }
+        elsif( $un !~ /^\w+$/ ) {
+            $err = 'invalid username';
         }
         elsif( $pw ne $pw2 ) {
             $err = 'passwords dont match';
@@ -221,6 +258,9 @@ sub handle {
                                               } );
             $user->_setpw( $pw );
             my $found;
+            
+            my $sessions = $root->get__sessions({});
+
             until( $found ) {
                 $sess_id = int(rand(2**64));
                 $found = ! $sessions->{$sess_id};
@@ -258,7 +298,7 @@ sub handle {
                                                         _original_name => 'upload',
                                                         extension      => 'png',
                                                     });
-                my $destdir = "/var/www/html/spuc/images/avatars/$user";
+                my $destdir = "$imagedir/avatars/$user";
                 make_path( $destdir );
                 my $dest = "$destdir/$img.png";
                 open my $out, '>', $dest;
@@ -277,7 +317,7 @@ sub handle {
                                                             _original_name => $fn,
                                                             extension      => $ext,
                                                         });
-                    my $destdir = "/var/www/html/spuc/images/avatars/$user";
+                    my $destdir = "$imagedir/avatars/$user";
                     make_path( $destdir );
                     my $dest = "$destdir/$img.$ext";
                     $img->set__origin_file( $dest );
@@ -332,12 +372,18 @@ sub handle {
         my $un = encode( 'UTF-8', $params->{un} );
         my $pw = $params->{pw};
 
+        my $emails = $root->get__emails({});
         my $unames = $root->get__users({});
-        $user = $unames->{lc($un)} || $root->get_dummy_user;
+        my $uu = $unames->{lc($un)};
+        my $eu = $emails->{lc($un)};
+        $user =  $uu || $eu || $root->get_dummy_user;
 
         # dummy automatically fails _checkpw
         if( $user->_checkpw( $pw ) ) {
             my $found;
+            #LOCK root _sessions
+            push @locks, lock( "SESSIONS" );
+            my $sessions = $root->get__sessions({});
             until( $found ) {
                 $sess_id = int(rand(2**64));
                 $found = ! $sessions->{$sess_id};
@@ -366,7 +412,7 @@ sub handle {
                                                             _original_name => 'upload',
                                                             extension      => 'png',
                                                         });
-                    my $destdir = "/var/www/html/spuc/images/comics/$comic";
+                    my $destdir = "$imagedir/comics/$comic";
                     make_path( $destdir );
                     my $dest = "$destdir/$img.png";
 
@@ -386,7 +432,7 @@ sub handle {
                                                                 _original_name => $fn,
                                                                 extension      => $ext,
                                                             });
-                        my $destdir = "/var/www/html/spuc/images/comics/$comic";
+                        my $destdir = "$imagedir/comics/$comic";
                         make_path( $destdir );
                         my $dest = "$destdir/$img.$ext";
                         $img->set__origin_file( $dest );
@@ -426,17 +472,18 @@ sub handle {
     # start new comic
     elsif( $path =~ m~^/start~ && $user && $action eq 'start-comic' ) {
         my $start = encode( 'UTF-8', $params->{start});
+        # LOCK app _unfinished_comics
         ( $msg, $err ) = $app->begin_strip( $user, $start );
     }
 
-    elsif( $path =~ m~^/recover_request~ ) {
+    elsif( $path =~ m~^/recover_request~ && $action eq 'request-link' ) {
         my $unorem = encode( 'UTF-8', $params->{unorem});
         my $emails = $root->get__emails({});
         my $unames = $root->get__users({});
         my $emu = $emails->{lc($unorem)};
         my $umu = $unames->{lc($unorem)};
         $user = $umu || $emu;
-        $user && $user->_send_reset_request;
+        $user && $app->_send_reset_request($user);
         $msg = "sent reset request";
     }
 

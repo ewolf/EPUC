@@ -14,10 +14,5 @@ use base 'Data::ObjectStore::Container';
 #   created - when this was created
 #
 #
-sub note {
-    my $self = shift;
-    my $c = $self->get_caption;
-    `echo '$c' > /tmp/wuu_$self`;
-}
 
 1;

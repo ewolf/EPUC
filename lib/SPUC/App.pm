@@ -43,7 +43,7 @@ sub begin_strip {
                                           } );
     
     $artist->add_to__unfinished_comics( $comic );
-    
+
     $self->add_to__unfinished_comics( $comic );
 
     return ("started comic",'');
@@ -82,7 +82,7 @@ sub find_comic_to_play {
 
 sub _send_reset_request {
     my( $self, $user ) = @_;
-    return;
+
     my $resets = $self->get__resets({});
     
     my $restok;
@@ -130,7 +130,7 @@ END
 
     my $msg = MIME::Lite->new(
         From => 'noreply@madyote.com',
-        To   => $self->get__email,
+        To   => $user->get__email,
         Subject => 'SPUC Password Reset',
         Type => 'multipart/alternative',
         );
