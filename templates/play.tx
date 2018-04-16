@@ -17,7 +17,13 @@
       <button id="panelsub" type="submit">upload a picture</button>
     </form>
 
-    : include "editor.tx" { width => 900, height => 630, action => 'upload-panel', path => '/play', upname => 'uppanel' }
+    : my $saved = $user.get( '_saved_panel' );
+    : if $saved {
+      <script>
+        initimage = "<:$saved.size(900,630):>";
+      </script>
+    : }
+    : include "editor.tx" { width => 900, height => 630, action => 'upload-panel', save_action => 'save-panel', path => '/play', upname => 'uppanel' }
     
   : } else {
     <h2>Caption or <a class="skip" href="?path=/play&skip=1">skip</a></h2>

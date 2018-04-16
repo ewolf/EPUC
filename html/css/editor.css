@@ -144,4 +144,11 @@ span.colorpick {
     margin: 1em;
     border: solid black 1px;
 }
-    
+.buttons button {
+    font-size: larger;
+    margin: 2px;
+    padding: 3px;
+}
+#saveform {
+    margin-left: 1em;
+}

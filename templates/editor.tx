@@ -5,22 +5,30 @@
   <div class="drawtool">
     
     <div class="canv col">
-      
-      <form id="edform" method="POST"
-            action="?path=<: $path :>"
-            enctype="application/x-www-form-urlencoded">
-        <input type="hidden" name="action" value="<: $action :>">
-        <input type="hidden" name="ava-open" value="1">
-        <input type="hidden" id="upper" name="<:$upname:>">
-        <button type="button" id="upedit">Use this Picture</button>
-      </form>
-      
-      <form id="autosave" method="POST"
-            action="?path=<: $path :>"
-            enctype="application/x-www-form-urlencoded">
-        <input type="hidden" name="action" value="autosave">
-        <input type="hidden" id="autoupper" name="autosave">
-      </form>
+
+      <div class="row buttons">
+        
+        <form id="edform" method="POST"
+              action="?path=<: $path :>"
+              enctype="application/x-www-form-urlencoded">
+          <input type="hidden" name="action" value="<: $action :>">
+          <input type="hidden" name="ava-open" value="1">
+          <input type="hidden" id="upper" name="<:$upname:>">
+          <button type="button" id="use-picture" class="big">Use this Picture</button>
+        </form>
+        
+        : if $save_action {
+        <form id="saveform" method="POST"
+              action="?path=<: $path :>"
+              enctype="application/x-www-form-urlencoded">
+          <input type="hidden" name="action" value="<: $save_action :>">
+          <input type="hidden" name="ava-open" value="1">
+          <input type="hidden" id="upper-save" name="<:$upname:>">
+          <button type="button" id="save-picture" class="big">Save Picture to finish later</button>        
+        </form>
+        : }
+        
+      </div>
 
       
       <canvas id="canv">
@@ -110,6 +118,6 @@
 </div>
 <script>
   var width = <: $width :>;
-  var height = <: $height :>;
+    var height = <: $height :>;
 </script>
-<script src='/spuc/js/editor.js'></script>
+<script src="/spuc/js/editor.js"></script>

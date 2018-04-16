@@ -3,9 +3,6 @@
     font-size: larger;
     margin-left: 2em;
 }
-.invisava {
-    display:none;
-}
 .frame {
     background-color: white;
     width: 150px;
@@ -25,6 +22,9 @@
     justify-content: space-evenly;
     
     background-color: #EAEEEB;
+}
+.avatars img {
+    background-color: white;
 }
 .avatars .selected {
     border: double 5px black;

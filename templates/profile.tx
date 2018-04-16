@@ -15,7 +15,9 @@
         <div class="frame">
           <img src="<:$selava.size(150,150):>" class="selava">
         </div>
-        <img class="invisava" src="<:$selava.size(600,600):>">
+        <script>
+          initimage = '<:$selava.size(600,600):>';
+        </script>
       </a>
       : if $params['ava-open'] {
       <a id="avatoggle" class="toggleedit" href="?path=/profile#avatars">Close Avatar Picker</a>

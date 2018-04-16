@@ -4,19 +4,35 @@
   : for $app.artists -> $user {
    <span class="artist row">
      <img src="<:$user.get('avatar').size(150,150):>">
-     <div class="col">
-       <p>
-         <span class="about">About <:$user.get('display_name'):> :
-         </span>
-       </p>
-       <p>
-         <span class="bio"><: $user.get('bio') :></span>
-       </p>
-       <a href="?path=/artist&artist=<:$user.get('display_name'):>">comics</a>
-       <span>Email : <: $user.get('_email') :></span>
-       <span>Last logged in : <: $app.format_time( $user.get('_login_time')) :></span>
-       <span>Last activity : <: $app.format_time( $user.get('_active_time')) :></span>
-       <span>Email : <: $user.get('_email') :></span>
+     <div class="row">
+       <div class="col">
+         <p>
+           <span class="about">About <:$user.get('display_name'):> :
+           </span>
+         </p>
+         <p>
+           <span class="bio"><: $user.get('bio') :></span>
+         </p>
+         <a href="?path=/artist&artist=<:$user.get('display_name'):>">comics</a>
+         <span>Email : <: $user.get('_email') :></span>
+         <span>Last logged in : <: $app.format_time( $user.get('_login_time')) :></span>
+         <span>Last activity : <: $app.format_time( $user.get('_active_time')) :></span>
+         <span>Email : <: $user.get('_email') :></span>
+       </div>
+       <div class="col">
+         : my $comic = $user.get('_playing');
+         : if $comic {
+         <span>Playing</span>
+           :  my $pan = $comic.last_panel;
+           :  if $pan.get('type') == 'caption' {
+         <p id="caption">&quot;<: $pan.get('caption') :>&quot;</p>
+           : } else {
+         <img class="picture" src="<:$pan.get('picture').size(450,315):>">
+           : }
+         : } else {
+        <span>Not Playing a Comic</span>
+         : }
+       </div>
      </div>
    </span>
 : }

@@ -433,60 +433,58 @@ sub _handle {
 
     # play
     elsif( $path =~ m~^/play~ && $user ) {
-        if( $action eq 'caption-picture' || $action eq 'upload-panel' ) {
-            my $comic = $user->get__playing;
+        my $comic = $user->get__playing;
+        if( $comic && ($action eq 'caption-picture' || $action eq 'upload-panel') ) {
             if( $action eq 'upload-panel' ) {
-                if( $comic ) {
-                    my $fn = $params->{uppanel};
-                    if( $fn =~ /^data:image\/png;base64,(.*)/ ) {
-                        my $png = MIME::Base64::decode( $1 );
+                my $fn = $params->{uppanel};
+                if( $fn =~ /^data:image\/png;base64,(.*)/ ) {
+                    my $png = MIME::Base64::decode( $1 );
+                    my $img = $self->{store}->create_container( 'SPUC::Image',
+                                                                {
+                                                                    _original_name => 'upload',
+                                                                    extension      => 'png',
+                                                                });
+                    my $destdir = "$self->{imagedir}/comics/$comic";
+                    make_path( $destdir, { group => $self->{group}, mode => 0775 } );
+                    my $dest = "$destdir/$img.png";
+
+                    open my $out, '>', $dest;
+                    print $out $png;
+                    close $out;
+                    $img->set__origin_file( $dest );
+                    my( $msg, $err ) = $comic->add_picture( $img, $user );
+                    $self->msg( $msg );
+                    $self->err( $err );
+                    $self->note( "drew panel", $user );
+                    $user->set__playing(undef);
+                    $comic->set__player( undef );
+                }
+                elsif( (my $fh = $uploader->fh('uppanel')) ) {
+                    my( $ext ) = ( $fn =~ /\.([^.]+)$/ );
+                    if( $ext =~ /^(png|jpeg|jpg|gif)$/ ) {
                         my $img = $self->{store}->create_container( 'SPUC::Image',
-                                                            {
-                                                                _original_name => 'upload',
-                                                                extension      => 'png',
-                                                            });
+                                                                    {
+                                                                        _original_name => $fn,
+                                                                        extension      => $ext,
+                                                                    });
                         my $destdir = "$self->{imagedir}/comics/$comic";
                         make_path( $destdir, { group => $self->{group}, mode => 0775 } );
-                        my $dest = "$destdir/$img.png";
-
-                        open my $out, '>', $dest;
-                        print $out $png;
-                        close $out;
+                        my $dest = "$destdir/$img.$ext";
                         $img->set__origin_file( $dest );
+                        copy( $fh, $dest );
                         my( $msg, $err ) = $comic->add_picture( $img, $user );
                         $self->msg( $msg );
                         $self->err( $err );
-                        $self->note( "drew panel", $user );
+                        $self->note( "uploaded panel", $user );
                         $user->set__playing(undef);
                         $comic->set__player( undef );
+                    } else {
+                        $self->err( "avatar file format not recognized" );
                     }
-                    elsif( (my $fh = $uploader->fh('uppanel')) ) {
-                        my( $ext ) = ( $fn =~ /\.([^.]+)$/ );
-                        if( $ext =~ /^(png|jpeg|jpg|gif)$/ ) {
-                            my $img = $self->{store}->create_container( 'SPUC::Image',
-                                                                {
-                                                                    _original_name => $fn,
-                                                                    extension      => $ext,
-                                                                });
-                            my $destdir = "$self->{imagedir}/comics/$comic";
-                            make_path( $destdir, { group => $self->{group}, mode => 0775 } );
-                            my $dest = "$destdir/$img.$ext";
-                            $img->set__origin_file( $dest );
-                            copy( $fh, $dest );
-                            my( $msg, $err ) = $comic->add_picture( $img, $user );
-                            $self->msg( $msg );
-                            $self->err( $err );
-                            $self->note( "uploaded panel", $user );
-                            $user->set__playing(undef);
-                            $comic->set__player( undef );
-                        } else {
-                            $self->err( "avatar file format not recognized" );
-                        }
-                    } #file up
-                    else {
-                        $self->note( "upload called without anything to upload", $user );
-                    }
-                } #if comic
+                } #file up
+                else {
+                    $self->note( "upload called without anything to upload", $user );
+                }
             } #if upload to panel
             elsif( $action eq 'caption-picture' ) {
                 my $cap = encode( 'UTF-8', $params->{caption});
@@ -497,10 +495,11 @@ sub _handle {
                 $user->set__playing(undef);
                 $comic->set__player( undef );
             }
+
             if( $comic->is_complete ) {
                 my $arts = $comic->get_artists;
                 $self->lock( "UNFINISHED" );
-		$self->note( "completed comic", $user );
+                $self->note( "completed comic", $user );
                 for my $thing ( $self->{app}, values %$arts) {
                     $thing->remove_from__unfinished_comics( $comic );
                     my $fin = $thing->get_finished_comics([]);
@@ -522,15 +521,43 @@ sub _handle {
             }
         } #if action played
 
-        # find new comic
-        $self->lock( "COMIC" );
-        my $comic = $self->{app}->find_comic_to_play( $user, $params->{skip} );
-        if( $comic ) {
-            $user->set__playing( $comic );
-            $comic->set__player( $user );
-            $self->msg( "found comic to play" );
-        } else {
-            $self->msg( "no comic found. start one?" );
+        if( $action eq 'save-panel' && $comic ) {
+            my $fn = $params->{uppanel};
+
+            if( $fn =~ /^data:image\/png;base64,(.*)/ ) {
+                my $png = MIME::Base64::decode( $1 );
+                my $img = $self->{store}->create_container( 'SPUC::Image',
+                                                            {
+                                                                _original_name => 'upload',
+                                                                extension      => 'png',
+                                                            });
+                my $destdir = "$self->{imagedir}/saves/$user";
+                make_path( $destdir, { group => $self->{group}, mode => 0775 } );
+                my $dest = "$destdir/$img.png";
+                
+                open my $out, '>', $dest;
+                print $out $png;
+                close $out;
+                $img->set__origin_file( $dest );
+                
+                $user->set__saved_panel( $img );
+                $self->note( "saved panel", $user );
+                $self->msg( "saved picture for later" );
+                $path = '/';
+            }
+        } #if save for later
+
+        else {
+            # find new comic
+            $self->lock( "COMIC" );
+            $comic = $self->{app}->find_comic_to_play( $user, $params->{skip} );
+            if( $comic ) {
+                $user->set__playing( $comic );
+                $comic->set__player( $user );
+                $self->msg( "found comic to play" );
+            } else {
+                $self->msg( "no comic found. start one?" );
+            }
         }
     } #play
 
@@ -556,7 +583,7 @@ sub _handle {
         $user && $self->{app}->_send_reset_request($user);
         $self->msg( "sent reset request" );
         $self->note( "requested reset", $user );
-	undef $user;
+        undef $user;
     }
 
     elsif( $path =~ m~^/recover~ ) {
@@ -652,7 +679,7 @@ sub _handle {
                                } );
     return \$txt, 200, $sess_id;
 
-} #handle
+} #_handle
 
 1;
 

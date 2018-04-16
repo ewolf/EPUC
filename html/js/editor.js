@@ -395,17 +395,6 @@ function setDrawingControls() {
     canvas.addEventListener('touchmove', movet );
     canvas.addEventListener('touchend', enddraw );
 
-/*
-    setInterval( () => {
-        if( ! isSaved ) {
-            var upper = byId('autoupper');
-            var edform = byId('autosave');
-            upper.value = canvas.toDataURL('image/png');
-            edform.submit();
-            isSaved = true;
-        }
-    }, 260000 );
-  */  
 }
 setDrawingControls();
 
@@ -510,21 +499,34 @@ function setColorControls() {
 } //setColorControls
 setColorControls();
 
-var uped = byId('upedit');
-uped.addEventListener('click', function(ev) {
+var user = byId('use-picture');
+user.addEventListener('click', ev => {
     ev.preventDefault();
     ev.stopPropagation();
     if( confirm( 'really use this picture' ) ) {
         var upper = byId('upper');
-        var edform = byId('edform');
+        var upform = byId('edform');
         upper.value = canvas.toDataURL('image/png');
-        edform.submit();
+        upform.submit();
     }
 } );
 
+var user = byId('save-picture');
+user.addEventListener('click', ev => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    var upper = byId('upper-save');
+    var upform = byId('saveform');
+    upper.value = canvas.toDataURL('image/png');
+    upform.submit();
+} );
 
 
-var selimg = oneByClass( 'invisava' );
-if( selimg ) {
-    ctx.drawImage( selimg, 0, 0 );
+if( window.initimage ) {
+    var i = new Image();
+    i.src = initimage;
+    i.onload = function() {
+        ctx.drawImage( i, 0, 0 );
+    }
 }
+

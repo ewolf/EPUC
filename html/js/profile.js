@@ -6,6 +6,7 @@
 var openedits = byClass( 'toggleedit' );
 var avedit = byId( 'avedit' );
 
+
 openedits.forEach( function( oe ) {
     oe.addEventListener( 'click', function(ev) {
         ev.preventDefault();
@@ -17,6 +18,7 @@ openedits.forEach( function( oe ) {
             }
         } else {
             avedit.classList.add( 'open' );
+
             if( this.textContent == 'Manage Avatars' ) {
                 this.textContent = 'Close';
             }
