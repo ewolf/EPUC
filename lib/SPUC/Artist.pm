@@ -7,8 +7,10 @@ use Data::ObjectStore;
 use base 'Data::ObjectStore::Container';
 
 use Digest::MD5;
+use File::Copy;
 use MIME::Lite;
 
+use SPUC::Image;
 #
 # Fields :
 #
@@ -39,6 +41,41 @@ use MIME::Lite;
 #  _viewing_source  - 'recent', 'top', 'bookmarks', 'mine', 'inprogress', etc...
 #  _playing - comic object currently playing
 #
+sub _init {
+    my $self = shift;
+    for my $bak (qw( comic avatar  )) {
+        for my $idx (1..2) {
+            my $var = "${bak}_backup_$idx";
+            my $img = $self->store->create_container( 'SPUC::Image',
+                                                        {
+                                                            _original_name => 'upload',
+                                                            extension      => 'png',
+                                                        });
+            $self->set( $var, $img );
+        }
+    }
+} #_init
+
+sub _backup {
+    my( $self, $png, $target, $handler ) = @_;
+
+    my $img1 = $self->get( "${target}_backup_1" );
+    my $img2 = $self->get( "${target}_backup_2" );
+    if( $img1 && $img2 ) {
+        my $destdir = "$handler->{imagedir}/${target}baks/$self";
+        make_path( $destdir, { group => $handler->{group}, mode => 0775 } );
+        
+        my $dest = "$destdir/$img1.png";
+
+        my $gonner = "$destdir/$img2.png";
+        move( $dest, $gonner );
+        
+        open my $out, '>', $dest;
+        print $out $png;
+        close $out;
+    }
+} #_backup
+
 sub _setpw {
     my( $self, $pw ) = @_;
     my $un = $self->get__login_name;

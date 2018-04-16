@@ -15,10 +15,6 @@
 }
 
 /*  COLOR CREATOR */
-#composite {
-//    display: none;
-}
-
 .colorslide {
     width:256px;
     margin:7px 0;
@@ -142,3 +138,10 @@ span.colorpick {
     cursor:pointer;
     color:black;
 }
+.display {
+    width:40px;
+    height:40px;
+    margin: 1em;
+    border: solid black 1px;
+}
+    

@@ -195,6 +195,11 @@ sub _handle {
                 $self->note( "invalid sessions (no user) $sess_id", $user );
                 undef $sess_id;
             }
+            if( ( time - $user->get__login_time ) > 3600*24*30 ||
+                ( time - $user->get__active_time ) > 3600*24*3 ) {
+                $self->err( 'session expired' );
+                $self->note( "session expired", $user );           
+            }
         } else {
             $self->note( "session not found for $sess_id", $user );
             undef $sess_id;
@@ -310,6 +315,13 @@ sub _handle {
             $self->note( "selected avatar", $user );
         }
 
+        elsif( $action eq 'autosave' ){ 
+            my $fn = $params->{autoupper};
+            if( $fn =~ /^data:image\/png;base64,(.*)/ ) {
+                my $png = MIME::Base64::decode( $1 );
+                $user->_backup( $png, 'avatar', $self );
+            }
+        }
         elsif( $action eq 'upload-avatar' ) {
             my $fn = $params->{avup};
             if( $fn =~ /^data:image\/png;base64,(.*)/ ) {
@@ -409,6 +421,7 @@ sub _handle {
             delete $sessions->{$sess->get_last_id};
             $sessions->{$sess_id} = $sess;
             $sess->set_last_id( $sess_id );
+            $user->set__login_time( time );
         } else {
             $self->err( 'login failed' );
             undef $user;
