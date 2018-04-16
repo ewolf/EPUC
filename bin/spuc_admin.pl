@@ -43,24 +43,6 @@ unless( $app ) {
                                      } );
     $root->set_SPUC( $app );
 }
-if(0){
-for my $user (values %{ $app->get__users({}) } ) {
-    for my $bak (qw( comic avatar  )) {
-        for my $idx (1..2) {
-            my $var = "${bak}_backup_$idx";
-            my $img = $user->get( $var );
-            unless( $img ) {
-                $img = $self->{store}->create_container( 'SPUC::Image',
-                                                         {
-                                                             _original_name => 'upload',
-                                                             extension      => 'png',
-                                                         });
-                $user->set( $var, $img );
-            }
-        }
-    }
-}
-}
 
 #
 # set the default avatar

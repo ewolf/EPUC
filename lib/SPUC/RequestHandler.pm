@@ -462,6 +462,7 @@ sub _handle {
                     $user->set__playing(undef);
                     $comic->set__player( undef );
                     $user->set__saved_panel( undef );
+                    $user->get__saved_comic( $comic );
                 }
                 elsif( (my $fh = $uploader->fh('uppanel')) ) {
                     my( $ext ) = ( $fn =~ /\.([^.]+)$/ );

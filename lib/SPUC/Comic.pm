@@ -96,4 +96,17 @@ sub add_panel {
     return ('added panel','');
 } #add_panel
 
+sub is_reserved {
+    my $self = shift;
+    my $player = $self->get__player;
+    if( $player ) {
+        my $at = $player->get__active_time;
+        if( $at == 0 ) {
+            $self->set__player( undef );
+            $player->set__playing( undef );
+        }
+    }
+    0;
+}
+
 1;
