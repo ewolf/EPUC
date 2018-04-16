@@ -16,7 +16,7 @@
   : } else if $path == '/mine' {
    <h1>your finished comics</h1>
   : } else if $path == '/artist' {
-   <h1>comics of <: $params.artist :></h1>
+   <h1><: $params.artist :></h1>
   : } else {
    <h1>recent comics</h1>
    : }
@@ -100,13 +100,13 @@
 <div class="artist">
   <div class="row">
     <img src="<:$artist.get('avatar').size(150,150):>">
-    <p>
-      <span class="about">About <:$artist.get('display_name'):> :
-      </span>
+    <div class="col">
+      <span class="about">About :</span>
       <span class="bio"><: $artist.get('bio') :></span>
-    </p>
+    </div>
   </div>
 </div>
+<h2>Comics</h2>
 : }
 
 

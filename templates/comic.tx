@@ -23,13 +23,13 @@
            <img src="<:$panel.get('artist').get('avatar').size(50,50):>">
            <: $panel.get('artist').get('display_name') :>
         </a>
-        <span><: $panel.get('kudos') :>
+        <div><: $panel.get('kudos') :>
         : if $user.has_kudo_for( $panel ) || $user == $panel.get('artist') {
           <span class="kudo">&#x2764;</span>
         : } else {
           <a href="?path=<: $path :>&idx=<: $startidx :>&single=1&panel=<:$~panel:>&sort=<:$params.sort:>&action=kudo<: $artist ? '&artist=' ~ $artist.get('display_name') : '':>" class="kudo">&#x1F49B;</a>
         : }
-        </span>
+        </div>
       </div>
     : }
 

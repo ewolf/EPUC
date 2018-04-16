@@ -25,6 +25,10 @@ sub artist {
     $self->get__users->{$name};
 } #artist
 
+sub artists {
+    [sort { $a->get__login_name cmp $b->get__login_name } values %{shift->get__users}];
+}
+
 sub begin_strip {
     my( $self, $artist, $caption ) = @_;
 
@@ -55,9 +59,10 @@ sub begin_strip {
                                           } );
     
     $artist->add_to__unfinished_comics( $comic );
-    $artist->get__comics({})->{$comic} = $comic;
+    $artist->add_once_to__all_comics( $comic );
 
     $self->add_to__unfinished_comics( $comic );
+    $self->add_to__all_comics( $comic );
 
     return ("started comic",'');
     

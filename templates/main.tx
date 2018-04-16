@@ -53,6 +53,7 @@
       : my $comics = $app.get( 'finished_comics' )      
       : if $comics.size() > 0 {
       <a href="?path=/read&sort=recent">read comics</a>
+      <a href="?path=/artists">artists</a>
       : }
       : if $user {
       <a href="?path=/play">play</a>
@@ -68,6 +69,8 @@
       <a href="?path=/profile">my profile</a>
       <a href="?path=/logout">log out</a>
         : if $user.get('_is_admin') {
+      <a href="?path=/all_comics">all comics</a>
+      <a href="?path=/users">users</a>
       <a href="?path=/logs">logs</a>
         : }
       : }
@@ -107,11 +110,17 @@
           : include "read.tx" { comics => $user.get('_bookmarks') }
       : } else if $path == '/logs' && $user && $user.get('_is_admin') {
           : include "logs.tx"
+      : } else if $path == '/all_comics' && $user && $user.get('_is_admin') {
+          : include "read.tx" { comics => $app.get('_all_comics') }
+      : } else if $path == '/artists' {
+          : include "artists.tx"
+      : } else if $path == '/users' && $user && $user.get('_is_admin') {
+          : include "users.tx"
       : } else if $path == '/notices' && $user {
           : include "notices.tx"
       : } else if $path == '/comic' && $user {
           : my $ucomics = $user.get( '_comics' );
-          : include "read.tx" { comics => [$ucomics[$params.comic]] }
+          : include "read.tx" { comics => $user.get('_all_comics') }
       : } else if $path == '/artist' {
         : my $artist = $app.artist( $params.artist )
           

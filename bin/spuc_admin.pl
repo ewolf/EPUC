@@ -43,6 +43,12 @@ unless( $app ) {
                                      } );
     $root->set_SPUC( $app );
 }
+my $unfin = $app->get__unfinished_comics;
+my $fin = $app->get_finished_comics;
+for my $comic ( sort { int("$a") <=> int("$b") } @$unfin, @$fin ) {
+    print STDERR Data::Dumper->Dump(["ADDING ($comic)"]);
+    $app->add_once_to__all_comics( $comic );
+}
 
 #
 # set the default avatar

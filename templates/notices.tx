@@ -25,7 +25,7 @@
   : my $note = $notes[$idx];
   : if $note {
       : if $note.type == 'comic' {
-        <p class="logline"><a href="?path=/comic&single=1&comic=<: $note.comic :>"><: $note.msg :></a></p>
+        <p class="logline"><a href="?path=/comic&single=1&idx=<: $note.comic :>"><: $note.msg :></a></p>
       : }
   : }
 
