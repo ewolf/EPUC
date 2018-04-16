@@ -5,8 +5,6 @@ use warnings;
 no warnings 'uninitialized';
 
 use lib "$ENV{PROJHOME}/EPUC/lib";
-use lib "$ENV{PROJHOME}/Yote/FixedRecordStore/lib";
-use lib "$ENV{PROJHOME}/Yote/ObjectStore/lib";
 
 
 use Encode qw/ decode encode /;
