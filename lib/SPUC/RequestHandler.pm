@@ -200,6 +200,7 @@ sub _handle {
                 $self->err( 'session expired' );
                 $self->note( "session expired", $user );           
             }
+            $user->set__active_time( time );
         } else {
             $self->note( "session not found for $sess_id", $user );
             undef $sess_id;
