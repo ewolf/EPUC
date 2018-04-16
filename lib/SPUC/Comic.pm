@@ -105,6 +105,8 @@ sub add_panel {
 
 sub is_free {
     my( $self, $user ) = @_;
+    print STDERR Data::Dumper->Dump([    ! $self->is_complete,
+         $self->get__player == $user, $self->get__hold_expires < time, "WUFDSYF"]);
     ! $self->is_complete && 
         ( $self->get__player == $user || $self->get__hold_expires < time );
 }
