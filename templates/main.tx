@@ -53,8 +53,8 @@
       : my $comics = $app.get( 'finished_comics' )      
       : if $comics.size() > 0 {
       <a href="?path=/read&sort=recent">read comics</a>
-      <a href="?path=/artists">artists</a>
       : }
+      <a href="?path=/artists">artists</a>
       : if $user {
       <a href="?path=/play">play</a>
       <a href="?path=/start">start a comic</a>
