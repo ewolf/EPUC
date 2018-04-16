@@ -6,7 +6,7 @@ use warnings;
 use Data::Dumper;
 use Digest::MD5;
 
-use lib '/home/coyo/proj/EPUC/lib';
+use lib "$ENV{HOME}/proj/EPUC/lib";
 
 use Data::ObjectStore;
 use SPUC::App;

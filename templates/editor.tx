@@ -36,6 +36,20 @@
       
       <div class="col">
         Palette
+        <!--
+        <form id="manage-palette" method="POST"
+              action="?path=<: $path :>"
+              class="row">
+          <input type="hidden" name="action" value="change-palette">
+          <input type="text" name="" value="default palette">
+          <select name="palette">
+            <option>change palette</option>
+            : for $palettes -> $pal {
+                <option value="$pal.name">change palette</option>
+            : }
+            <option value="new">new palette</option>
+          </select>
+        </form> -->
         <div id="palette">
         </div>
         <div class="row">

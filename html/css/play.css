@@ -29,3 +29,7 @@
 #caption button {
     flex-shrink: 1;
 }
+#uppic {
+    justify-content: space-evenly;
+    margin: 30px 0;
+}

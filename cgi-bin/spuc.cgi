@@ -4,7 +4,9 @@ use strict;
 use warnings;
 no warnings 'uninitialized';
 
-use lib '/home/coyo/proj/EPUC/lib';
+use lib "$ENV{PROJHOME}/EPUC/lib";
+use lib "$ENV{PROJHOME}/Yote/FixedRecordStore/lib";
+use lib "$ENV{PROJHOME}/Yote/ObjectStore/lib";
 
 
 use Encode qw/ decode encode /;
@@ -20,7 +22,7 @@ use SPUC::Uploader;
 #     config
 # ---------------------------------------
 
-our $site         = 'madyote.com';
+our $site         = $ENV{SERVER_NAME};
 our $spuc_path    = '/cgi-bin/spuc.cgi';
 our $basedir      = "/var/www";
 our $template_dir = "$basedir/templates/spuc";

@@ -11,12 +11,15 @@
     <h2>Draw or <a class="skip" href="?path=/play&skip=1">skip</a></h2>
     <p id="caption">&quot;<: $pan.get('caption') :>&quot;</p>
     
-    <form method="POST" action="?path=/play" enctype="multipart/form-data" class="box row">
+    <form method="POST" id="uppic" class="box" action="?path=/play" enctype="multipart/form-data" class="box row">
+      <h3>Upload Picture</h3>
       <input type="hidden" name="action" value="upload-panel">
       <input id="panelup" name="uppanel" type="file" accept="image/x-png,image/png,image/gif,image/jpeg">
-      <button id="panelsub" type="submit">upload a picture</button>
+      <button id="panelsub" type="submit" class="big">upload</button>
     </form>
 
+    <div class="box">
+    <h3>Draw Picture</h3>
     : my $saved = $user.get( '_saved_panel' );
     : if $saved {
       <script>
@@ -24,7 +27,7 @@
       </script>
     : }
     : include "editor.tx" { width => 900, height => 630, action => 'upload-panel', save_action => 'save-panel', path => '/play', upname => 'uppanel' }
-    
+    </div>
   : } else {
     <h2>Caption or <a class="skip" href="?path=/play&skip=1">skip</a></h2>
     <div class="col backer">
