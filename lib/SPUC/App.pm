@@ -104,6 +104,7 @@ sub find_comic_to_play {
         if( $skip ) {
             $last_comic->set__player(undef);
             $last_comic->set__hold_expires(0);
+            $artist->set__playing( undef );
         } elsif( $last_comic->is_free( $artist ) ) {
             return $last_comic;
         }
