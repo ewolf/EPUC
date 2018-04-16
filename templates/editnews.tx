@@ -1,0 +1,25 @@
+<h2>Editing News</h2>
+
+<form method="POST" action="?path=/newsedit"
+      class="col">
+  <input type="hidden" name="action" value="add-news">
+  <textarea>
+  <button type="submit">Add Item</button>
+</form>
+
+<div class="col news">
+: for $app.news -> $item {
+  <p class="row news">
+    <span><: $item :></span>
+    : if $item.get__is_published {
+    <a href="?path=/newsedit&item=$~item&action=news-unpublish">unpublish</a>
+    : } else {
+    <a href="?path=/newsedit&item=$~item&action=news-publish">publish</a>
+    : }
+    <a href="?path=/newsedit&item=$~item&action=news-remove">remove</a>
+    <span class="comment-count"> <: $item.get__comments.size() :> comments </span>
+  </p>
+: } else {
+  No news items
+: }
+</div>

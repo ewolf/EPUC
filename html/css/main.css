@@ -13,12 +13,19 @@ body {
 }
 nav {
     margin: 13px 0;
-    justify-content: space-between;
+    justify-content: space-evenly;
     flex-wrap: wrap;
     font-size: x-large;
 }
 nav > a {
     border: dotted 4px;
+    padding: 8px 12px;
+    margin: 3px;
+    text-decoration: none;
+}
+nav > a.admin {
+    border: dotted 4px orange;
+    background: lightyellow;
     padding: 8px 12px;
     margin: 3px;
     text-decoration: none;
@@ -87,5 +94,5 @@ input.error {
     margin-top: 1em;
 }
 main {
-    justify-contents: space-around;
+    justify-contents: space-evenly;
 }

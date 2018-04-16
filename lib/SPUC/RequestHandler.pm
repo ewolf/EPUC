@@ -195,12 +195,13 @@ sub _handle {
                 $self->note( "invalid sessions (no user) $sess_id", $user );
                 undef $sess_id;
             }
-            if( ( time - $user->get__login_time ) > 3600*24*30 ||
-                ( time - $user->get__active_time ) > 3600*24*3 ) {
+            my $t = time;
+            if( ( $t - $user->get__login_time($t) ) > 3600*24*30 ||
+                ( $t - $user->get__active_time($t) ) > 3600*24*3 ) {
                 $self->err( 'session expired' );
                 $self->note( "session expired", $user );           
             }
-            $user->set__active_time( time );
+            $user->set__active_time( $t );
         } else {
             $self->note( "session not found for $sess_id", $user );
             undef $sess_id;

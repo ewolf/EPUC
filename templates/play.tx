@@ -6,13 +6,10 @@
 
 : if $comic && $user == $comic.get('_player') {
   :  my $pan = $comic.last_panel
-:  $pan.note();
 
   : if $pan.get('type') == 'caption' {
     <h2>Draw or <a class="skip" href="?path=/play&skip=1">skip</a></h2>
     <p id="caption">&quot;<: $pan.get('caption') :>&quot;</p>
-
-
     
     <form method="POST" action="?path=/play" enctype="multipart/form-data" class="box row">
       <input type="hidden" name="action" value="upload-panel">

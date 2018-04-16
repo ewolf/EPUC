@@ -9,7 +9,7 @@
   <body class="col">
     <header class="row">
 
-      <a href="?path=/read&sort=recent" class="splash col">
+      <a href="?" class="splash col">
         <p>Scarf Poutine You Clone</p>
         <p>Collaborative Comics</p>
       </a>
@@ -69,9 +69,10 @@
       <a href="?path=/profile">my profile</a>
       <a href="?path=/logout">log out</a>
         : if $user.get('_is_admin') {
-      <a href="?path=/all_comics">all comics</a>
-      <a href="?path=/users">users</a>
-      <a href="?path=/logs">logs</a>
+      <a href="?path=/all_comics" class="admin">all comics</a>
+      <a href="?path=/users" class="admin">users</a>
+      <a href="?path=/newsedit" class="admin">edit news</a>
+      <a href="?path=/logs" class="admin">logs</a>
         : }
       : }
     </nav>
@@ -108,6 +109,8 @@
           : include "read.tx" { comics => $user.get__unfinished_comics }
       : } else if $path == '/bookmarked' && $user {
           : include "read.tx" { comics => $user.get('_bookmarks') }
+      : } else if $path == '/newsedit' && $user && $user.get('_is_admin') {
+          : include "editnews.tx"
       : } else if $path == '/logs' && $user && $user.get('_is_admin') {
           : include "logs.tx"
       : } else if $path == '/all_comics' && $user && $user.get('_is_admin') {
@@ -129,10 +132,10 @@
         : } else {
           : include "read.tx" { comics => $comics }
         : }
-      : } else if $comics.size() > 0 {
-        : include "read.tx" { comics => $comics }
+      : } elsif $path == '/read' {
+          : include "read.tx" { comics => $comics }
       : } else {
-        : include "about.tx"
+        : include "about.tx" { comics => $comics }
       : }
       
       
@@ -144,8 +147,14 @@
       Min Viable Product
       TODOS
       <ul>
+        <li>about page with latest</li>
+        <li>news</li>
+        <li>bug reports</li>
+        <li>fix bug in comments</li>
         <li>correct level of mail check in production</li>
         <li>spuc contact info</li>
+        <li>news editor for admin</li>
+        <li>seen news</li>
       </ul>
       Other TODOS
       <ul>

@@ -1,19 +1,34 @@
+<link rel="stylesheet" type="text/css" href="/spuc/css/comic.css" title="Default">
+<link rel="stylesheet" type="text/css" href="/spuc/css/read.css" title="Default">
+<link rel="stylesheet" type="text/css" href="/spuc/css/about.css" title="Default">
 <h1>Scarf Poutine You Clone</h1>
 
-<p>
-Once upon a time there was a site called 'Eat Poop U Cat' that was
-a lot of fun, but it closed down and the <a href="eatpoopucat.com">eatpoopucat.com</a>
-domain is now defunct (after briefly advertising <a href="https://web.archive.org/web/20171001111309/http://www.eatpoopucat.com/">beauty products</a>).
-</p>
+<div class="row">
 
-<p>
-The artists at the old site missed playing the game, so one of them
-implemented a clone of it; that would be this site.
-</p>
+  : if $comics.size() > 0  {
+  <div class="col latest">
+    <h3>Latest Comic</h3>
+    : include "comic.tx" { comic => $comics[0], small => 1, idx => 0, path => '/read' }
+  </div>
+  : }
+  
+  <div class="col">
+    <p>
+      Once upon a time there was a site called 'Eat Poop U Cat' that was
+      a lot of fun, but it closed down and the <a href="eatpoopucat.com">eatpoopucat.com</a>
+      domain is now defunct (after briefly advertising <a href="https://web.archive.org/web/20171001111309/http://www.eatpoopucat.com/">beauty products</a>).
+    </p>
+
+    <p>
+      The artists at the old site missed playing the game, so one of them
+      implemented a clone of it; that would be this site.
+    </p>
 
 
-<h2>The Game</h2>
+    <h2>The Game</h2>
 
-<p>The game is simple. Draw pictures for captions and write captions
-for pictures.</p>
+    <p>The game is simple. Draw pictures for captions and write captions
+      for pictures.</p>
+  </div>
 
+</div>

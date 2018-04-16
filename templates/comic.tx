@@ -1,5 +1,5 @@
 : if $small {
-<a class="comic col" href="?path=<:$path:>&single=1&idx=<:$idx:>&sort=<:$params.sort:><: $artist ? '&artist=' ~ $artist.get('display_name') : '':>">
+<a class="comic col small" href="?path=<:$path:>&single=1&idx=<:$idx:>&sort=<:$params.sort:><: $artist ? '&artist=' ~ $artist.get('display_name') : '':>">
 : } else {
 <div class="comic col">
 : }  

@@ -67,6 +67,7 @@
 
 <div class="comments col">
 
+  : if $user {
   <form method="POST" action="?path=<:$path:>" class="col comment">
     <h3>leave a comment</h3>
     <input type="hidden" name="action" value="comment">
@@ -76,7 +77,8 @@
     <textarea cols="35" name="comment"></textarea>
     <button type="submit">Add Comment</button>
   </form>
-
+  : }
+  
   <div class="col">
     : for $comments -> $comment {
     : my $artist = $comment.get('artist')
@@ -127,7 +129,7 @@
 </div>
 
 
-<div id="comics" class="comics row small">
+<div id="comics" class="comics row">
 
   : for [0..3] -> $i {
     : my $idx = $i + $startidx;
