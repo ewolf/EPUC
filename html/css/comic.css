@@ -61,15 +61,7 @@ a.artist {
     text-decoration: none;
     color: black;
 }
-.artist img {
-    margin: auto 4px;
-    border: solid 1px grey;
-    background: white;
-    
-}
 img.picture {
-    border: solid 1px grey;
-    background-color: white;
     vertical-align:middle;
 }
 span.caption {
@@ -89,7 +81,4 @@ div.picture {
 .kudo {
     color: red;
     text-decoration: none;
-}
-.avatar {
-    margin: auto 4px;
 }

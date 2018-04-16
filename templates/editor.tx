@@ -87,8 +87,9 @@
                class="colorpick circle"></div>
           <div data-color="rgba(255,255,0,255)"
                class="colorpick circle"></div>
+          <div data-color="rgba(210,180,140,255)"
+               class="colorpick circle"></div>
           <div data-color="rgba(179, 160, 11,255)"
-          <div data-color="rgba(255,255,0,255)"
                class="colorpick circle"></div>
           <div data-color="rgba(67, 21, 0,255)"
                class="colorpick circle"></div>

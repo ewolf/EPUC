@@ -139,4 +139,10 @@ sub kudo {
                          type => 'comic',
                          comic => $panel->get_comic };
 }
+
+sub note_comics {
+    my $notes = shift->get__updates([]);
+    [ map { $_->{comic} } @$notes];
+}
+
 1;

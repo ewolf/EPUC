@@ -6,6 +6,19 @@ use warnings;
 use Data::ObjectStore;
 use base 'Data::ObjectStore::Container';
 
+#
+# Fields
+#    item
+#    list
+#    next
+#    prev
+#
+
+
+1;
+
+__END__
+
 sub _init {
     my $self = shift;
     $self->set_lists({});

@@ -33,9 +33,10 @@
         <form id="caption" method="POST" action="?path=/play" class="row">
           <input type="hidden" name="action" value="caption-picture">
           <input type="text" name="caption" placeholder="your caption here" maxlength="100">
-          <button type="submit">Caption</button>
+          <button type="submit" id="docaption" class="subbut">Caption</button>
         </form>
       </div>
     </div>
+    <script src="/spuc/js/play.js"></script>
   : }
 : }

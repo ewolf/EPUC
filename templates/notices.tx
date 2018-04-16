@@ -1,8 +1,9 @@
-<link rel="stylesheet" type="text/css" href="/spuc/css/read.css" title="Default">
+<link rel="stylesheet" type="text/css"
+      href="/spuc/css/read.css" title="Default">
 <h2>notices</h2>
 
 : my $notes = $user.get( '_updates' );
-: my $startidx = $params.idx || 0
+: my $startidx = $params.idx || 0;
 
 <div class="row pagination">
 : if $startidx > 0 {
@@ -20,13 +21,19 @@
    : }
 </div>
 
+<div class="col notes">
 : for [0..99] -> $i {
   : my $idx = $i + $startidx;
   : my $note = $notes[$idx];
   : if $note {
-      : if $note.type == 'comic' {
-        <p class="logline"><a href="?path=/comic&single=1&idx=<: $note.comic :>"><: $note.msg :></a></p>
+     : if $note.type == 'comic' {
+     <p class="logline">
+       <a class="note"
+          href="?path=/from_note&single=1&idx=<: $idx :>">
+        : $note.msg
+       </a>
+     </p>
       : }
   : }
-
+</div>
 : }

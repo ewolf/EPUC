@@ -4,6 +4,6 @@
 <form class="row" id="poststart" method="POST" action="?path=/start">
   <input type="hidden" name="action" value="start-comic">
   <input type="text" id="starter" placeholder="write your starting caption" name="start" size="80" maxlength="100">
-  <button id="startcomic" type="submit">start the comic</button>
+  <button id="startcomic" class="subbut" type="submit">start the comic</button>
 </form>
 <script src="/spuc/js/start.js"></script>

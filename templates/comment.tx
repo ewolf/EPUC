@@ -9,7 +9,7 @@
     <input type="hidden" name="artist" value="<:$params.artist:>">
     <input type="hidden" name="single" value="1">
     <textarea cols="35" name="comment" maxlength="2000"></textarea>
-    <button type="submit">Add Comment</button>
+    <button id="subcomment" type="submit" class="subbut">Add Comment</button>
   </form>
   : }
   
@@ -19,11 +19,7 @@
     : for $comments -> $comment {
       : my $artist = $comment.get('artist')
     <div class="row comment">
-      <a class="artist col"
-         href="?path=/artist&artist=<:$artist.get('display_name'):><: $artist ? '&artist=' ~ $artist.get('display_name') : '':>">
-        <img src="<:$artist.get('avatar').size(50,50):>">
-        <: $artist.get('display_name') :>
-      </a>
+      : include 'avatar.tx' { artist => $artist, size => 50 }
       <p class="comment">
          <span class="comment"><: $comment.get_comment :></span>
          <span class="time"><: $app.format_time( $comment.get('time') ) :></span>
@@ -35,3 +31,4 @@
   
 </div>
   
+<script src="/spuc/js/comment.js"></script>

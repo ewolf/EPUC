@@ -124,9 +124,8 @@
           : include "users.tx"
       : } else if $path == '/notices' && $user {
           : include "notices.tx"
-      : } else if $path == '/comic' && $user {
-          : my $ucomics = $user.get( '_comics' );
-          : include "read.tx" { comics => $user.get('_all_comics') }
+      : } else if $path == '/from_note' && $user {
+          : include "read.tx" { comics => $user.note_comics }
       : } else if $path == '/artist' {
         : my $artist = $app.artist( $params.artist )
           
@@ -154,6 +153,8 @@
         <li>bug reports</li>
         <li>correct level of mail check in production</li>
         <li>spuc contact info</li>
+        <li>make notifications not sucky</li>
+        <li></li>        
       </ul>
       Other TODOS
       <ul>
@@ -162,11 +163,8 @@
         <li>admin deactivate comics - remove from finished and put into deactivated and mark them deactivated</li>
         <li>admin edit comics</li>
         
-        <li>group chat</li>
-
         <li>email for account verification</li>
 
-        
         <li>testing comic</li>
         <li>UI advice</li>
         

@@ -1,9 +1,8 @@
-<link rel="stylesheet" type="text/css" href="/spuc/css/comic.css" title="Default">
 <div class="col">
   <p>Current time <:$app.format_time:></p>
   : for $app.artists -> $user {
    <span class="artist row">
-     <img src="<:$user.get('avatar').size(150,150):>">
+    : include 'avatar.tx' { artist => $user, size => 150 }
      <div class="row">
        <div class="col">
          <p>

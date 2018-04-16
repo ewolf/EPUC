@@ -14,6 +14,20 @@ function oneTag( tagname ) {
     return document.getElementsByTagName( tagname )[0];
 }
 
+function text_activate( txt, subbut ) {
+    subbut.setAttribute( 'disabled', true );
+    txt.addEventListener( 'keyup', ev => {
+        if( txt.value.match( /\S/ ) ) {
+            subbut.removeAttribute( 'disabled' );
+            subbut.classList.add( 'enabled' );
+        } else {
+            subbut.setAttribute( 'disabled', true );
+            subbut.classList.remove( 'enabled' );
+        }
+    } );
+    txt.focus();
+}
+
 var user;
 var token;
 var cache = {};

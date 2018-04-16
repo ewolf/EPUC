@@ -2,11 +2,16 @@
 <h1>Make an Artist Account</h1>
 <form method="POST" action="?path=/register" class="col">
   <span id="err"><:$err:></span>
-    <input type="hidden" name="action" value="registering">
-    <input type="email" name="em" placeholder="email" value="<:$params['em']:>">
-    <input type="text" name="un" placeholder="user" value="<:$params.un:>"> 
-    <input type="password" name="pw" placeholder="password" value="<:$params.pw:>">
-    <input type="password" name="pw2" placeholder="repeat password">
+    <input type="hidden"
+           name="action" value="registering">
+    <input type="email" placeholder="email"
+           name="em" value="<:$params['em']:>">
+    <input type="text" placeholder="user"
+           name="un" value="<:$params.un:>"> 
+    <input type="password" placeholder="password"
+           name="pw"  value="<:$params.pw:>">
+    <input type="password" placeholder="repeat password"
+           name="pw2"> 
         : if $errs.size() > 0 {
         <div id="err col">
           : for $errs -> $err {
@@ -16,5 +21,5 @@
         : }
     <button type="submit">Register Account</button>
     <a id="cancel" href="?path=/">cancel</a>
-  <script src="/spuc/js/register.js"></script>
 </form>
+<script src="/spuc/js/register.js"></script>

@@ -2,9 +2,7 @@
 <div class="col">
 : for $app.artists -> $artist {
    <div class="artist row">
-     <div class="avatar">
-     <img  src="<:$artist.get('avatar').size(150,150):>">
-     </div>
+   : include 'avatar.tx' { artist => $artist, size => 150 }
      <div class="col">
        <p>
          <span class="about">About <:$artist.get('display_name'):> :

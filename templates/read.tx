@@ -23,6 +23,8 @@
 <h1>your unfinished comics</h1>
   : } else if $path == '/artist' {
 <h1><: $params.artist :></h1>
+  : } else if $path == '/from_note' {
+<h1>Notification Comics</h1>
   : } else {
 <h1>recent comics</h1>
   : }
@@ -47,7 +49,7 @@
     <a href="?path=<: $path :>&idx=<: $startidx :>&sort=<:$params.sort:><: $artist ? '&artist=' ~ $artist.get('display_name') : '':>">
      back to list</a>
 
-   : if $user && $user._has_bookmark( $comic ) {
+   : if $user && $comic && $user._has_bookmark( $comic ) {
     <a href="?path=<: $path :>&idx=<: $startidx :>&single=1&sort=<:$params.sort:>&action=unbookmark<: $artist ? '&artist=' ~ $artist.get('display_name') : '':>">unbookmark</a>
    : } else {
     <a href="?path=<: $path :>&idx=<: $startidx :>&single=1&sort=<:$params.sort:>&action=bookmark<: $artist ? '&artist=' ~ $artist.get('display_name') : '':>">bookmark</a>
@@ -78,7 +80,7 @@
     : if $artist {  # specific artist comic list
 <div class="artist">
   <div class="row">
-    <img src="<:$artist.get('avatar').size(150,150):>">
+    : include 'avatar.tx' { artist => $artist, size => 150 }
     <div class="col">
       <span class="about">About :</span>
       <span class="bio"><: $artist.get('bio') :></span>
