@@ -196,8 +196,8 @@ sub _handle {
                 undef $sess_id;
             }
             my $t = time;
-            if( ( $t - $user->get__login_time($t) ) > 3600*24*30 ||
-                ( $t - $user->get__active_time($t) ) > 3600*24*3 ) {
+            if( ( $t - $user->get__active_time($t) ) > 3600*24*3 ||
+                ( $t - $user->get__login_time($user->get__active_time) ) > 3600*24*30 ) {
                 $self->err( 'session expired' );
                 $self->note( "session expired", $user );           
             }
@@ -278,8 +278,9 @@ sub _handle {
                 avatar       => $self->{app}->get__default_avatar,
                 _avatars     => [],
 
-                _created         => time,
-                _logged_in_since => time,
+                _created      => time,
+                _login_time   => time,
+                _active_time  => time,
                                               } );
             $user->_setpw( $pw );
             my $found;
