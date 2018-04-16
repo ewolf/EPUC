@@ -23,25 +23,11 @@ our $basedir      = "/var/www";
 our $spuc_path    = '/cgi-bin/spuc.cgi';
 our $imagedir     = "$basedir/html/spuc/images";
 
+Data::ObjectStore::upgrade_store( "/var/www/data/spuc/", { group => $gid } );
+
 my $store = Data::ObjectStore::open_store( "/var/www/data/spuc/", { group => $gid } );
 my $root  = $store->load_root_container;
 
-# my $ll = $store->create_container( 'SPUC::LinkedList' );
-
-# for my $add (sort { ($a*0)+(int(rand(3))-1) <=> ($b*0)+(int(rand(3))-1) } (30..48) ) {
-#     print ")$add\n";
-#     $ll->add( $add, sub { my( $a, $b ) = @_; $b <=> $a } );
-# }
-# print "head ". $ll->get_head->get_item."\n";
-# print "tail ". $ll->get_tail->get_item."\n";
-
-# my $next = $ll->get_head;
-# while( $next ) {
-#     print ">".$next->get_item."\n";
-#     $next = $next->get_next;
-# }
-       
-# __END__
 
 # set the root password
 # set up question mark default avatar
@@ -52,14 +38,25 @@ my $root  = $store->load_root_container;
 # The SPUC app itself
 #
 my $app = $root->get_SPUC;
+
+# one time adjustment
+if( $app ) {
+    $app->privatize( qw( site spuc_path imagedir dummy_user default_session finished_comics ) );
+    my $unames = $app->get__users({});
+    for my $user (values %$unames) {
+        $user->privatize( qw( finished_comics ) );
+    }
+}
+
 unless( $app ) {
     $app = $store->create_container( 'SPUC::App', {
-            site      => $site,
-            spuc_path => $spuc_path,
-            imagedir  => $imagedir,
+            _site      => $site,
+            _spuc_path => $spuc_path,
+            _imagedir  => $imagedir,
                                      } );
     $root->set_SPUC( $app );
 }
+
 
 #
 # set the default avatar
@@ -78,7 +75,7 @@ unless( $defava ) {
 #
 # Dummy user with default session
 #
-my $user = $app->get_dummy_user;
+my $user = $app->get__dummy_user;
 unless( $user ) {
     my $un = 'dummy';
 
@@ -88,10 +85,10 @@ unless( $user ) {
         __avatar     => $app->get__default_avatar,
         _created     => time,
                                       } );
-    $app->set_dummy_user( $user );
+    $app->set__dummy_user( $user );
 }
 
-my $sess = $app->get_default_session;
+my $sess = $app->get__default_session;
 unless( $sess ) {
     $sess = $store->create_container( 'SPUC::Session', {
         user => $user,
@@ -99,7 +96,7 @@ unless( $sess ) {
             $app => $app,
         },
                                       } );
-    $app->set_default_session( $sess );
+    $app->set__default_session( $sess );
     my $sessions = $app->get__sessions({}); 
     $sessions->{0} = $sess;    
     $user->set__session( $sess );
@@ -110,6 +107,7 @@ $store->save;
 
 print "SPUC ADMIN. Type 'help' to get help\n\nSPUC>";
 while( <STDIN> ) {
+    my $app = $root->get_SPUC;
     if( /^(\?|help)/ ) {
         print "SPUC ADMIN COMMANDS\n";
         print join( "\n",
@@ -161,6 +159,7 @@ while( <STDIN> ) {
     }
     elsif( /^\s*users/ ) {
         my $unames = $app->get__users({});
+        print "USERS\n";
         my( @uns ) = sort keys %$unames;
         my $longest;
         if( @uns ) {
@@ -201,7 +200,6 @@ while( <STDIN> ) {
             print "User '$un' not found\n";
         }
     } # password <user>
-    
     $store->save;
     print "SPUC>";
 }

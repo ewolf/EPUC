@@ -5,6 +5,7 @@ use warnings;
 no warnings 'uninitialized';
 
 use lib "$ENV{PROJHOME}/EPUC/lib";
+use lib "$ENV{PROJHOME}/Yote/ObjectStore/lib";
 
 use Encode qw/ decode encode /;
 use CGI;
@@ -52,6 +53,18 @@ $path ||= '/';
 #     processing
 # ---------------------------------------
 
+my $options = {
+    site         => $site,
+    spuc_path    => $spuc_path,
+    basedir      => $basedir,
+    template_dir => $template_dir,
+    datadir      => $datadir,
+    lockdir      => $lockdir,
+    imagedir     => $imagedir,
+    logdir       => $logdir,
+    group        => $group,
+};
+
 #
 # uploads..hmmm
 #
@@ -61,22 +74,12 @@ my( $content_ref, $status, $new_sess_id, $content_type );
 if( $path eq '/RPC' ) {
     print STDERR Data::Dumper->Dump([$params, $sess_id, "RPC CALL"]);
     ( $content_ref, $status, $new_sess_id )
-        = SPUC::RequestHandler::handle_RPC( $params, $sess_id, $uploader );
+        = SPUC::RequestHandler::handle_RPC( $params, $sess_id, $uploader, $options );
     $content_type = 'text/json';
 }
 else {
     ( $content_ref, $status, $new_sess_id )
-        = SPUC::RequestHandler::handle( $path, $params, $sess_id, $uploader, {
-            site         => $site,
-            spuc_path    => $spuc_path,
-            basedir      => $basedir,
-            template_dir => $template_dir,
-            datadir      => $datadir,
-            lockdir      => $lockdir,
-            imagedir     => $imagedir,
-            logdir       => $logdir,
-            group        => $group,
-                                        } );
+        = SPUC::RequestHandler::handle( $path, $params, $sess_id, $uploader, $options );
     $content_type = 'text/html;charset=UTF-8';
 
 }

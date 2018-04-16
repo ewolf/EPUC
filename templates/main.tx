@@ -47,7 +47,7 @@
       
     </header>
     <nav class="row">
-      : my $comics = $app.get( 'finished_comics' )      
+      : my $comics = $app.get( '_finished_comics' )      
       : if $comics.size() > 0 {
       <a href="?path=/read&sort=recent">read comics</a>
       : }
@@ -104,7 +104,7 @@
           <div class="err-msg bigerr">reset link is stale</div>
         : }
       : } else if $path == '/mine' && $user {
-          : include "read.tx" { comics => $user.get_finished_comics }
+          : include "read.tx" { comics => $user.get__finished_comics }
       : } else if $path == '/unfinished' && $user {
           : include "read.tx" { comics => $user.get__unfinished_comics }
       : } else if $path == '/bookmarked' && $user {
@@ -127,7 +127,7 @@
         : my $artist = $app.artist( $params.artist )
           
         : if $artist {
-          : include "read.tx" { comics => $artist.get_finished_comics, artist => $artist }
+          : include "read.tx" { comics => $artist.get__finished_comics, artist => $artist }
         : } else {
           : include "read.tx" { comics => $comics }
         : }
@@ -143,21 +143,41 @@
     : if $user && $user.get__is_admin {
     <hr>
     <footer class="message" style="margin-top:100px">
-      Min Viable Product
-      TODOS
+
+
+      Do a bit of testing on the RPC
+      <div class="col">
+        <div id="random-comic">
+        </div>
+        <button type="button" id="do-rand">pressme</button>
+      </div>
+     <script>
+            // this would be where an init might be called.
+            // maybe call localstorage in with the cache?
+            // why not :>
+      byId('do-rand').addEventListener('click', ev => {
+          RPCCall( 0, 'dorand', [ 'sweet bees' ] ).then( resp => {
+              resp[1].is_complete().then( res => { alert(res); } );
+          });
+      } );
+      </script>
+      <h2>Min Viable Product</h2>
+      <h3>TODOS</h3>
       <ul>
         <li>news &amp; gossip (artists lounge)</li>
         <li>bug reports</li>
+        <li>time in the users page, sort by most recently active</li>
         <li>correct level of mail check in production</li>
         <li>spuc contact info</li>
         <li>make notifications not sucky</li>
         <li>call out lounge if stuff not yet seen</li>
+        <li>RPC</li>
         <li>persistant palette</li>        
         <li></li>        
       </ul>
       Other TODOS
       <ul>
-        <li>modperl</li>
+        <li>modperl (along with the cgi too)</li>
         
         <li>admin deactivate comics - remove from finished and put into deactivated and mark them deactivated</li>
         <li>admin edit comics</li>

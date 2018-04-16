@@ -3,8 +3,7 @@ package SPUC::Image;
 use strict;
 use warnings;
 
-use Data::ObjectStore;
-use base 'Data::ObjectStore::Container';
+use base 'SPUC::Base';
 
 #
 # FIELDS

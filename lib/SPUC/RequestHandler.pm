@@ -41,6 +41,7 @@ sub _singleton {
     return $singleton if $singleton;
     
     my $options = shift;
+
     my $store = Data::ObjectStore::open_store( $options->{datadir}, $options );
     my $root  = $store->load_root_container;
     my $app   = $root->get_SPUC;
@@ -68,11 +69,118 @@ sub _singleton {
     $singleton;
 }
 
+
 #
 #
 #---------- instance methods ---------------
 #
 #
+
+sub handle_RPC {
+    my( $params, $sess_id, $uploader, $options ) = @_;
+    _singleton($options)->_handle_RPC( $params, $sess_id, $uploader, $options );
+}
+
+our $PKG2METHS = {};
+sub _methods {
+    my $pkg = shift;
+    my $meths = _meths( $pkg );
+    use strict 'refs';
+    $meths;
+}
+sub _meths {
+    my $pkg = shift;
+    return [] if $pkg =~ /^(UNIVERSAL|Data::ObjectStore::Container)$/;
+
+    my $meths = $PKG2METHS->{$pkg};
+    if( $meths ) {
+        return $meths;
+    }
+
+    no strict 'refs';
+    push @$meths, (
+        grep { $_ !~ /(^_|^[sg]et|^[sg]et_|(^isa|import|move|make_path|AUTOLOAD|BEGIN|DESTROY|can|a|b|store|ISA|copy$)|::)/ }
+        keys %{"$pkg\::"} );
+    for my $class ( @{"${pkg}\::ISA" } ) {
+        push @$meths, @{ _meths( $class ) };
+    }
+    $PKG2METHS->{$pkg} = $meths;
+    $meths;
+} #_meths
+
+sub _handle_RPC {
+    my( $self, $params, $sess_id, $uploader ) = @_;
+    my $sessions = $self->{app}->get__sessions({});
+    my $store = $self->{store};
+    my $sess    = $sessions->{$sess_id};
+    if( $sess ) {
+        my $payload = from_json( $params->{p} );
+        my $method      = $payload->{m};
+        my $id          = $payload->{i};
+        my $last_update = $payload->{t} || 0;
+        print STDERR Data::Dumper->Dump([$payload,"PAYLOAD ($method,$id)"]);
+        
+        my $obj = $sess->_fetch( $id );
+        
+        if( $obj && $method !~ /^(_|[sg]et_|[sg]et$)/ && $obj->can( $method ) ) {
+            my $args = _unpack( $payload->{a}, $sess );
+
+            my $ups = [];
+            my $ret = {
+                r => _pack ( $obj->$method( @$args ), $sess ),
+                u => $ups,
+                t => time,
+            };
+
+            # reset is set upon log in
+            if( $sess->get_reset ) {
+                $ret->{R} = 1;
+                $sess->set_reset(undef);
+                undef $last_update;
+            }
+
+            # construct the payload. Find the items that need updating
+            my $seen = {};
+            my $updates = $sess->_updates( $last_update, $seen );
+            while( @$updates ) {
+                my $up = shift @$updates;
+                my $meths = [];
+                my $data;
+                if( ref( $up ) eq 'HASH' ) {
+                    $data = { map { $_ => $sess->_stow($up->{$_}) } keys %$up };
+                }
+                elsif( ref( $up ) eq 'ARRAY' ) {
+                    $data = [ map { $sess->_stow($_) } @$up ];
+                }
+                else {
+                    $meths = _methods( ref( $up ) );
+                    $data = { map { $_ => $sess->_stow($up->get($_)) } grep { $_ !~ /^_/ } keys %{$up->[1]} };
+                }
+                push @$ups, {
+                    i => $sess->_stow( $up ),
+                    m => $meths,
+                    f => $data,
+                };
+                if( 0 == @$updates ) {
+                    push @$updates, @{$sess->_updates( $last_update, $seen ) };
+                }
+            }
+            my $json_out = to_json( $ret );
+
+            print STDERR Data::Dumper->Dump([$ret,$json_out,"RETURNY"]);
+            
+            $self->write_notes;
+            
+            $self->{store}->save;
+            
+            $self->unlock;
+            
+            return \$json_out, 200, $sess_id;
+        }
+        print STDERR Data::Dumper->Dump([ref($obj),"EEK ($method,$obj,$id)"]);
+    }
+    
+} #_handleRPC
 
 sub reset {
     my $self = shift;
@@ -209,7 +317,7 @@ sub _handle {
     }
     
     unless( $sess ) {
-        $sess = $self->{app}->get_default_session;
+        $sess = $self->{app}->get__default_session;
     }
 
     # --------- the decision tree based on the path
@@ -299,6 +407,7 @@ sub _handle {
                 $self->{store}->create_container( 'SPUC::Session', {
                     last_id => $sess_id,
                     user    => $user,
+                    app     => $self->{app},
                                           } );
             $user->set__session( $sess );
 
@@ -318,13 +427,6 @@ sub _handle {
             $self->note( "selected avatar", $user );
         }
 
-        elsif( $action eq 'autosave' ){ 
-            my $fn = $params->{autoupper};
-            if( $fn =~ /^data:image\/png;base64,(.*)/ ) {
-                my $png = MIME::Base64::decode( $1 );
-                $user->_backup( $png, 'avatar', $self );
-            }
-        }
         elsif( $action eq 'upload-avatar' ) {
             my $fn = $params->{avup};
             if( $fn =~ /^data:image\/png;base64,(.*)/ ) {
@@ -410,7 +512,7 @@ sub _handle {
         my $unames = $self->{app}->get__users({});
         my $uu = $unames->{lc($un)};
         my $eu = $emails->{lc($un)};
-        $user =  $uu || $eu || $self->{app}->get_dummy_user;
+        $user =  $uu || $eu || $self->{app}->get__dummy_user;
 
         # dummy automatically fails _checkpw
         if( $user->_checkpw( $pw ) ) {
@@ -428,6 +530,7 @@ sub _handle {
             $sessions->{$sess_id} = $sess;
             $sess->set_last_id( $sess_id );
             $user->set__login_time( time );
+            $sess->_reset;
         } else {
             $self->err( 'login failed' );
             undef $user;
@@ -515,7 +618,7 @@ sub _handle {
                     $self->note( "completed comic", $user );
                     for my $thing ( $self->{app}, values %$arts) {
                         $thing->remove_from__unfinished_comics( $comic );
-                        my $fin = $thing->get_finished_comics([]);
+                        my $fin = $thing->get__finished_comics([]);
                         unshift @$fin, $comic;
                     }
                     for my $art (values %$arts) {
@@ -662,7 +765,7 @@ sub _handle {
     elsif( $action =~ /^(comment|bookmark|unbookmark|kudo)$/ && $user && defined( $params->{idx} ) ) {
         my $comics;
         if( $path eq '/mine' ) { 
-            $comics = $user->get_finished_comics;
+            $comics = $user->get__finished_comics;
         }
         elsif( $path eq '/bookmarks' ) {
             $comics = $user->get__bookmarks;
@@ -672,10 +775,10 @@ sub _handle {
         }
         elsif( $params->{artist} ) {
             my $artist = $self->{app}->artist( $params->{artist} );
-            $comics = $artist->get_finished_comics;
+            $comics = $artist->get__finished_comics;
         }
         else {
-            $comics //= $self->{app}->get_finished_comics;
+            $comics //= $self->{app}->get__finished_comics;
         }
         
         my $comic = $comics->[$params->{idx}];
@@ -730,9 +833,6 @@ sub _handle {
 
 } #_handle
 
-1;
-
-__END__
 
 sub _pack {
     my( $item, $session ) = @_;
@@ -740,7 +840,7 @@ sub _pack {
     if( $r eq 'HASH' ) {
         my $tied = tied (%$item);
         if( $tied ) {
-            return $session->stow( $item );
+            return $session->_stow( $item );
         } else {
             return { map { $_ => _pack($item->{$_},$session) } keys %$item };
         }
@@ -748,16 +848,16 @@ sub _pack {
     elsif( $r eq 'ARRAY' ) {
         my $tied = tied (@$item);
         if( $tied ) {
-            return $session->stow( $item );
+            return $session->_stow( $item );
         } else {
             return [ map { _pack($_,$session) } @$item ];
         }
     }
     elsif( $r ) {
-        return $session->stow( $item );
+        return $session->_stow( $item );
     }
-    elsif( defined( $r ) ) {
-        return "v$r";
+    elsif( defined( $item ) ) {
+        return "v$item";
     }
     return undef;
 } #_pack
@@ -771,34 +871,17 @@ sub _unpack {
     elsif( $r eq 'ARRAY' ) {
         return [ map { _unpack($_,$session) } @$item ];
     }
-    elsif( $r =~ /^v(.*)/ ) {
+    elsif( $item =~ /^v(.*)/ ) {
         return $1;
     }
-    elsif( $r =~ /^u/ ) {
+    elsif( $item =~ /^u/ ) {
         return undef;
     }
-    return $session->fetch( $r );
+    return $session->_fetch( $r );
 }
 
-sub handle_RPC {
-    my( $params, $sess_id, $uploader ) = @_;
-    my $sessions = $self->{app}->get__sessions({});
 
-    my $sess    = $sessions->{$sess_id};
-    if( $sess ) {
-        my $payload = from_json( $params->{p} );
-        my $method  = $payload->{m};
-        my $id      = $payload->{i};
-        if( $id == 0 ) {
-            if( $method eq 'load' ) {
-                my $user = $sess->get_user;
+1;
 
-            }
-        }
-        my $args    = _unpack( $payload->{a}, $sess );
-        # just return the user object if its loaded
-    }
-    else {
+__END__
 
-    }
-} #handleRPC

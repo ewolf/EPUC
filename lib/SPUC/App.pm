@@ -3,8 +3,7 @@ package SPUC::App;
 use strict;
 use warnings;
 
-use Data::ObjectStore;
-use base 'Data::ObjectStore::Container';
+use base 'SPUC::Base';
 
 use SPUC::Comic;
 use SPUC::Panel;
@@ -13,12 +12,17 @@ our @mon = qw( jan feb mar apr may jun jly aug sep oct nov dec );
 #
 # Fields :
 #   _unfinished_comics - list
-#   finished_comics    - list
-#   default_session
-#   dummy_user
+#   _finished_comics   - list
+#   _default_session
+#   _dummy_user
+#
 #   _sessions - sessid -> session obj
 #   _emails - email to -> artist
 #   _unames - user name -> artist
+#
+#   _site
+#   _spuc_path
+#   _imagedir
 #
 
 sub artist {
@@ -146,8 +150,8 @@ sub _send_reset_request {
     $user->set__reset_token( $restok );
     $user->set__reset_token_good_until( $gooduntil );
 
-    my $site = $self->get_site;
-    my $path = $self->get_spuc_path;
+    my $site = $self->get__site;
+    my $path = $self->get__spuc_path;
     my $link = "https://$site$path\?path=/recover\&tok=$restok";
     
     my $body_html = <<"END";

@@ -30,7 +30,39 @@ function text_activate( txt, subbut ) {
 
 var user;
 var token;
-var cache = {};
+var _cache = {};
+var _top_id = 0;
+var cacheFetch = (id) => {
+    id = parseInt( id );
+    var item = _cache[id];
+    if( item === undefined ) {
+        let upd = localStorage.getItem( id );
+        if( upd ) {
+            item = _update( JSON.parse( upd ), true );
+        }
+    }
+    return item;
+};
+var cacheStow = (id,item,update) => {
+    id = parseInt( id );
+    localStorage.setItem( id, JSON.stringify(update) );
+    _cache[id] = item;
+    if( id > _top_id ) {
+        _top_id = id;
+        localStorage.setItem( 'top-id', id );
+    }
+};
+var resetCache = () => {
+    var top = parseInt(localStorage.getItem( 'top-id' ));
+    if( top > 0 ) {
+        for( var i=0; i<top; i++ ) {
+            localStorage.removeItem( i );
+        }
+        localStorage.removeItem( 'top-id' );
+        localStorage.removeItem( 'last-update' );
+    }
+    
+};
 
 function error( errs ) {
     var errbox = byClass( 'err-txt' );
@@ -68,18 +100,17 @@ function initApp(appname) {
 }
 async function init(appname) {
     user = await initRPC();
-    alert(loader);
 }
 
 //init().then( function() { alert("INI") } );
 
-function _update( update ) {
+function _update( update, noFetchCache ) {
     var id = update.i;
-    let obj = _fetchobj( id );
-    if( typeof obj !== 'object' ) {
+    let obj = noFetchCache ? undefined : cacheFetch( id );
+    if( obj === undefined ) {
         obj = {
             id        : id,
-            listeners : [],
+            listeners : [], // update listeners?
             get       : fld => {
                 return this.fields[fld];
             },
@@ -89,30 +120,31 @@ function _update( update ) {
         };
         update.m.forEach( method => {
             obj[method] = args => {
-                return RPCCall( this.id, method, args );        
+                return RPCCall( obj.id, method, args );
             };
         } );
-        cache[id] = obj;
+        obj.fields = update.f;
+        cacheStow( id, obj, update );
     }
-    obj.fields = update.f;
+    else {
+        obj.fields = update.f;
+        obj.listeners.forEach( l => ( l(obj) ) );
+    }
 
     // notify the listsners that this has changed
     obj.listeners.forEach( listener => {
         listener( this );
     } );
-    
-} //_update
 
-function _fetchobj( id ) {
-    return cache[id];
-}
+    return obj;
+} //_update
 
 function _pack( item ) {
     if( Array.isArray( item ) ) {
         return item.map( _pack );
     }
     else if( typeof item === 'object' ) {
-        if( cache[item.id] === item ) {
+        if( cacheFetch(item.id) === item ) {
             return item.id;
         }
         const ret = {};
@@ -126,7 +158,7 @@ function _pack( item ) {
         return 'u';
     }
     return 'v' + item;
-}
+} // pack
 
 function _unpack( item ) {
     if( Array.isArray( item ) ) {
@@ -139,14 +171,14 @@ function _unpack( item ) {
         }
         return ret;
     }
-    if( item.match( /^v(.*)/ ) ) {
+    if( (''+item).match( /^v(.*)/ ) ) {
         return item.substring(1);
     }
-    if( item.match( /^u/ ) ) {
+    if( (''+item).match( /^u/ ) ) {
         return undefined;
     }
-    return _fetchobj( item );
-}
+    return cacheFetch( item );
+} // _unpack
 
 function RPCCall( id, method, args ) {
     return new Promise(function( resolve, reject)  {
@@ -158,38 +190,42 @@ function RPCCall( id, method, args ) {
         var payload = JSON.stringify( {
             'i' : id,
             'm' : method,
-            'a' : args,
+            'a' : _pack(args),
+            't' : localStorage.getItem('last-update') || '0',
         } );
+
         sendData.set( 'p', payload );
-        sendData.set( 't', token );
         
 
         // ready the send mechanism
         req.open('POST',url);
         req.responseType = 'json';
         req.onload = function() {
-            try {
+//            try {
                 if( req.status === 200 ) {
-                    const resp = JSON.parse( req.response );
+                    const resp = req.response;
                     if( typeof resp === 'object' ) {
                         // updates
+                        if( resp.R ) {
+                            resetCache();
+                            alert('r');
+                        }
+                        localStorage.setItem('last-update', resp.t );
+
                         resp.u.forEach( _update );
                         
                         // response
                         
-                        // token
-                        token = resp.t;
-                        
-                        resolve( _unpack(resp) );
+                        resolve( _unpack(resp.r) );
                     } else {
                         reject(Error('RPC response failed'));
                     }
                 } else {
                     reject(Error('Bad thing happened : ' + req.statusText));
                 }
-            } catch( Err ) {
-                reject(Err);
-            }
+            // } catch( Err ) {
+            //     reject(Err);
+            // }
         };
         req.onerror = function() {
             reject(Error('Bad thing happened : ' + req.statusText));

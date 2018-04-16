@@ -66,3 +66,19 @@ sub add {
 } #add
 
 1;
+__END__
+# my $ll = $store->create_container( 'SPUC::LinkedList' );
+
+# for my $add (sort { ($a*0)+(int(rand(3))-1) <=> ($b*0)+(int(rand(3))-1) } (30..48) ) {
+#     print ")$add\n";
+#     $ll->add( $add, sub { my( $a, $b ) = @_; $b <=> $a } );
+# }
+# print "head ". $ll->get_head->get_item."\n";
+# print "tail ". $ll->get_tail->get_item."\n";
+
+# my $next = $ll->get_head;
+# while( $next ) {
+#     print ">".$next->get_item."\n";
+#     $next = $next->get_next;
+# }
+       

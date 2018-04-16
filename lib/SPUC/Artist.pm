@@ -3,8 +3,7 @@ package SPUC::Artist;
 use strict;
 use warnings;
 
-use Data::ObjectStore;
-use base 'Data::ObjectStore::Container';
+use base 'SPUC::Base';
 
 use Digest::MD5;
 use File::Copy;
@@ -33,7 +32,7 @@ use SPUC::Image;
 #
 #  ** comics **
 #  _unfinished_comics - list of comic objects
-#  finished_comics - linked list node of comic objects
+#  _finished_comics - linked list node of comic objects
 #  _bookmarks
 #
 # ** game state **
@@ -55,26 +54,6 @@ sub _init {
         }
     }
 } #_init
-
-sub _backup {
-    my( $self, $png, $target, $handler ) = @_;
-
-    my $img1 = $self->get( "${target}_backup_1" );
-    my $img2 = $self->get( "${target}_backup_2" );
-    if( $img1 && $img2 ) {
-        my $destdir = "$handler->{imagedir}/${target}baks/$self";
-        make_path( $destdir, { group => $handler->{group}, mode => 0775 } );
-        
-        my $dest = "$destdir/$img1.png";
-
-        my $gonner = "$destdir/$img2.png";
-        move( $dest, $gonner );
-        
-        open my $out, '>', $dest;
-        print $out $png;
-        close $out;
-    }
-} #_backup
 
 sub _setpw {
     my( $self, $pw ) = @_;
