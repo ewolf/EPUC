@@ -1,0 +1,6 @@
+<a class="avatar col"
+   href="?path=/artist&artist=<:$artist.get('display_name'):>">
+  <img src="<:$artist.get('avatar').size($size,$size):>">
+  <: $artist.get('display_name') :>
+</a>
+
