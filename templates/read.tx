@@ -85,7 +85,7 @@
         <img src="<:$artist.get('avatar').size(50,50):>">
         <: $artist.get('display_name') :>
       </a>
-      <p class="comment"><span class="comment"><:$comment.get_comment:></span><span class="time">( time )</span></p>
+      <p class="comment"><span class="comment"><:$comment.get_comment:></span><span class="time"><: $app.format_time( $comment.get('time') ) :></span></p>
     </div>
     : }
   </div>

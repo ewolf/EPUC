@@ -9,6 +9,7 @@ use base 'Data::ObjectStore::Container';
 use SPUC::Comic;
 use SPUC::Panel;
 
+our @mon = qw( jan feb mar apr may jun jly aug sep oct nov dec );
 #
 # Fields :
 #   _unfinished_comics - list
@@ -24,6 +25,30 @@ sub artist {
     my( $self, $name ) = @_;
     $self->get__users->{$name};
 } #artist
+
+sub format_time {
+    my( $self, $time ) = @_;
+    my( @thentime ) = localtime( $time // time );
+    my( @nowtime )  = localtime( time );
+
+    #
+    #    0    1     2     3    4     5
+    #  sec, min, hour, mday, mon, year
+    #
+    
+    # different year
+    if( $thentime[5] != $nowtime[5] ) {
+        return sprintf( "%s %02d", $mon[$thentime[4]], $thentime[5] + 1900);
+    }
+    if( $thentime[4] != $nowtime[4] || $nowtime[3] > (1+$thentime[3])) {
+        return sprintf( "%s %d", $mon[$thentime[4]], $thentime[3] );
+    }
+    if( $nowtime[3] == $thentime[3] ) {
+        return sprintf( "today %d:%d", $thentime[2], $thentime[1] );
+    }
+    return sprintf( "yesterday %d:%d", $thentime[2], $thentime[1] );
+
+}
 
 sub artists {
     [sort { $a->get__login_name cmp $b->get__login_name } values %{shift->get__users}];

@@ -43,12 +43,23 @@ unless( $app ) {
                                      } );
     $root->set_SPUC( $app );
 }
-my $unfin = $app->get__unfinished_comics;
-my $fin = $app->get_finished_comics;
-for my $comic ( sort { int("$a") <=> int("$b") } @$unfin, @$fin ) {
-    print STDERR Data::Dumper->Dump(["ADDING ($comic)"]);
-    $app->add_once_to__all_comics( $comic );
+for my $user (values %{ $app->get__users({}) } ) {
+    for my $bak (qw( comic avatar  )) {
+        for my $idx (1..2) {
+            my $var = "${bak}_backup_$idx";
+            my $img = $user->get( $var );
+            unless( $img ) {
+                $img = $self->{store}->create_container( 'SPUC::Image',
+                                                         {
+                                                             _original_name => 'upload',
+                                                             extension      => 'png',
+                                                         });
+                $user->set( $var, $img );
+            }
+        }
+    }
 }
+
 
 #
 # set the default avatar

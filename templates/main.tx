@@ -144,33 +144,23 @@
       Min Viable Product
       TODOS
       <ul>
-        <li>time in comments</li>
-        
-        <li>link and page for email reset password (test)</li>
-        <li>email reset password (test)</li>
-        <li>locking comics and other objects (test)</li>
-        
         <li>correct level of mail check in production</li>
-        
         <li>spuc contact info</li>
       </ul>
       Other TODOS
       <ul>
-        <li>admin deactivate comics - just remove from finished and put into deactivated</li>
+        <li>modperl</li>
+        
+        <li>admin deactivate comics - remove from finished and put into deactivated and mark them deactivated</li>
         <li>admin edit comics</li>
         
         <li>group chat</li>
 
         <li>email for account verification</li>
 
-        <li>modperl</li>
         
         <li>testing comic</li>
         <li>UI advice</li>
-        
-
-                
-        <li>permissions/group datastore. Maybe a spuc admin group?</li>
         
         <li>spuc_admin.pl actions</li>
 

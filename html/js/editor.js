@@ -1,22 +1,26 @@
-var h = byId("editor");
-var eye = byId("eyedrop");
-var c = byId("canv");
-c.height = height;
-c.width = width;
-c.style['width'] = width + 'px';
-c.style['height'] = height + 'px';
+var editor  = byId("editor");
+var eyedrop = byId("eyedrop");
+var canvas  = byId("canv");
+
+// color -> picker
+var colorcontrol = {};
+
+canvas.height = height;
+canvas.width = width;
+canvas.style['width'] = width + 'px';
+canvas.style['height'] = height + 'px';
 
 var pal = byId("palette");
-var compo = byId("composite");
 
-var ctx = c.getContext("2d");
+var ctx = canvas.getContext("2d");
 var size = 8;
 var maxUndos = 50;
 var lastX, lastY;
 var color = 'rgba(0,0,0,255)';
+var color_displays = byClass( 'display' );
 
-var usingCompo = false;
-var compocolor, inicolor;
+var usingComposite = false;
+var inicolor;
 
 
 var isDrawing = false;
@@ -43,6 +47,7 @@ function min() {
     return m;
 }
 
+//  THE COLOR SLIDERS
 var slider_boxes = document.getElementsByClassName('colorslide');
 function setup_sliders() {
     var lastslide;
@@ -51,8 +56,7 @@ function setup_sliders() {
     
     var sat   = ['#FF0000','#00FF00','#0000FF','#FFFFFF' ];
     var unsat = ['#FFFFFF','#FFFFFF','#FFFFFF','#000000' ];
-    
-    
+
     function setup_slider(sliderbox) {
         var sliding = false;
         var arry = [255,255,255];
@@ -83,21 +87,23 @@ function setup_sliders() {
                 
                 // interpolate the bright. if the bright is 255, then set the max color to 255
                 // and interpolate the others accordingly.
-                compocolor = 'rgba(' + r + ',' + g + ',' + b + ',255)';
-                compo.style.display = 'block';
-                compo.setAttribute( 'data-color', compocolor );
-                compo.style['background-color'] = compocolor;
-                usingCompo = true;
-                compo.changecolor();
+                color = 'rgba(' + r + ',' + g + ',' + b + ',255)';
+                ctx.fillStyle = color;
+                // update the displays to the color chosen
+                color_displays.forEach( disp => {
+                    disp.style['background-color'] = color;
+                } );
+
+                // demo composite
+                usingComposite = true;
             }
-        }
+        } // slide updated
         sliderbox.updateslide = updateslide;
         sliderbox.addEventListener('click', function(ev) {
             ev.preventDefault();
             ev.stopPropagation();
             sliding = false;
             lastslide = this;
-            console.log( ev );
             updateslide( ev.offsetX );
         } );
 
@@ -162,16 +168,15 @@ function setup_sliders() {
 } //setup_sliders
 setup_sliders();
 
-
-
 function setDrawingControls() {
+    var isSaved = true;
     var undob = byId("undo");
     var redob = byId("redo");
 //    var iy = byId( 'imgy' );
 
 
     var blankscreen = ctx.getImageData( 0, 0, width, height );
-//    iy.src = c.toDataURL("image/png");
+//    iy.src = canvas.toDataURL("image/png");
 //    iy.style['border'] = '1px black solid';
 
     var undos = [ blankscreen ];
@@ -200,7 +205,7 @@ function setDrawingControls() {
         } else {
             redob.classList.remove('active');
         }
-//        iy.src = c.toDataURL("image/png" );
+//        iy.src = canvas.toDataURL("image/png" );
 
     }
 
@@ -219,46 +224,45 @@ function setDrawingControls() {
     }
 
     function starttouch(ev) {
-        console.log( 'start touch' );
         if( ev.touches.length == 1 ) {
             ev.preventDefault();
             ev.stopPropagation();
-            startdraw( ev.touches[0].pageX - c.offsetLeft,
-                       ev.touches[0].pageY - c.offsetTop );
+            startdraw( ev.touches[0].pageX - canvas.offsetLeft,
+                       ev.touches[0].pageY - canvas.offsetTop );
         }
     }
     function startmousedraw(ev) {
-        console.log( 'start mouse draw' );
         startdraw( ev.offsetX, ev.offsetY );
     }
     function startdraw(x,y) {
         //save how things are
         if( isEyedrop ) {
             // select a color
-            
             var pixel = ctx.getImageData( x, y, 1, 1 ).data;
             var pcolor = 'rgba(' + pixel[0] + ',' + pixel[1] + ',' + pixel[2] + ',' + pixel[3] + ')';
             if( colorcontrol[pcolor] ) {
                 colorcontrol[pcolor].changecolor();
             }
             isEyedrop = false;
-            c.style.cursor = 'default';
+            canvas.style.cursor = 'default';
         }
         else {
             isDrawing = true;
             lastX = x;
             lastY = y;
             drawPoint( lastX, lastY );
-            if( usingCompo ) {
+            if( usingComposite ) {
                 // add to palette
-                if( colorcontrol[ compocolor ] ) {
-                    colorcontrol[ compocolor ].changecolor();
-                } else { 
+                if( colorcontrol[ color ] ) {
+                    colorcontrol[ color ].changecolor();
+                } else {
+//                if( !(colorcontrol[ color ] && colorcontrol[ color ].classList.contains('palette') ) ) {
                     var newc = document.createElement("span");
+                    newc.classList.add( 'palette' );
                     newc.classList.add( 'colorpick' );
                     newc.classList.add( 'circle' );
-                    newc.setAttribute( 'data-color', compocolor );
-                    newc.style['background-color'] = compocolor;
+                    newc.setAttribute( 'data-color', color );
+                    newc.style['background-color'] = color;
                     newc.changecolor = changecolor;
                     newc.setAttribute( 'data-inicolor', inicolor.join(',') );
                     newc.addEventListener('click', function() {
@@ -268,15 +272,14 @@ function setDrawingControls() {
                         }
                         this.changecolor();
                     } );
-                    colorcontrol[ compocolor ] = newc;
+                    colorcontrol[ color ] = newc;
                     pal.appendChild( newc );
                 }
-                usingCompo = false;
+                usingComposite = false;
             }
         }
     }
     function movem(ev) {
-        console.log( 'move mouse' );
         if( isDrawing ) {
             if( typeof outtime !== 'undefined' ) {
                 clearTimeout( outtime );
@@ -286,22 +289,20 @@ function setDrawingControls() {
         }
     }
     function movet(ev) {
-        console.log( 'move touch' );
         ev.preventDefault();
         ev.stopPropagation();
         if( ev.touches.length == 1 ) {
             if( isDrawing ) {
-                move( Math.round(ev.touches[0].pageX - c.offsetLeft ),
-                      Math.round( ev.touches[0].pageY - c.offsetTop ) );
+                move( Math.round(ev.touches[0].pageX - canvas.offsetLeft ),
+                      Math.round( ev.touches[0].pageY - canvas.offsetTop ) );
             } else {
-                drawPoint( Math.round(ev.touches[0].pageX - c.offsetLeft ),
-                           Math.round( ev.touches[0].pageY - c.offsetTop ) );
+                drawPoint( Math.round(ev.touches[0].pageX - canvas.offsetLeft ),
+                           Math.round( ev.touches[0].pageY - canvas.offsetTop ) );
             }
         }
     } //movet
     
     function enddraw() {
-        console.log( 'end draw' );
         if( isDrawing ) {
             isDrawing = false;
             ++paintpoint;
@@ -313,11 +314,11 @@ function setDrawingControls() {
                 --paintpoint;
             }
             checkundoredo();
+            isSaved = false;
         }
     } //enddraw
 
     function mouseout() {
-                console.log( 'mouse out' );
         if( isDrawing ) {
             outtime = setTimeout( enddraw, 300 );
         }
@@ -385,15 +386,26 @@ function setDrawingControls() {
     var clearey = byId('cleary');
     clearey.addEventListener('click', blank );
     
-    c.addEventListener('mousedown', startmousedraw );
-    c.addEventListener('mouseup', enddraw );
-    c.addEventListener('mousemove', movem );
-    c.addEventListener('mouseout', mouseout );
+    canvas.addEventListener('mousedown', startmousedraw );
+    canvas.addEventListener('mouseup', enddraw );
+    canvas.addEventListener('mousemove', movem );
+    canvas.addEventListener('mouseout', mouseout );
     
-    c.addEventListener('touchstart', starttouch );
-    c.addEventListener('touchmove', movet );
-    c.addEventListener('touchend', enddraw );
-    
+    canvas.addEventListener('touchstart', starttouch );
+    canvas.addEventListener('touchmove', movet );
+    canvas.addEventListener('touchend', enddraw );
+
+/*
+    setInterval( () => {
+        if( ! isSaved ) {
+            var upper = byId('autoupper');
+            var edform = byId('autosave');
+            upper.value = canvas.toDataURL('image/png');
+            edform.submit();
+            isSaved = true;
+        }
+    }, 260000 );
+  */  
 }
 setDrawingControls();
 
@@ -448,9 +460,9 @@ function setSizeControls() {
     }
 } //setSizeControls
 setSizeControls();
-var colorcontrol = {};
-var picks = byClass('colorpick');
-var changecolor = function changecolor() {    
+
+var changecolor = function changecolor() {
+    var picks = byClass('colorpick');
     for( var i=0; i<picks.length; i++ ) {
         picks[i].classList.remove( 'picked' );
     }
@@ -459,38 +471,38 @@ var changecolor = function changecolor() {
     if( color === 'eyedrop' ) {
         isEyedrop = true;
         isErase = false;
-        h.classList.remove('erasing');
-        c.style.cursor = 'crosshair';
+        editor.classList.remove('erasing');
+        canvas.style.cursor = 'crosshair';
     } else {
         isErase = color === 'erase';
         if( isErase ) {
-            h.classList.add('erasing');
+            editor.classList.add('erasing');
         } else {
-            h.classList.remove('erasing');
+            editor.classList.remove('erasing');
         }
         isEyedrop = false;
-        c.style.cursor = 'default';
+        canvas.style.cursor = 'default';
         ctx.fillStyle = color;
         pickedBrush.style.backgroundColor = color;
-        compo.style.backgroundColor = color;        
+        color_displays.forEach( compo => {
+            compo.style.backgroundColor = color;
+        } );
     }
-}
+} //changecolor
 function setColorControls() {
-
+    var picks = byClass('colorpick');
     for( var i=0; i<picks.length; i++ ) {
         var pick = picks[i];
         pick.changecolor = changecolor;
         var pickcolor = pick.getAttribute('data-color');
-        if( pickcolor ) {
-            pick.style.backgroundColor = pickcolor;
-            colorcontrol[pickcolor] = pick;
-            if( pickcolor == color ) {
-                pickedBrush.style.backgroundColor = color;
-                pick.classList.add( 'picked' );
-            }
-            if( pickcolor == 'white' ) {
-                pick.classList.add( 'white' );
-            }
+        pick.style.backgroundColor = pickcolor;
+        colorcontrol[pickcolor] = pick;
+        if( pickcolor == color ) {
+            pickedBrush.style.backgroundColor = color;
+            pick.classList.add( 'picked' );
+        }
+        if( pickcolor == 'white' ) {
+            pick.classList.add( 'white' );
         }
         pick.addEventListener('click', changecolor );
         pick.addEventListener('touchstart', changecolor );
@@ -505,10 +517,12 @@ uped.addEventListener('click', function(ev) {
     if( confirm( 'really use this picture' ) ) {
         var upper = byId('upper');
         var edform = byId('edform');
-        upper.value = c.toDataURL('image/png');
+        upper.value = canvas.toDataURL('image/png');
         edform.submit();
     }
 } );
+
+
 
 var selimg = oneByClass( 'invisava' );
 if( selimg ) {

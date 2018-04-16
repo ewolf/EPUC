@@ -1,66 +1,99 @@
-<link rel="stylesheet" type="text/css" href="/spuc/css/editor.css" title="Default">
+<link rel="stylesheet" type="text/css"
+      href="/spuc/css/editor.css" title="Default">
+
 <div id="editor">
   <div class="drawtool">
     
     <div class="canv col">
-      <form id="edform" method="POST" action="?path=<: $path :>" enctype="application/x-www-form-urlencoded">
+      
+      <form id="edform" method="POST"
+            action="?path=<: $path :>"
+            enctype="application/x-www-form-urlencoded">
         <input type="hidden" name="action" value="<: $action :>">
         <input type="hidden" name="ava-open" value="1">
         <input type="hidden" id="upper" name="<:$upname:>">
         <button type="button" id="upedit">Use this Picture</button>
       </form>
+      
+      <form id="autosave" method="POST"
+            action="?path=<: $path :>"
+            enctype="application/x-www-form-urlencoded">
+        <input type="hidden" name="action" value="autosave">
+        <input type="hidden" id="autoupper" name="autosave">
+      </form>
+
+      
       <canvas id="canv">
       </canvas>
       
-      <div>
+      <div class="col">
         Palette
         <div id="palette">
         </div>
-        <div class="slide-controls">
-          <div data-color-idx="0" class="colorslide">
-            <span class="slider">&nbsp;</span>
+        <div class="row">
+          <div id="colordisplay_palette" class="display"
+               style="background-color: white">
           </div>
-          <div data-color-idx="1" class="colorslide">
-            <span class="slider">&nbsp;</span>
-          </div>
-          <div data-color-idx="2" class="colorslide">
-            <span class="slider">&nbsp;</span>
-          </div>
-          <div data-color-idx="3" class="colorslide">
-            <span class="slider atend">&nbsp;</span>
+          <div class="col slide-controls">
+            <div data-color-idx="0" class="colorslide">
+              <span class="slider">&nbsp;</span>
+            </div>
+            <div data-color-idx="1" class="colorslide">
+              <span class="slider">&nbsp;</span>
+            </div>
+            <div data-color-idx="2" class="colorslide">
+              <span class="slider">&nbsp;</span>
+            </div>
+            <div data-color-idx="3" class="colorslide">
+              <span class="slider atend">&nbsp;</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    
-    <div>
+
+    <div class="col">
       <div class="barbutton" id="undo">undo</div>
       <div class="barbutton" id="redo">redo</div>
       <div class="barbutton active" id="cleary">clear</div>
-
-      <div id="composite" class="circle picked brushsize colorpick" style="background-color: black"></div>
-      <div id="composite" class="picked erasorbrush">erasing</div>
+      <div id="colordisplay" class="display"
+           style="background-color: black"></div>
+      <div class="picked erasorbrush">erasing</div>
     </div>
+    
     
     <div class="rightpane">
       <div class="longcontrols">
         <div class="colorpicker">
-          <div data-color="eyedrop" id="eyedrop" class="eyedrop colorpick">pick a color</div>
-          <div data-color="erase" id="erase" class="colorpick">erase</div>
-          <div data-color="rgba(0,0,0,255)" class="colorpick circle"></div>
-          <div data-color="rgba(255,255,255,255)" class="colorpick circle white"></div>
-          <div data-color="rgba(255,0,0,255)"   class="colorpick circle"></div>
-          <div data-color="rgba(255,164,0,255)"   class="colorpick circle"></div>
-          <div data-color="rgba(255,255,0,255)"   class="colorpick circle"></div>
-          <div data-color="rgba(0,128,0,255)" class="colorpick circle"></div>
-          <div data-color="rgba(0,0,255,255)"  class="colorpick circle"></div>
-          <div data-color="rgba(128,0,128,255)"  class="colorpick circle"></div>
+          <div data-color="eyedrop" id="eyedrop"
+               class="eyedrop">pick a color</div>
+          <div data-color="erase" id="erase"
+               class="colorpick">erase</div>
+          <div data-color="rgba(0,0,0,255)"
+               class="colorpick circle"></div>
+          <div data-color="rgba(255,255,255,255)"
+               class="colorpick circle white"></div>
+          <div data-color="rgba(255,0,0,255)"
+               class="colorpick circle"></div>
+          <div data-color="rgba(255,164,0,255)"
+               class="colorpick circle"></div>
+          <div data-color="rgba(255,255,0,255)"
+               class="colorpick circle"></div>
+          <div data-color="rgba(179, 160, 11,255)"
+          <div data-color="rgba(255,255,0,255)"
+               class="colorpick circle"></div>
+          <div data-color="rgba(67, 21, 0,255)"
+               class="colorpick circle"></div>
+          <div data-color="rgba(0,128,0,255)"
+               class="colorpick circle"></div>
+          <div data-color="rgba(0,0,255,255)"
+               class="colorpick circle"></div>
+          <div data-color="rgba(128,0,128,255)"
+               class="colorpick circle"></div>
         </div>
       </div>
-
-    
-
     </div>
+
 
     <div class="brushpicker">
       <div style="margin: 0 3px;">brush size</div>
