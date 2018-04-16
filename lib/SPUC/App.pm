@@ -104,7 +104,7 @@ sub find_comic_to_play {
     if( $last_comic ) {
         if( $skip ) {
             $last_comic->set__player(undef);
-        } else {
+        } elsif( $last_comic->is_free( $artist ) ) {
             return $last_comic;
         }
     }
@@ -119,7 +119,7 @@ sub find_comic_to_play {
       #  to contribute to are sorted last
     sort { (@{$b->get_panels}) * rand() <=> (@{$b->get_panels}) * rand() }  # initial random sort, favoring more complete comics
     grep { (! $skip) || $_ ne $last_comic } # if the comic was skipped dont show it again
-    grep { ! $_->get__player }  #comics not being currently played
+    grep { $_->is_free( $artist ) }  #comics not being currently played
     @$comics;
     
     $comic;

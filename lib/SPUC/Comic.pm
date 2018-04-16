@@ -49,7 +49,10 @@ sub is_complete {
 }
 sub add_caption {
     my( $self, $caption, $user ) = @_;
-    
+
+    if( ! $self->is_free( $user ) ) {
+        return ('', 'this comic is reserved by an other artist' );
+    }
     if( $self->last_panel->get_type eq 'caption' ) {
         return ('', 'caption cant follow caption' );
     }
@@ -64,6 +67,11 @@ sub add_caption {
 
 sub add_picture {
     my( $self, $picture, $user ) = @_;
+
+    if( ! $self->is_free( $user ) ) {
+        return ('', 'this comic is reserved by an other artist' );
+    }
+    
     if( $self->last_panel->get_type eq 'picture' ) {
         return ('', 'picture cant follow picture' );
     }
@@ -96,17 +104,10 @@ sub add_panel {
     return ('added panel','');
 } #add_panel
 
-sub is_reserved {
-    my $self = shift;
-    my $player = $self->get__player;
-    if( $player ) {
-        my $at = $player->get__active_time;
-        if( $at == 0 ) {
-            $self->set__player( undef );
-            $player->set__playing( undef );
-        }
-    }
-    0;
+sub is_free {
+    my( $self, $user ) = @_;
+    ! $self->is_complete && 
+        ( $self->get__player == $user || $self->get__hold_expires < time );
 }
 
 1;

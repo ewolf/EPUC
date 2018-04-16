@@ -21,7 +21,11 @@
        <div class="col">
          : my $comic = $user.get('_playing');
          : if $comic {
-         <span>Comic thinks <: $comic.get('_player').get('display_name') :></span>
+            : if $comic.is_free( $user ) {
+               <span>Comic reserved by this artist</span>
+            : } else {
+               <span>Comic reserved by an other player</span>
+            : } 
          <span>Playing</span>
            :  my $pan = $comic.last_panel;
            :  if $pan.get('type') == 'caption' {

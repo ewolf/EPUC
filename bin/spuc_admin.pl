@@ -26,6 +26,23 @@ our $imagedir     = "$basedir/html/spuc/images";
 my $store = Data::ObjectStore::open_store( "/var/www/data/spuc/", { group => $gid } );
 my $root  = $store->load_root_container;
 
+# my $ll = $store->create_container( 'SPUC::LinkedList' );
+
+# for my $add (sort { ($a*0)+(int(rand(3))-1) <=> ($b*0)+(int(rand(3))-1) } (30..48) ) {
+#     print ")$add\n";
+#     $ll->add( $add, sub { my( $a, $b ) = @_; $b <=> $a } );
+# }
+# print "head ". $ll->get_head->get_item."\n";
+# print "tail ". $ll->get_tail->get_item."\n";
+
+# my $next = $ll->get_head;
+# while( $next ) {
+#     print ">".$next->get_item."\n";
+#     $next = $next->get_next;
+# }
+       
+# __END__
+
 # set the root password
 # set up question mark default avatar
 # set up initial account?
@@ -155,7 +172,10 @@ while( <STDIN> ) {
         }
         for my $un (@uns) {
             my $user = $unames->{$un};
-            printf "%${longest}s %s %s\n",$un, $user->get__email, $user->get__is_admin ? 'admin-user' : '';
+            my $last_active = $user->get__active_time;
+            my $last_login = $user->get__login_time;
+            
+            printf "%${longest}s %s %s Last Active : %s, Last Login : %s\n",$un, $user->get__email, $user->get__is_admin ? 'admin-user' : '', $app->format_time( $last_active ), $app->format_time( $last_login );
         }
     }
     elsif( /^\s*passwd\s+(\S+)/ ) {
