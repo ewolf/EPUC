@@ -41,7 +41,7 @@ use SPUC::Image;
 #  _viewing_source  - 'recent', 'top', 'bookmarks', 'mine', 'inprogress', etc...
 #  _playing - comic object currently playing
 #
-sub _load {
+sub _init {
     my $self = shift;
     for my $bak (qw( comic avatar  )) {
         for my $idx (1..2) {
@@ -54,7 +54,7 @@ sub _load {
             $self->set( $var, $img );
         }
     }
-} #_load
+} #_init
 
 sub _backup {
     my( $self, $png, $target, $handler ) = @_;

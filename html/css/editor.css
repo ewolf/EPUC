@@ -138,15 +138,6 @@ span.colorpick {
     cursor:pointer;
     color:black;
 }
-div.demo {
-    margin: auto 45px;
-    padding: 9px;
-    border: 7px forestgreen;
-    border-style: groove;
-}
-span.demo {
-    cursor: default;
-}
 .display {
     width:40px;
     height:40px;
