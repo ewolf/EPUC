@@ -31,12 +31,9 @@
       : } else if $path != '/register' {
       <aside class="column">
       <form method="POST" action="?path=/login" class="col" id="loginblock">
-        : if $errs.size() > 0 {
-        <div id="err col">
-          : for $errs -> $err {
-             <p><: $err :></p>
-          : }
+        : include 'error.tx';
         </div>
+        : if $errs.size() > 0 {
         <a href="?path=/recover_request">recover password</a>
         : } 
         <input type="text" name="un" placeholder="user or email">
@@ -104,7 +101,7 @@
         : if $user {
           : include "update_password.tx" { path => '/recover', tok => $user.get__reset_token }
         : } else {
-          <div class="err bigerr">reset link is stale</div>
+          <div class="err-msg bigerr">reset link is stale</div>
         : }
       : } else if $path == '/mine' && $user {
           : include "read.tx" { comics => $user.get_finished_comics }
@@ -154,6 +151,10 @@
         <li>correct level of mail check in production</li>
         <li>spuc contact info</li>
         <li>make notifications not sucky</li>
+        <li>call out lounge if stuff not yet seen</li>
+        <li>mobile mode pick color</li>
+        <li>persistant palette</li>        
+        <li>rewite editor from scratch</li>        
         <li></li>        
       </ul>
       Other TODOS

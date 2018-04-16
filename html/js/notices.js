@@ -1,0 +1,3 @@
+byClass( 'note' ).forEach( note => {
+    
+} );

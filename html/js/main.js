@@ -33,11 +33,28 @@ var token;
 var cache = {};
 
 function error( errs ) {
-    var errbox = Object.values(document.getElementsByClassName);
-    var txt = errs.join(',');
-    errbox.forEach( box => {
-        box.textContent = txt;
-    } );
+    var errbox = byClass( 'err-txt' );
+    if( errs && errs.length > 0 ) {
+        var txt = errs.join(',');
+        errbox.forEach( box => {
+            while( box.hasChildNodes() ) {
+                box.removeChild( box.lastChild );
+            }
+            errs.forEach( err => {
+                var p = document.createElement('span');
+                p.textContent = err;
+                box.appendChild( p );
+            } );
+            box.classList.add( 'error' );
+        } );
+    } else {
+        errbox.forEach( box => {
+            while( box.hasChildNodes() ) {
+                box.removeChild( box.lastChild );
+            }
+            box.classList.remove( 'error' );
+        } );
+    }
 }
 
 

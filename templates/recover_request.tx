@@ -4,9 +4,7 @@
   <div class="row">
     <input type="hidden" name="action" value="request-link">
     <input type="text" class="unorem" name="unorem" placeholder="username or email" size="40">
-    : if $err {
-    <span class="err"><:$err:></span>
-    : }
+    : include 'error.tx'
     <button id="reset-req" type="submit">send request</button>
   </div>
 </form>

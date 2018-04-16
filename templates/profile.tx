@@ -5,9 +5,7 @@
 
 <div class="profile" >
   <h1>Editing Profile</h1>
-  : if $err {
-  <span class="err bigerr"><:$err:></span>
-  : }
+  : include 'error.tx' { big => 1 }
   <h2>Avatars</h2>
   <section id="avatars" class="col">
     <div class="col">

@@ -1,12 +1,13 @@
-.erasorbrush,
-.brushsize {
+.eyedrop,
+.erasor-brush,
+.brush-size {
     border: solid 1px black;
     margin: 7px auto;
 }
-.brushcontrol.picked {
+.brush-control.picked {
     border: solid 4px black;
 }
-.brushcontrol {
+.brush-control {
     background-color: white;
     border: solid 1px black;
     margin: 7px;
@@ -14,8 +15,19 @@
     cursor:pointer;
 }
 
+.color-display {
+    width: 50px;
+    height: 50px;
+}
+#colordisplay_palette {
+    margin: 15px;
+}
+#colordisplay {
+    margin: 15px auto;
+}
+
 /*  COLOR CREATOR */
-.colorslide {
+.color-slide {
     width:256px;
     margin:7px 0;
     border: solid 1px black;
@@ -30,16 +42,31 @@
     cursor:pointer;
 }
 /*  COLOR SELECT */
-span.colorpick {
+span.paint-control {
     display:inline-block;
     margin: 3px;
 }
-.colorpick {
+.paint-control {
     border: solid 1px black;
     width: 40px;
     height: 40px;
     cursor: pointer;
     margin: 7px auto;
+}
+
+.paint-control#eyedrop.picked {
+    border: solid 1px black;
+    background-color: silver;
+}
+.paint-control.picked {
+    border: double 6px white;
+    width: 35px;
+    height: 35px;
+}
+.paint-control.picked.white {
+    border: double 6px black;
+    width: 35px;
+    height: 35px;
 }
 #eyedrop, #erase {
     background-color: white;
@@ -48,27 +75,11 @@ span.colorpick {
     text-align: center;
     padding: 3px;
 }
-.colorpick.eyedrop.picked {
-    border: solid 1px black;
-    width: 40px;
-    height: 40px;
-    background-color: silver;
-}
 #erase {
     border: solid 1px black;
 }
 #erase.picked {
     background-color: silver;
-}
-.colorpick.picked {
-    border: double 6px white;
-    width: 35px;
-    height: 35px;
-}
-.colorpick.picked.white {
-    border: double 6px black;
-    width: 35px;
-    height: 35px;
 }
 
 /* LAYOUT */
@@ -93,7 +104,8 @@ span.colorpick {
 }
 
 /* GENERIC CONTROLS */
-.colorpicker,.brushpicker {
+.paint-controls,
+.brushpicker {
     font-size: larger;
     background-color: lightgray;
     border:solid 1px black;
@@ -111,19 +123,27 @@ span.colorpick {
     -webkit-border-radius: 15px;
     border-radius: 15px;
 }
-.erasing .brushsize {
+.erasing .brush-size {
     display: none;
 }
-.erasorbrush {
+.eyedropping #colordisplay,
+.erasing #colordisplay,
+.eyedrop,
+.erasor-brush {
     display: none;
 }
-.erasing .erasorbrush {
+.eyedropping .eyedrop,
+.erasing .erasor-brush {
     display: block;
+    background-color: white;
+}
+.eyedropping #canv {
+    cursor: crosshair;
 }
 #palette {
     max-width: 250px;
 }
-.barbutton {
+.bar-button {
     cursor:not-allowed;
     color:gray;
     background-color:lightgrey;
@@ -132,7 +152,7 @@ span.colorpick {
     border: solid 1px gray;
 }
 
-.active.barbutton {
+.active.bar-button {
     border: solid 1px grey;
     background-color: white;
     cursor:pointer;

@@ -1,6 +1,6 @@
 <link rel="stylesheet" type="text/css" href="/spuc/css/play.css" title="Default">
 
-<span id="err"><:$err:></span>
+: include 'error.tx'
 
 : my $comic = $user.get('_playing')
 

@@ -1,7 +1,6 @@
 <link rel="stylesheet" type="text/css" href="/spuc/css/register.css" title="Default">
 <h1>Make an Artist Account</h1>
 <form method="POST" action="?path=/register" class="col">
-  <span id="err"><:$err:></span>
     <input type="hidden"
            name="action" value="registering">
     <input type="email" placeholder="email"
@@ -11,14 +10,8 @@
     <input type="password" placeholder="password"
            name="pw"  value="<:$params.pw:>">
     <input type="password" placeholder="repeat password"
-           name="pw2"> 
-        : if $errs.size() > 0 {
-        <div id="err col">
-          : for $errs -> $err {
-             <p><: $err :></p>
-          : }
-        </div>
-        : }
+           name="pw2">
+    : include 'error.tx'
     <button type="submit">Register Account</button>
     <a id="cancel" href="?path=/">cancel</a>
 </form>

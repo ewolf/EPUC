@@ -62,16 +62,17 @@ header aside img {
     text-decoration: none;
     color: black;
 }
-.err {
+.error.err-txt {
     background-color: #FEE;
-    border: red solid 1px;
+    border: red solid 3px;
     padding: 3px 5px;
 }
-.err.bigerr {
+.err-txt.bigerr {
     font-size: x-large;
     padding: 10px 15px;
 }
 input.error {
+    border: red solid 1px;
     background-color: pink;
 }
 .message {

@@ -2,7 +2,7 @@
       href="/spuc/css/editor.css" title="Default">
 
 <div id="editor">
-  <div class="drawtool">
+  <div class="drawtool drawing">
     
     <div class="canv col">
 
@@ -39,20 +39,20 @@
         <div id="palette">
         </div>
         <div class="row">
-          <div id="colordisplay_palette" class="display"
-               style="background-color: white">
+          <div id="colordisplay_palette"
+               class="color-display">
           </div>
           <div class="col slide-controls">
-            <div data-color-idx="0" class="colorslide">
+            <div data-color-idx="0" class="color-slide">
               <span class="slider">&nbsp;</span>
             </div>
-            <div data-color-idx="1" class="colorslide">
+            <div data-color-idx="1" class="color-slide">
               <span class="slider">&nbsp;</span>
             </div>
-            <div data-color-idx="2" class="colorslide">
+            <div data-color-idx="2" class="color-slide">
               <span class="slider">&nbsp;</span>
             </div>
-            <div data-color-idx="3" class="colorslide">
+            <div data-color-idx="3" class="color-slide">
               <span class="slider atend">&nbsp;</span>
             </div>
           </div>
@@ -61,44 +61,44 @@
     </div>
 
     <div class="col">
-      <div class="barbutton" id="undo">undo</div>
-      <div class="barbutton" id="redo">redo</div>
-      <div class="barbutton active" id="cleary">clear</div>
-      <div id="colordisplay" class="display"
-           style="background-color: black"></div>
-      <div class="picked erasorbrush">erasing</div>
+      <div class="bar-button" id="undo">undo</div>
+      <div class="bar-button" id="redo">redo</div>
+      <div class="bar-button active" id="cleary">clear</div>
+      <div class="color-display" id="colordisplay"></div>
+      <div class="picked erasor-brush">erasing</div>
+      <div class="picked eyedrop">picking a color</div>
     </div>
     
     
     <div class="rightpane">
       <div class="longcontrols">
-        <div class="colorpicker">
+        <div class="paint-controls">
           <div data-color="eyedrop" id="eyedrop"
-               class="eyedrop">pick a color</div>
+               class="paint-control">pick a color</div>
           <div data-color="erase" id="erase"
-               class="colorpick">erase</div>
+               class="paint-control">erase</div>
           <div data-color="rgba(0,0,0,255)"
-               class="colorpick circle"></div>
+               class="paint-control circle"></div>
           <div data-color="rgba(255,255,255,255)"
-               class="colorpick circle white"></div>
+               class="paint-control circle white"></div>
           <div data-color="rgba(255,0,0,255)"
-               class="colorpick circle"></div>
+               class="paint-control circle"></div>
           <div data-color="rgba(255,164,0,255)"
-               class="colorpick circle"></div>
+               class="paint-control circle"></div>
           <div data-color="rgba(255,255,0,255)"
-               class="colorpick circle"></div>
+               class="paint-control circle"></div>
           <div data-color="rgba(210,180,140,255)"
-               class="colorpick circle"></div>
-          <div data-color="rgba(179, 160, 11,255)"
-               class="colorpick circle"></div>
-          <div data-color="rgba(67, 21, 0,255)"
-               class="colorpick circle"></div>
+               class="paint-control circle"></div>
+          <div data-color="rgba(179,160,11,255)"
+               class="paint-control circle"></div>
+          <div data-color="rgba(67,21,0,255)"
+               class="paint-control circle"></div>
           <div data-color="rgba(0,128,0,255)"
-               class="colorpick circle"></div>
+               class="paint-control circle"></div>
           <div data-color="rgba(0,0,255,255)"
-               class="colorpick circle"></div>
+               class="paint-control circle"></div>
           <div data-color="rgba(128,0,128,255)"
-               class="colorpick circle"></div>
+               class="paint-control circle"></div>
         </div>
       </div>
     </div>
@@ -106,19 +106,20 @@
 
     <div class="brushpicker">
       <div style="margin: 0 3px;">brush size</div>
-      <div data-size="1" class="brushcontrol"></div>
-      <div data-size="4" class="brushcontrol"></div>
-      <div data-size="8" class="brushcontrol"></div>
-      <div data-size="13" class="brushcontrol"></div>
-      <div data-size="21" class="brushcontrol"></div>
-      <div data-size="34" class="brushcontrol"></div>
-      <div data-size="50" class="brushcontrol"></div>
+      <div data-size="1" class="brush-control"></div>
+      <div data-size="4" class="brush-control"></div>
+      <div data-size="8" class="brush-control"></div>
+      <div data-size="13" class="brush-control"></div>
+      <div data-size="21" class="brush-control"></div>
+      <div data-size="34" class="brush-control"></div>
+      <div data-size="50" class="brush-control"></div>
     </div>
 
   </div>
 </div>
+
 <script>
   var width = <: $width :>;
-    var height = <: $height :>;
+  var height = <: $height :>;
 </script>
 <script src="/spuc/js/editor.js"></script>
