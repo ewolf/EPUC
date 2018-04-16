@@ -65,7 +65,8 @@
       : }
       : if $user.get('_updates').size() > 0 {
         <a href="?path=/notices">notices</a>
-      : }  
+      : }
+      <a href="?path=/lounge">artist lounge</a>  
       <a href="?path=/profile">my profile</a>
       <a href="?path=/logout">log out</a>
         : if $user.get('_is_admin') {
@@ -89,6 +90,8 @@
       
       : if $path == '/register' && ! $user {
         : include "register.tx"
+      : } else if $path == '/lounge' && $user {
+        : include "lounge.tx"
       : } else if $path == '/profile' && $user {
         : include "profile.tx"
       : } else if( $path == '/play' && $user ) {
@@ -151,7 +154,6 @@
         <li>bug reports</li>
         <li>correct level of mail check in production</li>
         <li>spuc contact info</li>
-        <li>length of caption or of anything?</li>
       </ul>
       Other TODOS
       <ul>

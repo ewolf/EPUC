@@ -28,7 +28,10 @@ sub artist {
 
 sub format_time {
     my( $self, $time ) = @_;
-    my( @thentime ) = localtime( $time // time );
+    unless( $time ) {
+        return "?";
+    }
+    my( @thentime ) = localtime( $time );
     my( @nowtime )  = localtime( time );
 
     #

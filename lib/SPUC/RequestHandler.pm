@@ -493,7 +493,7 @@ sub _handle {
             } #if upload to panel
             elsif( $action eq 'caption-picture' ) {
                 my $cap = encode( 'UTF-8', $params->{caption});
-                if( $cap > 200 ) {
+                if( length($cap) > 200 ) {
                     $cap = substr( $cap, 0, 200 );
                 }
                 my( $msg, $err ) = $comic->add_caption( $cap, $user );
@@ -572,7 +572,7 @@ sub _handle {
     # start new comic
     elsif( $path =~ m~^/start~ && $user && $action eq 'start-comic' ) {
         my $start = encode( 'UTF-8', $params->{start});
-        if( $start > 200 ) {
+        if( length($start) > 200 ) {
             $start = substr( $start, 0, 200 );
         }
         # LOCK app _unfinished_comics
@@ -625,6 +625,26 @@ sub _handle {
         }
     } #recover
 
+    elsif( $path eq '/lounge' && $user ) {
+        if( $action eq 'chat' ) {
+            my $txt = $params->{comment};
+            if( length( $txt ) > 2000 ) {
+                $txt = substr( $txt, 0, 2000 );
+            }
+            my $comment = $self->{store}->create_container( {
+                artist => $user,
+                comment => $txt,
+                time => time(),
+                                                            } );
+            my $chat = $self->{app}->get__chat([]);
+            unshift @$chat, $comment;
+            $self->note( "added chat", $user );
+        }
+        elsif( $action eq 'suggest' ) {
+            
+        }
+    }
+    
     elsif( $action =~ /^(comment|bookmark|unbookmark|kudo)$/ && $user && defined( $params->{idx} ) ) {
         my $comics;
         if( $path eq '/mine' ) { 
@@ -647,9 +667,13 @@ sub _handle {
         my $comic = $comics->[$params->{idx}];
         if( $comic ) { 
             if( $action eq 'comment' && $params->{comment} =~ /\S/ ) {
+                my $txt = $params->{comment};
+                if( length( $txt ) > 2000 ) {
+                    $txt = substr( $txt, 0, 2000 );
+                }
                 my $comment = $self->{store}->create_container( {
                     artist => $user,
-                    comment => $params->{comment},
+                    comment => $txt,
                     time => time(),
                                                             } );
                 $comic->add_to_comments( $comment );
