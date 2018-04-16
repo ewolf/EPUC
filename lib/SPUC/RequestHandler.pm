@@ -542,6 +542,7 @@ sub _handle {
             else {
                 my $fn = $params->{uppanel};
                 $comic->set__hold_expires( time + 7*24*3600 ); # in 1 week
+                $comic->set__player( $user );
 
                 if( $fn =~ /^data:image\/png;base64,(.*)/ ) {
                     my $png = MIME::Base64::decode( $1 );
