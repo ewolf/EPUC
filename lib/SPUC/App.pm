@@ -80,7 +80,6 @@ sub begin_strip {
         creator     => $artist,
         started     => time,
         artists     => { $artist => $artist },
-        last_artist => $artist,
         panels      => [ $panel ],
         needs       => 9,
         app         => $self,
@@ -113,7 +112,8 @@ sub find_comic_to_play {
     # comics are randomly sorted, other than comics with this artist are sorted last and
     # of those, the same artist is sorted very last
     my( $comic ) = sort { $a->has_artist($artist) && $b->has_artist($artist) ? 
-                              $a->is_last_artist($artist) && $b->is_last_artist($artist) ? 0 : $a->is_last_artist($artist) ? 1 : -1
+                              $a->is_last_artist($artist) && $b->is_last_artist($artist) ? 0 : 
+                              $a->is_last_artist($artist) ? 1 : -1
                               : $a->has_artist($artist) ? 1 : -1 
     } # comics that this artist has not contributed to are sorted first. comics that this artist was the last one
       #  to contribute to are sorted last

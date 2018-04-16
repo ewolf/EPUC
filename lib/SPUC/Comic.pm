@@ -17,7 +17,6 @@ use SPUC::Panel;
 #   creator - who started this strip
 #   _player - Artist object who is currently playing this
 #   artists - hash (set) of artists working on this
-#   last_artist - artist object last to add a panel
 #   panels - list of Panel objects that make this up
 #   needs - number of panels this needs to have to be complete
 #   app - app object
@@ -35,7 +34,7 @@ sub has_artist {
 
 sub is_last_artist {
     my( $self, $artist ) = @_;
-    $artist == $self->get_last_artist;
+    $artist == $self->last_panel->get_artist;
 }
 
 sub last_panel {

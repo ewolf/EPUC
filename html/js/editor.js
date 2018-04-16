@@ -159,7 +159,6 @@ brushbuttons.forEach( bb => {
     brushIcon.style['-webkit-border-radius'] = rsize;
     brushIcon.style['border-radius'] = rsize;
     
-
     // erasor mode
     var eraseIcon = document.createElement('p');
     eraseIcon.classList.add( 'erasor-brush' );
