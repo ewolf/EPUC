@@ -62,7 +62,7 @@ a.artist {
     color: black;
 }
 .artist img {
-    margin: auto;
+    margin: auto 4px;
     border: solid 1px grey;
     background: white;
     
