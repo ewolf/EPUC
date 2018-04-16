@@ -35,7 +35,7 @@ sub format_time {
     #    0    1     2     3    4     5
     #  sec, min, hour, mday, mon, year
     #
-    
+
     # different year
     if( $thentime[5] != $nowtime[5] ) {
         return sprintf( "%s %02d", $mon[$thentime[4]], $thentime[5] + 1900);

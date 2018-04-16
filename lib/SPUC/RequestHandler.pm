@@ -500,8 +500,8 @@ sub _handle {
             if( $comic->is_complete ) {
                 my $arts = $comic->get_artists;
                 $self->lock( "UNFINISHED" );
+		$self->note( "completed comic", $user );
                 for my $thing ( $self->{app}, values %$arts) {
-                    $self->note( "completed comic", $user );
                     $thing->remove_from__unfinished_comics( $comic );
                     my $fin = $thing->get_finished_comics([]);
                     unshift @$fin, $comic;
