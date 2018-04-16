@@ -96,3 +96,7 @@ input.error {
 main {
     justify-contents: space-evenly;
 }
+.callout {
+    font-weight: bold;
+    font-style: italic;
+}

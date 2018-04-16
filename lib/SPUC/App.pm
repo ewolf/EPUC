@@ -114,7 +114,7 @@ sub find_comic_to_play {
                               : $a->has_artist($artist) ? 1 : -1 
     } # comics that this artist has not contributed to are sorted first. comics that this artist was the last one
       #  to contribute to are sorted last
-    sort { (0*$b) + rand() <=> (0*$a) + rand() }  # initial random sort
+    sort { (@{$b->get_panels}) * rand() <=> (@{$b->get_panels}) * rand() }  # initial random sort, favoring more complete comics
     grep { (! $skip) || $_ ne $last_comic } # if the comic was skipped dont show it again
     grep { ! $_->get__player }  #comics not being currently played
     @$comics;

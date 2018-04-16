@@ -14,21 +14,29 @@
   
   <div class="col">
     <p>
-      Once upon a time there was a site called 'Eat Poop U Cat' that was
+      Once upon a time there was a site called <span class="callout">'Eat Poop U Cat'</span> that was
       a lot of fun, but it closed down and the <a href="eatpoopucat.com">eatpoopucat.com</a>
       domain is now defunct (after briefly advertising <a href="https://web.archive.org/web/20171001111309/http://www.eatpoopucat.com/">beauty products</a>).
     </p>
 
     <p>
       The artists at the old site missed playing the game, so one of them
-      implemented a clone of it; that would be this site.
+      implemented a clone of it; that would be this site. <a href="?path=/artist&artist=coyo">coyo</a>
+      this togeter and admins the site. He can be a bit flaky, so if the site is down, its probably
+      due to an update happening and he forgot to kick the webserver back up.
     </p>
 
 
-    <h2>The Game</h2>
-
-    <p>The game is simple. Draw pictures for captions and write captions
-      for pictures.</p>
+    <h2>Gameplay</h2>
+    <ul>
+      <li><a id="reglink" href="?path=/register">create an account</a></li>
+      <li><a id="reglink" href="?path=/profile">set up your profile</a></li>
+      <li>Click <a href="?path=/play">Play</a></li>
+      <li>If you get a picture, write a caption</li>
+      <li>If you get a caption, draw or upload a picture</li>
+      <li>Click the heart icon next to a comic panel to give that artist a kudo</li>
+      <li>Bookmark the comics you like</li>
+      <li>Comment on the comics if you want</li>
   </div>
 
 </div>
