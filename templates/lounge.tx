@@ -1,0 +1,20 @@
+<link rel="stylesheet" type="text/css" href="/spuc/css/lounge.css" title="Default">
+<link rel="stylesheet" type="text/css" href="/spuc/css/comic.css" title="Default">
+<link rel="stylesheet" type="text/css" href="/spuc/css/read.css" title="Default">
+<h1>the artist lounge</h1>
+<div class="row lounge">
+  <div class="col">
+    <h2>Chatter</h2>
+
+: include 'comment.tx' { comments => $app.get('_chat'), action => 'chat', title => 'say something' }
+    
+  </div>
+  <!--
+  <div class="col">
+    <h2>Suggestions</h2>
+    
+: include 'comment.tx' { comments => $app.get('suggest'), action => 'chat', title => 'suggest something' }    
+
+  </div>
+-->
+</div>
