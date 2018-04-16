@@ -382,6 +382,9 @@ sub _handle {
         }
         elsif( $action eq 'set-bio' ) {
             my $bio = encode( 'UTF-8', $params->{bio} );
+            if( length($bio ) > 2000 ) {
+                $bio = substr( $bio, 0, 2000 );
+            }
             $user->set_bio( $bio );
             $self->msg( 'updated bio' );
             $self->note( "updated bio", $user );

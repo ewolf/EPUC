@@ -500,27 +500,30 @@ function setColorControls() {
 setColorControls();
 
 var user = byId('use-picture');
-user.addEventListener('click', ev => {
-    ev.preventDefault();
-    ev.stopPropagation();
-    if( confirm( 'really use this picture' ) ) {
-        var upper = byId('upper');
-        var upform = byId('edform');
+if( user ) {
+    user.addEventListener('click', ev => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        if( confirm( 'really use this picture' ) ) {
+            var upper = byId('upper');
+            var upform = byId('edform');
+            upper.value = canvas.toDataURL('image/png');
+            upform.submit();
+        }
+    } );
+}
+
+var saver = byId('save-picture');
+if( saver ) {
+    saver.addEventListener('click', ev => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        var upper = byId('upper-save');
+        var upform = byId('saveform');
         upper.value = canvas.toDataURL('image/png');
         upform.submit();
-    }
-} );
-
-var user = byId('save-picture');
-user.addEventListener('click', ev => {
-    ev.preventDefault();
-    ev.stopPropagation();
-    var upper = byId('upper-save');
-    var upform = byId('saveform');
-    upper.value = canvas.toDataURL('image/png');
-    upform.submit();
-} );
-
+    } );
+}
 
 if( window.initimage ) {
     var i = new Image();
