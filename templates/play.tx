@@ -32,7 +32,7 @@
         <img class="picture" src="<:$pan.get('picture').size(900,630):>">
         <form id="caption" method="POST" action="?path=/play" class="row">
           <input type="hidden" name="action" value="caption-picture">
-          <input type="text" name="caption" placeholder="your caption here" >
+          <input type="text" name="caption" placeholder="your caption here" maxlength="100">
           <button type="submit">Caption</button>
         </form>
       </div>
