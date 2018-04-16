@@ -11,9 +11,10 @@
        <p>
          <span class="bio"><: $user.get('bio') :></span>
        </p>
-       <a href="?path=/artist&artist=<:$usre.get('display_name'):>">comics</a>
+       <a href="?path=/artist&artist=<:$user.get('display_name'):>">comics</a>
        <span>Email : <: $user.get('_email') :></span>
        <span>Last logged in : <: $app.format_time( $user.get('_login_time')) :></span>
+       <span>Last activity : <: $app.format_time( $user.get('_active_time')) :></span>
        <span>Email : <: $user.get('_email') :></span>
      </div>
    </span>

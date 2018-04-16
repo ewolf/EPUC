@@ -44,9 +44,9 @@ sub format_time {
         return sprintf( "%s %d", $mon[$thentime[4]], $thentime[3] );
     }
     if( $nowtime[3] == $thentime[3] ) {
-        return sprintf( "today %d:%d", $thentime[2], $thentime[1] );
+        return sprintf( "today %02d:%02d", $thentime[2], $thentime[1] );
     }
-    return sprintf( "yesterday %d:%d", $thentime[2], $thentime[1] );
+    return sprintf( "yesterday %02d:%02d", $thentime[2], $thentime[1] );
 
 }
 
