@@ -461,6 +461,7 @@ sub _handle {
                     $self->note( "drew panel", $user );
                     $user->set__playing(undef);
                     $comic->set__player( undef );
+                    $user->set__saved_panel( undef );
                 }
                 elsif( (my $fh = $uploader->fh('uppanel')) ) {
                     my( $ext ) = ( $fn =~ /\.([^.]+)$/ );
@@ -480,6 +481,7 @@ sub _handle {
                         $self->err( $err );
                         $self->note( "uploaded panel", $user );
                         $user->set__playing(undef);
+                        $user->set__saved_panel( undef );
                         $comic->set__player( undef );
                     } else {
                         $self->err( "avatar file format not recognized" );
@@ -491,6 +493,9 @@ sub _handle {
             } #if upload to panel
             elsif( $action eq 'caption-picture' ) {
                 my $cap = encode( 'UTF-8', $params->{caption});
+                if( $cap > 200 ) {
+                    $cap = substr( $cap, 0, 200 );
+                }
                 my( $msg, $err ) = $comic->add_caption( $cap, $user );
                 $self->msg( $msg );
                 $self->err( $err );
@@ -567,6 +572,9 @@ sub _handle {
     # start new comic
     elsif( $path =~ m~^/start~ && $user && $action eq 'start-comic' ) {
         my $start = encode( 'UTF-8', $params->{start});
+        if( $start > 200 ) {
+            $start = substr( $start, 0, 200 );
+        }
         # LOCK app _unfinished_comics
         $self->lock( "UNFINISHED" );
         my( $msg, $err ) = $self->{app}->begin_strip( $user, $start );
