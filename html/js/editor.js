@@ -28,7 +28,8 @@ var touchDo = fun => {
         if( ev.touches.length == 1 ) {
             ev.preventDefault();
             ev.stopPropagation();
-            fun();
+            fun( ev.touches[0].pageX - canvas.offsetLeft,
+                 ev.touches[0].pageY - canvas.offsetTop );
         }
     };
 };
@@ -459,6 +460,9 @@ var drawEnd = () => {
 canvas.addEventListener('mousedown', ev => {
     startDraw( ev.offsetX, ev.offsetY );
 } );
+
+canvas.addEventListener('touchstart', touchDo( startDraw ) );
+canvas.addEventListener('touchmove', touchDo( moveDraw ) );
 
 canvas.addEventListener('mousemove', ev => {
     if( brushDown ) {
