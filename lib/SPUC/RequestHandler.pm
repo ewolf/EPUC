@@ -66,7 +66,7 @@ sub _singleton {
     }, 'SPUC::RequestHandler';
     open( $singleton->{logfh}, '>>', $options->{logdir} );
     $singleton;
-}
+} #_singleton
 
 #
 #
