@@ -123,6 +123,12 @@ sub unbookmark {
     $self->remove_from__bookmarks( $comic );
 }
 
+sub unfinished_comics {
+    my $self = shift;
+    my $uf = $self->get__unfinished_comics;
+    [ reverse sort { $a->get_last_updated <=> $b->get_last_updated  } @$uf ];
+}
+
 sub has_kudo_for {
     my( $self, $panel ) = @_;
     defined $self->get__kudos({})->{$panel};

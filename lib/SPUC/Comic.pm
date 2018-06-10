@@ -95,6 +95,8 @@ sub add_panel {
     push @$panels, $panel;
     my $arts = $self->get_artists;
 
+    $self->set_last_updated( time );
+
     $user->add_once_to__unfinished_comics( $self );
     $user->add_once_to__all_comics( $self );
     

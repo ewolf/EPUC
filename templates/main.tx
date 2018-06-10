@@ -106,7 +106,7 @@
       : } else if $path == '/mine' && $user {
           : include "read.tx" { comics => $user.get_finished_comics }
       : } else if $path == '/unfinished' && $user {
-          : include "read.tx" { comics => $user.get__unfinished_comics }
+          : include "read.tx" { comics => $user.unfinished_comics }
       : } else if $path == '/bookmarked' && $user {
           : include "read.tx" { comics => $user.get('_bookmarks') }
       : } else if $path == '/newsedit' && $user && $user.get('_is_admin') {

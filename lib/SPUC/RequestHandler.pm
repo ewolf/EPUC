@@ -668,7 +668,7 @@ sub _handle {
             $comics = $user->get__bookmarks;
         }
         elsif( $path eq '/unfinished' ) {
-            $comics = $user->get__unfinished_comics;
+            $comics = $user->unfinished_comics;
         }
         elsif( $params->{artist} ) {
             my $artist = $self->{app}->artist( $params->{artist} );
